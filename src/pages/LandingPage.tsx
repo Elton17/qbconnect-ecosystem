@@ -63,28 +63,29 @@ export default function LandingPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="hero-gradient relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djJoLTJ2LTJoMnptMC00aDJ2MmgtMnYtMnptLTQgOHYtMmgydjJoLTJ6bTIgMGgtMnYtMmgydjJ6bTItMnYyaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-        <div className="container relative py-20 md:py-32">
+      <section className="relative overflow-hidden min-h-[600px] flex items-center">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/hero-bg.jpg')" }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-secondary/95 via-secondary/80 to-secondary/40" />
+        <div className="container relative py-24 md:py-36">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="mx-auto max-w-3xl text-center"
+            className="max-w-2xl"
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-1.5 text-sm text-primary-foreground/80">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
               <Coins className="h-4 w-4" />
-              Ecossistema Digital Empresarial
+              Desde 1988 · Quatro Barras & Campina Grande do Sul
             </div>
-            <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-primary-foreground md:text-6xl">
+            <h1 className="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-6xl">
               Conecte sua empresa ao{" "}
               <span className="text-gradient">futuro dos negócios</span> regionais
             </h1>
-            <p className="mb-8 text-lg text-primary-foreground/70 md:text-xl">
+            <p className="mb-8 text-lg text-secondary-foreground/70 md:text-xl">
               A plataforma B2B que une empresas de Quatro Barras e Campina Grande do Sul.
               Marketplace, oportunidades, capacitação e muito mais.
             </p>
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <Button variant="hero" size="xl" asChild>
                 <Link to="/marketplace">
                   Explorar Marketplace
@@ -171,7 +172,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="hero-gradient py-20">
+      <section className="bg-secondary py-20">
         <div className="container text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -179,10 +180,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="mb-4 text-3xl font-extrabold text-primary-foreground md:text-4xl">
+            <h2 className="mb-4 text-3xl font-extrabold text-secondary-foreground md:text-4xl">
               Faça parte do maior ecossistema empresarial da região
             </h2>
-            <p className="mb-8 text-lg text-primary-foreground/70">
+            <p className="mb-8 text-lg text-secondary-foreground/70">
               Junte-se a mais de 120 empresas que já estão gerando negócios na plataforma.
             </p>
             <Button variant="hero" size="xl">
