@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,6 +53,8 @@ const formSchema = z.object({
   website: z.string().url("URL inválida").optional().or(z.literal("")),
   phone: z.string().min(8, "Telefone inválido").max(20),
   email: z.string().email("E-mail inválido").max(255),
+  password: z.string().min(6, "Mínimo 6 caracteres"),
+  confirmPassword: z.string().min(6, "Confirme a senha"),
   description: z.string().trim().min(10, "Mínimo 10 caracteres").max(1000),
   address: z.string().trim().min(5, "Endereço é obrigatório").max(200),
   plan: z.enum(["basic", "premium"], { required_error: "Selecione um plano" }),
@@ -59,6 +62,9 @@ const formSchema = z.object({
   contactRole: z.string().trim().min(2, "Cargo é obrigatório").max(100),
   contactEmail: z.string().email("E-mail inválido").max(255),
   contactPhone: z.string().min(8, "Telefone inválido").max(20),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -99,13 +105,53 @@ export default function CompanyRegistrationPage() {
     }
   };
 
-  const onSubmit = (data: FormData) => {
-    console.log("Registration data:", data);
-    toast({
-      title: "Cadastro enviado com sucesso!",
-      description: "Sua empresa será analisada e aprovada em breve.",
+  const onSubmit = async (data: FormData) => {
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: { emailRedirectTo: window.location.origin },
     });
-    setTimeout(() => navigate("/"), 2000);
+
+    if (authError) {
+      toast({
+        title: "Erro no cadastro",
+        description: authError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Update the auto-created profile with company data
+    if (authData.user) {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          company_name: data.companyName,
+          cnpj: data.cnpj,
+          segment: data.segment,
+          city: data.city,
+          phone: data.phone,
+          website: data.website || "",
+          description: data.description,
+          address: data.address,
+          plan: data.plan,
+          contact_name: data.contactName,
+          contact_role: data.contactRole,
+          contact_email: data.contactEmail,
+          contact_phone: data.contactPhone,
+        })
+        .eq("user_id", authData.user.id);
+
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+      }
+    }
+
+    toast({
+      title: "Cadastro realizado com sucesso!",
+      description: "Verifique seu e-mail para confirmar a conta.",
+    });
+    setTimeout(() => navigate("/login"), 2000);
   };
 
   const fadeIn = {
@@ -203,6 +249,22 @@ export default function CompanyRegistrationPage() {
                   <Label htmlFor="website">Website</Label>
                   <Input id="website" placeholder="https://..." {...register("website")} />
                   {errors.website && <p className="mt-1 text-xs text-destructive">{errors.website.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="password">Senha *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input id="password" type="password" placeholder="Mínimo 6 caracteres" className="pl-9" {...register("password")} />
+                  </div>
+                  {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input id="confirmPassword" type="password" placeholder="Repita a senha" className="pl-9" {...register("confirmPassword")} />
+                  </div>
+                  {errors.confirmPassword && <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>}
                 </div>
               </CardContent>
             </Card>
@@ -341,11 +403,17 @@ export default function CompanyRegistrationPage() {
             </Card>
           </motion.div>
 
-          <motion.div custom={4} initial="hidden" animate="visible" variants={fadeIn} className="flex justify-center">
+          <motion.div custom={4} initial="hidden" animate="visible" variants={fadeIn} className="flex flex-col items-center gap-3">
             <Button type="submit" size="xl" disabled={isSubmitting} className="w-full sm:w-auto">
-              {isSubmitting ? "Enviando..." : "Cadastrar Empresa"}
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Empresa"}
               <ArrowRight className="ml-1 h-5 w-5" />
             </Button>
+            <p className="text-sm text-muted-foreground">
+              Já tem conta?{" "}
+              <Link to="/login" className="font-semibold text-primary hover:underline">
+                Entrar
+              </Link>
+            </p>
           </motion.div>
         </form>
       </div>

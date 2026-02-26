@@ -1,8 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
@@ -15,6 +16,13 @@ const navItems = [
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -54,10 +62,20 @@ export default function Header() {
               Admin
             </Link>
           </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/cadastro">Cadastrar</Link>
-          </Button>
-          <Button size="sm">Entrar</Button>
+          {user ? (
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="mr-1 h-4 w-4" /> Sair
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/cadastro">Cadastrar</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link to="/login">Entrar</Link>
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -101,10 +119,20 @@ export default function Header() {
                     Painel Admin
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/cadastro" onClick={() => setMobileOpen(false)}>Cadastrar</Link>
-                </Button>
-                <Button size="sm">Entrar</Button>
+                {user ? (
+                  <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
+                    <LogOut className="mr-1 h-4 w-4" /> Sair
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/cadastro" onClick={() => setMobileOpen(false)}>Cadastrar</Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link to="/login" onClick={() => setMobileOpen(false)}>Entrar</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </nav>
           </motion.div>
