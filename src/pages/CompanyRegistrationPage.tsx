@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock } from "lucide-react";
+import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +41,14 @@ const segments = [
   "Serviços Gerais",
   "Tecnologia",
   "Outro",
+];
+
+const cities = [
+  "Quatro Barras",
+  "Campina Grande do Sul",
+  "Colombo",
+  "Pinhais",
+  "Curitiba",
 ];
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
@@ -82,6 +90,7 @@ export default function CompanyRegistrationPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [cnpjLoading, setCnpjLoading] = useState(false);
 
   const {
     register,
@@ -105,6 +114,34 @@ export default function CompanyRegistrationPage() {
     }
   };
 
+  const lookupCNPJ = async (cnpj: string) => {
+    const digits = cnpj.replace(/\D/g, "");
+    if (digits.length !== 14) return;
+
+    setCnpjLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("cnpj-lookup", {
+        body: { cnpj },
+      });
+
+      if (error || !data || data.error) {
+        toast({ title: "CNPJ não encontrado", description: "Preencha os dados manualmente.", variant: "destructive" });
+        setCnpjLoading(false);
+        return;
+      }
+
+      if (data.companyName) setValue("companyName", data.companyName, { shouldValidate: true });
+      if (data.address) setValue("address", data.address, { shouldValidate: true });
+      if (data.phone) setValue("phone", data.phone, { shouldValidate: true });
+      if (data.email) setValue("email", data.email, { shouldValidate: true });
+
+      toast({ title: "Dados carregados!", description: "Dados da Receita Federal preenchidos automaticamente." });
+    } catch {
+      // silently fail
+    }
+    setCnpjLoading(false);
+  };
+
   const onSubmit = async (data: FormData) => {
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
@@ -113,15 +150,10 @@ export default function CompanyRegistrationPage() {
     });
 
     if (authError) {
-      toast({
-        title: "Erro no cadastro",
-        description: authError.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro no cadastro", description: authError.message, variant: "destructive" });
       return;
     }
 
-    // Update the auto-created profile with company data
     if (authData.user) {
       const { error: profileError } = await supabase
         .from("profiles")
@@ -147,30 +179,19 @@ export default function CompanyRegistrationPage() {
       }
     }
 
-    toast({
-      title: "Cadastro realizado com sucesso!",
-      description: "Verifique seu e-mail para confirmar a conta.",
-    });
+    toast({ title: "Cadastro realizado com sucesso!", description: "Verifique seu e-mail para confirmar a conta." });
     setTimeout(() => navigate("/login"), 2000);
   };
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.1, duration: 0.4 },
-    }),
+    visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.4 } }),
   };
 
   return (
     <div className="py-12">
       <div className="container max-w-3xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10 text-center"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
           <h1 className="mb-3 text-3xl font-extrabold text-foreground md:text-4xl">
             Cadastre sua <span className="text-primary">Empresa</span>
           </h1>
@@ -190,23 +211,31 @@ export default function CompanyRegistrationPage() {
                 <CardDescription>Informações básicas sobre sua empresa.</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
+                <div>
+                  <Label htmlFor="cnpj">CNPJ *</Label>
+                  <div className="relative">
+                    <Input
+                      id="cnpj"
+                      placeholder="XX.XXX.XXX/XXXX-XX"
+                      {...register("cnpj")}
+                      onChange={(e) => {
+                        const formatted = formatCNPJ(e.target.value);
+                        setValue("cnpj", formatted, { shouldValidate: true });
+                        if (formatted.replace(/\D/g, "").length === 14) {
+                          lookupCNPJ(formatted);
+                        }
+                      }}
+                    />
+                    {cnpjLoading && (
+                      <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-primary" />
+                    )}
+                  </div>
+                  {errors.cnpj && <p className="mt-1 text-xs text-destructive">{errors.cnpj.message}</p>}
+                </div>
+                <div>
                   <Label htmlFor="companyName">Nome da Empresa *</Label>
                   <Input id="companyName" placeholder="Razão social" {...register("companyName")} />
                   {errors.companyName && <p className="mt-1 text-xs text-destructive">{errors.companyName.message}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="cnpj">CNPJ *</Label>
-                  <Input
-                    id="cnpj"
-                    placeholder="XX.XXX.XXX/XXXX-XX"
-                    {...register("cnpj")}
-                    onChange={(e) => {
-                      const formatted = formatCNPJ(e.target.value);
-                      setValue("cnpj", formatted, { shouldValidate: true });
-                    }}
-                  />
-                  {errors.cnpj && <p className="mt-1 text-xs text-destructive">{errors.cnpj.message}</p>}
                 </div>
                 <div>
                   <Label htmlFor="segment">Segmento *</Label>
@@ -229,8 +258,9 @@ export default function CompanyRegistrationPage() {
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Quatro Barras">Quatro Barras</SelectItem>
-                      <SelectItem value="Campina Grande do Sul">Campina Grande do Sul</SelectItem>
+                      {cities.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   {errors.city && <p className="mt-1 text-xs text-destructive">{errors.city.message}</p>}
@@ -322,13 +352,7 @@ export default function CompanyRegistrationPage() {
                   onValueChange={(v) => setValue("plan", v as "basic" | "premium", { shouldValidate: true })}
                   className="grid gap-4 sm:grid-cols-2"
                 >
-                  <label
-                    className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${
-                      selectedPlan === "basic"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-muted-foreground/30"
-                    }`}
-                  >
+                  <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${selectedPlan === "basic" ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}>
                     <div className="flex items-start gap-3">
                       <RadioGroupItem value="basic" id="basic" className="mt-1" />
                       <div>
@@ -342,13 +366,7 @@ export default function CompanyRegistrationPage() {
                       </div>
                     </div>
                   </label>
-                  <label
-                    className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${
-                      selectedPlan === "premium"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-muted-foreground/30"
-                    }`}
-                  >
+                  <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${selectedPlan === "premium" ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}>
                     <div className="flex items-start gap-3">
                       <RadioGroupItem value="premium" id="premium" className="mt-1" />
                       <div>
@@ -403,18 +421,16 @@ export default function CompanyRegistrationPage() {
             </Card>
           </motion.div>
 
-          <motion.div custom={4} initial="hidden" animate="visible" variants={fadeIn} className="flex flex-col items-center gap-3">
-            <Button type="submit" size="xl" disabled={isSubmitting} className="w-full sm:w-auto">
-              {isSubmitting ? "Cadastrando..." : "Cadastrar Empresa"}
-              <ArrowRight className="ml-1 h-5 w-5" />
-            </Button>
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Já tem conta?{" "}
-              <Link to="/login" className="font-semibold text-primary hover:underline">
-                Entrar
-              </Link>
+              <Link to="/login" className="font-medium text-primary hover:underline">Faça login</Link>
             </p>
-          </motion.div>
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Empresa"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </form>
       </div>
     </div>

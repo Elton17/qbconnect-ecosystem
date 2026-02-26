@@ -1,7 +1,16 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar } from "lucide-react";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Pencil } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const types = [
   { label: "Todos", value: "all" },
@@ -9,15 +18,6 @@ const types = [
   { label: "Procuro Parceiro", value: "parceiro", icon: Users },
   { label: "Estou Contratando", value: "contratando", icon: Briefcase },
   { label: "Venda de Estoque", value: "estoque", icon: Package },
-];
-
-const mockOpportunities = [
-  { id: 1, title: "Procuro fornecedor de aço inox", company: "MetalForge", type: "fornecedor", value: "R$ 50.000", date: "Há 2 dias", urgent: true },
-  { id: 2, title: "Parceria para projeto de automação", company: "TechSol Sistemas", type: "parceiro", value: "R$ 120.000", date: "Há 3 dias", urgent: false },
-  { id: 3, title: "Vaga para engenheiro civil", company: "ConstroMax", type: "contratando", value: "CLT", date: "Há 1 dia", urgent: true },
-  { id: 4, title: "Estoque de madeira tratada", company: "MadeiraViva", type: "estoque", value: "R$ 15.000", date: "Há 5 dias", urgent: false },
-  { id: 5, title: "Fornecedor de embalagens sustentáveis", company: "Sabor Regional", type: "fornecedor", value: "R$ 8.000/mês", date: "Hoje", urgent: true },
-  { id: 6, title: "Parceiro para clínica móvel", company: "CliniVida", type: "parceiro", value: "A definir", date: "Há 4 dias", urgent: false },
 ];
 
 const typeColors: Record<string, string> = {
@@ -32,15 +32,83 @@ const fadeInUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.4 } }),
 };
 
+interface Opportunity {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  type: string;
+  value: string;
+  urgent: boolean;
+  created_at: string;
+  company_name?: string;
+}
+
 export default function OpportunitiesPage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [activeType, setActiveType] = useState("all");
   const [search, setSearch] = useState("");
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
 
-  const filtered = mockOpportunities.filter((o) => {
+  const fetchData = async () => {
+    const { data: opps } = await supabase.from("opportunities").select("*").eq("active", true).order("created_at", { ascending: false });
+    if (!opps) { setLoading(false); return; }
+
+    const userIds = [...new Set(opps.map((o: any) => o.user_id))];
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.company_name]));
+
+    setOpportunities(opps.map((o: any) => ({ ...o, company_name: profileMap.get(o.user_id) || "Empresa" })));
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const handleSubmit = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.from("opportunities").insert({
+      user_id: user.id,
+      title: form.title,
+      type: form.type,
+      value: form.value,
+      description: form.description,
+      urgent: form.urgent,
+    });
+    setSaving(false);
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Oportunidade publicada!" });
+      setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
+      setDialogOpen(false);
+      fetchData();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    await supabase.from("opportunities").delete().eq("id", id);
+    fetchData();
+  };
+
+  const filtered = opportunities.filter((o) => {
     const matchType = activeType === "all" || o.type === activeType;
-    const matchSearch = o.title.toLowerCase().includes(search.toLowerCase()) || o.company.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = o.title.toLowerCase().includes(search.toLowerCase()) || (o.company_name || "").toLowerCase().includes(search.toLowerCase());
     return matchType && matchSearch;
   });
+
+  const timeAgo = (date: string) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return "Hoje";
+    if (days === 1) return "Há 1 dia";
+    return `Há ${days} dias`;
+  };
 
   return (
     <div className="py-8">
@@ -50,85 +118,80 @@ export default function OpportunitiesPage() {
             <h1 className="mb-2 text-3xl font-extrabold text-foreground">Oportunidades</h1>
             <p className="text-muted-foreground">Matchmaking empresarial — encontre o parceiro ideal.</p>
           </div>
-          <Button variant="default" size="lg">
-            Publicar Oportunidade
-          </Button>
+          {user && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="lg"><Plus className="mr-1 h-4 w-4" /> Publicar Oportunidade</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Nova Oportunidade</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Procuro fornecedor de aço" /></div>
+                  <div><Label>Tipo *</Label>
+                    <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{types.filter(t => t.value !== "all").map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Valor estimado</Label><Input value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="R$ 10.000" /></div>
+                  <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+                  <div className="flex items-center gap-2"><Switch checked={form.urgent} onCheckedChange={(v) => setForm({ ...form, urgent: v })} /><Label>Urgente</Label></div>
+                  <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Publicar</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
-        {/* Search */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Buscar oportunidade..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <input type="text" placeholder="Buscar oportunidade..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
         </div>
 
-        {/* Type filters */}
         <div className="mb-8 flex flex-wrap gap-2">
           {types.map((t) => (
-            <button
-              key={t.value}
-              onClick={() => setActiveType(t.value)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
-                activeType === t.value
-                  ? "bg-primary text-primary-foreground shadow"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {t.label}
-            </button>
+            <button key={t.value} onClick={() => setActiveType(t.value)} className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${activeType === t.value ? "bg-primary text-primary-foreground shadow" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>{t.label}</button>
           ))}
         </div>
 
-        {/* List */}
-        <div className="space-y-4">
-          {filtered.map((opp, i) => (
-            <motion.div
-              key={opp.id}
-              custom={i}
-              initial="hidden"
-              animate="visible"
-              variants={fadeInUp}
-              className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover md:flex-row md:items-center md:justify-between"
-            >
-              <div className="flex-1">
-                <div className="mb-2 flex flex-wrap items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${typeColors[opp.type]}`}>
-                    {types.find((t) => t.value === opp.type)?.label}
-                  </span>
-                  {opp.urgent && (
-                    <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">
-                      Urgente
-                    </span>
+        {loading ? (
+          <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        ) : (
+          <div className="space-y-4">
+            {filtered.map((opp, i) => (
+              <motion.div key={opp.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp} className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover md:flex-row md:items-center md:justify-between">
+                <div className="flex-1">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${typeColors[opp.type] || ""}`}>{types.find((t) => t.value === opp.type)?.label}</span>
+                    {opp.urgent && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">Urgente</span>}
+                  </div>
+                  <h3 className="mb-1 text-lg font-bold text-card-foreground">{opp.title}</h3>
+                  {opp.description && <p className="mb-1 text-sm text-muted-foreground line-clamp-2">{opp.description}</p>}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>{opp.company_name}</span>
+                    <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{timeAgo(opp.created_at)}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {opp.value && (
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-foreground">{opp.value}</div>
+                      <div className="text-xs text-muted-foreground">Valor estimado</div>
+                    </div>
+                  )}
+                  {user?.id === opp.user_id ? (
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(opp.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  ) : (
+                    <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
                   )}
                 </div>
-                <h3 className="mb-1 text-lg font-bold text-card-foreground">{opp.title}</h3>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{opp.company}</span>
-                  <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{opp.date}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-lg font-bold text-foreground">{opp.value}</div>
-                  <div className="text-xs text-muted-foreground">Valor estimado</div>
-                </div>
-                <Button variant="default" size="sm">
-                  Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="py-16 text-center text-muted-foreground">
-            Nenhuma oportunidade encontrada.
+              </motion.div>
+            ))}
           </div>
+        )}
+
+        {!loading && filtered.length === 0 && (
+          <div className="py-16 text-center text-muted-foreground">Nenhuma oportunidade encontrada.</div>
         )}
       </div>
     </div>

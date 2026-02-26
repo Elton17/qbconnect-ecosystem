@@ -287,7 +287,14 @@ export default function ProfilePage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="city">Cidade</Label>
-                <Input id="city" value={form.city} onChange={(e) => handleChange("city", e.target.value)} />
+                <Select value={form.city} onValueChange={(v) => handleChange("city", v)}>
+                  <SelectTrigger id="city"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>
+                    {["Quatro Barras", "Campina Grande do Sul", "Colombo", "Pinhais", "Curitiba"].map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>

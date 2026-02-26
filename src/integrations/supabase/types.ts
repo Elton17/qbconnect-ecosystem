@@ -14,6 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      benefits: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string | null
+          exclusive: boolean | null
+          id: string
+          offer: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          exclusive?: boolean | null
+          id?: string
+          offer: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          exclusive?: boolean | null
+          id?: string
+          offer?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          duration: string | null
+          id: string
+          premium: boolean | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: string | null
+          id?: string
+          premium?: boolean | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          duration?: string | null
+          id?: string
+          premium?: boolean | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      opportunities: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          title: string
+          type: string
+          updated_at: string | null
+          urgent: boolean | null
+          user_id: string
+          value: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title: string
+          type?: string
+          updated_at?: string | null
+          urgent?: boolean | null
+          user_id: string
+          value?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+          type?: string
+          updated_at?: string | null
+          urgent?: boolean | null
+          user_id?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
