@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Search, Filter, Star, MapPin, ArrowRight, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const categories = ["Todos", "Tecnologia", "Construção", "Alimentação", "Saúde", "Serviços", "Indústria", "Educação", "Logística", "Outro"];
@@ -114,9 +115,11 @@ export default function MarketplacePage() {
                     {company.city || "—"}
                   </span>
                 </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  Ver perfil <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                </Button>
+                <Link to={`/empresa/${company.id}`} className="w-full">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Ver perfil <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                  </Button>
+                </Link>
               </motion.div>
             ))}
           </div>
