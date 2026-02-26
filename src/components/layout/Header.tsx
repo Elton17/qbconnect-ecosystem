@@ -1,9 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
@@ -15,9 +16,17 @@ const navItems = [
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
+      setIsAdmin(!!data);
+    });
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,12 +65,14 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/admin">
-              <LayoutDashboard className="mr-1 h-4 w-4" />
-              Admin
-            </Link>
-          </Button>
+          {isAdmin && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/admin">
+                <LayoutDashboard className="mr-1 h-4 w-4" />
+                Admin
+              </Link>
+            </Button>
+          )}
           {user ? (
             <>
               <Button variant="ghost" size="sm" asChild>
@@ -120,12 +131,14 @@ export default function Header() {
                 </Link>
               ))}
               <div className="mt-2 flex flex-col gap-2 border-t border-border pt-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/admin" onClick={() => setMobileOpen(false)}>
-                    <LayoutDashboard className="mr-1 h-4 w-4" />
-                    Painel Admin
-                  </Link>
-                </Button>
+                {isAdmin && (
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/admin" onClick={() => setMobileOpen(false)}>
+                      <LayoutDashboard className="mr-1 h-4 w-4" />
+                      Painel Admin
+                    </Link>
+                  </Button>
+                )}
                 {user ? (
                   <>
                     <Button variant="ghost" size="sm" asChild>
