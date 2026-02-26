@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import CompanyMatchmaking from "@/components/CompanyMatchmaking";
 
 interface Profile {
   id: string;
@@ -249,6 +250,12 @@ export default function CompanyProfilePage() {
       {totalItems === 0 && (
         <p className="mt-4 text-center text-sm text-muted-foreground">Esta empresa ainda não publicou conteúdo.</p>
       )}
+
+      <CompanyMatchmaking
+        currentCompanyId={profile.id}
+        segment={profile.segment}
+        city={profile.city}
+      />
     </div>
   );
 }
