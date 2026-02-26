@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -63,9 +63,16 @@ export default function Header() {
             </Link>
           </Button>
           {user ? (
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="mr-1 h-4 w-4" /> Sair
-            </Button>
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/perfil">
+                  <Building2 className="mr-1 h-4 w-4" /> Meu Perfil
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="mr-1 h-4 w-4" /> Sair
+              </Button>
+            </>
           ) : (
             <>
               <Button variant="outline" size="sm" asChild>
@@ -120,9 +127,16 @@ export default function Header() {
                   </Link>
                 </Button>
                 {user ? (
-                  <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
-                    <LogOut className="mr-1 h-4 w-4" /> Sair
-                  </Button>
+                  <>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/perfil" onClick={() => setMobileOpen(false)}>
+                        <Building2 className="mr-1 h-4 w-4" /> Meu Perfil
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
+                      <LogOut className="mr-1 h-4 w-4" /> Sair
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button variant="outline" size="sm" asChild>
