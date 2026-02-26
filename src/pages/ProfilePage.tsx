@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Building2, User, Phone, Globe, MapPin, Save, Loader2, Shield } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Building2, User, Phone, Globe, MapPin, Save, Loader2, Shield, Camera } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -45,6 +46,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
     cnpj: "",
@@ -59,6 +61,7 @@ export default function ProfilePage() {
     contact_role: "",
     contact_email: "",
     contact_phone: "",
+    logo_url: "",
   });
 
   useEffect(() => {
@@ -95,6 +98,7 @@ export default function ProfilePage() {
           contact_role: data.contact_role || "",
           contact_email: data.contact_email || "",
           contact_phone: data.contact_phone || "",
+          logo_url: data.logo_url || "",
         });
       }
       setLoading(false);
@@ -106,6 +110,32 @@ export default function ProfilePage() {
   const handleChange = (field: string, value: string) => {
     if (field === "cnpj") value = formatCNPJ(value);
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploading(true);
+    const fileExt = file.name.split(".").pop();
+    const filePath = `${user.id}/logo.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("logos")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast({ title: "Erro no upload", description: uploadError.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from("logos").getPublicUrl(filePath);
+
+    await supabase.from("profiles").update({ logo_url: publicUrl }).eq("user_id", user.id);
+    setForm((prev) => ({ ...prev, logo_url: publicUrl }));
+    toast({ title: "Logo atualizado!" });
+    setUploading(false);
   };
 
   const handleSave = async () => {
@@ -155,8 +185,33 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <Building2 className="h-8 w-8 text-primary" />
+          <div className="relative group">
+            <Avatar className="h-16 w-16">
+              {form.logo_url ? (
+                <AvatarImage src={form.logo_url} alt="Logo da empresa" />
+              ) : null}
+              <AvatarFallback className="bg-primary/10 text-primary text-xl">
+                <Building2 className="h-8 w-8" />
+              </AvatarFallback>
+            </Avatar>
+            <label
+              htmlFor="logo-upload"
+              className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              {uploading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Camera className="h-5 w-5" />
+              )}
+            </label>
+            <input
+              id="logo-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoUpload}
+              disabled={uploading}
+            />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">
@@ -165,11 +220,11 @@ export default function ProfilePage() {
             <div className="mt-1 flex items-center gap-2">
               <Badge variant={currentPlan.color}>{currentPlan.label}</Badge>
               {profile?.approved ? (
-                <Badge variant="outline" className="border-green-500/30 text-green-600">
+                <Badge variant="outline" className="border-primary/30 text-primary">
                   <Shield className="mr-1 h-3 w-3" /> Aprovada
                 </Badge>
               ) : (
-                <Badge variant="outline" className="border-yellow-500/30 text-yellow-600">
+                <Badge variant="outline" className="border-destructive/30 text-destructive">
                   Pendente de aprovação
                 </Badge>
               )}
