@@ -11,6 +11,7 @@ import AcademyPage from "@/pages/AcademyPage";
 import RankingPage from "@/pages/RankingPage";
 import BenefitsPage from "@/pages/BenefitsPage";
 import AdminPage from "@/pages/AdminPage";
+import CompanyRegistrationPage from "@/pages/CompanyRegistrationPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/ranking" element={<RankingPage />} />
             <Route path="/beneficios" element={<BenefitsPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/cadastro" element={<CompanyRegistrationPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

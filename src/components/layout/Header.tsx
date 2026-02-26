@@ -54,6 +54,9 @@ export default function Header() {
               Admin
             </Link>
           </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/cadastro">Cadastrar</Link>
+          </Button>
           <Button size="sm">Entrar</Button>
         </div>
 
@@ -97,6 +100,9 @@ export default function Header() {
                     <LayoutDashboard className="mr-1 h-4 w-4" />
                     Painel Admin
                   </Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/cadastro" onClick={() => setMobileOpen(false)}>Cadastrar</Link>
                 </Button>
                 <Button size="sm">Entrar</Button>
               </div>

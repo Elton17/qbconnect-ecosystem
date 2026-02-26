@@ -92,8 +92,8 @@ export default function LandingPage() {
                   <ArrowRight className="ml-1 h-5 w-5" />
                 </Link>
               </Button>
-              <Button variant="heroOutline" size="xl">
-                Quero me associar
+              <Button variant="heroOutline" size="xl" asChild>
+                <Link to="/cadastro">Quero me associar</Link>
               </Button>
             </div>
           </motion.div>
@@ -186,9 +186,11 @@ export default function LandingPage() {
             <p className="mb-8 text-lg text-secondary-foreground/70">
               Junte-se a mais de 120 empresas que já estão gerando negócios na plataforma.
             </p>
-            <Button variant="hero" size="xl">
-              Cadastrar minha empresa
-              <ArrowRight className="ml-1 h-5 w-5" />
+            <Button variant="hero" size="xl" asChild>
+              <Link to="/cadastro">
+                Cadastrar minha empresa
+                <ArrowRight className="ml-1 h-5 w-5" />
+              </Link>
             </Button>
           </motion.div>
         </div>
