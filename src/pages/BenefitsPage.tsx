@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Copy, Check, Ticket } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Copy, Check, Ticket, Gift, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,8 +47,6 @@ export default function BenefitsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false });
-
-  // Redeem state
   const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [redeemingBenefit, setRedeemingBenefit] = useState<Benefit | null>(null);
   const [redeemCode, setRedeemCode] = useState<string | null>(null);
@@ -59,24 +57,14 @@ export default function BenefitsPage() {
   const fetchData = async () => {
     const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
-
     const userIds = [...new Set(items.map((b: any) => b.user_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, company_name").in("user_id", userIds);
     const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.company_name]));
-
     setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id) || "Empresa" })));
-
-    // Fetch user's existing redemptions
     if (user) {
-      const { data: redemptions } = await supabase
-        .from("redemptions")
-        .select("benefit_id, code")
-        .eq("user_id", user.id);
-      if (redemptions) {
-        setUserRedemptions(new Map(redemptions.map((r: any) => [r.benefit_id, r.code])));
-      }
+      const { data: redemptions } = await supabase.from("redemptions").select("benefit_id, code").eq("user_id", user.id);
+      if (redemptions) setUserRedemptions(new Map(redemptions.map((r: any) => [r.benefit_id, r.code])));
     }
-
     setLoading(false);
   };
 
@@ -85,109 +73,99 @@ export default function BenefitsPage() {
   const handleSubmit = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("benefits").insert({
-      user_id: user.id,
-      offer: form.offer,
-      category: form.category,
-      exclusive: form.exclusive,
-    });
+    const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive });
     setSaving(false);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Benefício criado!" });
-      setForm({ offer: "", category: "Tecnologia", exclusive: false });
-      setDialogOpen(false);
-      fetchData();
-    }
+    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+    else { toast({ title: "Benefício criado!" }); setForm({ offer: "", category: "Tecnologia", exclusive: false }); setDialogOpen(false); fetchData(); }
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("benefits").delete().eq("id", id);
-    fetchData();
-  };
+  const handleDelete = async (id: string) => { await supabase.from("benefits").delete().eq("id", id); fetchData(); };
 
   const handleRedeem = async (benefit: Benefit) => {
-    if (!user) {
-      toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios.", variant: "destructive" });
-      return;
-    }
-
-    setRedeemingBenefit(benefit);
-    setRedeemDialogOpen(true);
-    setCopied(false);
-
-    // Check if already redeemed
+    if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios.", variant: "destructive" }); return; }
+    setRedeemingBenefit(benefit); setRedeemDialogOpen(true); setCopied(false);
     const existingCode = userRedemptions.get(benefit.id);
-    if (existingCode) {
-      setRedeemCode(existingCode);
-      return;
-    }
-
-    // Generate and save new code
+    if (existingCode) { setRedeemCode(existingCode); return; }
     setRedeemLoading(true);
     const code = generateCode();
-    const { error } = await supabase.from("redemptions").insert({
-      user_id: user.id,
-      benefit_id: benefit.id,
-      code,
-    });
-
+    const { error } = await supabase.from("redemptions").insert({ user_id: user.id, benefit_id: benefit.id, code });
     if (error) {
       if (error.code === "23505") {
-        // Already redeemed (race condition), fetch existing
         const { data } = await supabase.from("redemptions").select("code").eq("user_id", user.id).eq("benefit_id", benefit.id).single();
         setRedeemCode(data?.code || code);
-      } else {
-        toast({ title: "Erro", description: error.message, variant: "destructive" });
-        setRedeemDialogOpen(false);
-      }
-    } else {
-      setRedeemCode(code);
-      setUserRedemptions(new Map(userRedemptions).set(benefit.id, code));
-    }
+      } else { toast({ title: "Erro", description: error.message, variant: "destructive" }); setRedeemDialogOpen(false); }
+    } else { setRedeemCode(code); setUserRedemptions(new Map(userRedemptions).set(benefit.id, code)); }
     setRedeemLoading(false);
   };
 
-  const handleCopy = () => {
-    if (redeemCode) {
-      navigator.clipboard.writeText(redeemCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+  const handleCopy = () => { if (redeemCode) { navigator.clipboard.writeText(redeemCode); setCopied(true); setTimeout(() => setCopied(false), 2000); } };
+
+  const exclusiveCount = benefits.filter(b => b.exclusive).length;
 
   return (
-    <div className="py-8">
-      <div className="container">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="mb-2 text-3xl font-extrabold text-foreground">Clube de Benefícios</h1>
-            <p className="text-muted-foreground">Descontos e condições exclusivas entre empresas associadas.</p>
-          </div>
-          {user && (
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="default" size="lg"><Plus className="mr-1 h-4 w-4" /> Criar Benefício</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Novo Benefício</DialogTitle></DialogHeader>
-                <div className="space-y-4">
-                  <div><Label>Oferta *</Label><Input value={form.offer} onChange={(e) => setForm({ ...form, offer: e.target.value })} placeholder="Ex: 20% de desconto em consultoria" /></div>
-                  <div><Label>Categoria *</Label>
-                    <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{benefitCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-2"><Switch checked={form.exclusive} onCheckedChange={(v) => setForm({ ...form, exclusive: v })} /><Label>Exclusivo Premium</Label></div>
-                  <Button onClick={handleSubmit} disabled={saving || !form.offer} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Criar Benefício</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
+    <div>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-secondary py-16 md:py-20">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -left-10 top-1/4 h-72 w-72 rounded-full bg-accent blur-3xl" />
+          <div className="absolute -bottom-10 right-1/4 h-64 w-64 rounded-full bg-primary blur-3xl" />
         </div>
+        <div className="container relative">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
+              <Gift className="h-4 w-4" /> Clube Exclusivo
+            </div>
+            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
+              Clube de <span className="text-gradient">Benefícios</span>
+            </h1>
+            <p className="mb-8 text-lg text-secondary-foreground/70">
+              Descontos e condições exclusivas entre empresas associadas da QBCAMP.
+            </p>
+            {user && (
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="hero" size="xl"><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>Novo Benefício</DialogTitle></DialogHeader>
+                  <div className="space-y-4">
+                    <div><Label>Oferta *</Label><Input value={form.offer} onChange={(e) => setForm({ ...form, offer: e.target.value })} placeholder="Ex: 20% de desconto em consultoria" /></div>
+                    <div><Label>Categoria *</Label>
+                      <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>{benefitCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center gap-2"><Switch checked={form.exclusive} onCheckedChange={(v) => setForm({ ...form, exclusive: v })} /><Label>Exclusivo Premium</Label></div>
+                    <Button onClick={handleSubmit} disabled={saving || !form.offer} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Criar Benefício</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </motion.div>
 
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+            {[
+              { label: "Benefícios Ativos", value: `${benefits.length}`, icon: Percent },
+              { label: "Exclusivos Premium", value: `${exclusiveCount}`, icon: Sparkles },
+              { label: "Categorias", value: `${benefitCategories.length}`, icon: Tag },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+                  <stat.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-xl font-extrabold text-secondary-foreground">{stat.value}</div>
+                  <div className="text-xs text-secondary-foreground/60">{stat.label}</div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <div className="container py-10">
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : (
@@ -212,12 +190,7 @@ export default function BenefitsPage() {
                     <Building2 className="h-3.5 w-3.5" />{benefit.company_name}
                     <span className="ml-auto flex items-center gap-1"><Tag className="h-3.5 w-3.5" />{benefit.category}</span>
                   </div>
-                  <Button
-                    variant={alreadyRedeemed ? "secondary" : "outline"}
-                    size="sm"
-                    className="w-full"
-                    onClick={() => handleRedeem(benefit)}
-                  >
+                  <Button variant={alreadyRedeemed ? "secondary" : "outline"} size="sm" className="w-full" onClick={() => handleRedeem(benefit)}>
                     <Ticket className="mr-1.5 h-3.5 w-3.5" />
                     {alreadyRedeemed ? "Ver meu cupom" : "Resgatar benefício"}
                   </Button>
@@ -228,24 +201,21 @@ export default function BenefitsPage() {
         )}
 
         {!loading && benefits.length === 0 && (
-          <div className="py-16 text-center text-muted-foreground">Nenhum benefício disponível ainda.</div>
+          <div className="py-16 text-center">
+            <Gift className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <p className="text-muted-foreground">Nenhum benefício disponível ainda.</p>
+          </div>
         )}
 
         {/* Redeem Dialog */}
         <Dialog open={redeemDialogOpen} onOpenChange={setRedeemDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Ticket className="h-5 w-5 text-primary" /> Cupom de Benefício
-              </DialogTitle>
-              <DialogDescription>
-                Apresente este código à empresa para validar seu desconto.
-              </DialogDescription>
+              <DialogTitle className="flex items-center gap-2"><Ticket className="h-5 w-5 text-primary" /> Cupom de Benefício</DialogTitle>
+              <DialogDescription>Apresente este código à empresa para validar seu desconto.</DialogDescription>
             </DialogHeader>
             {redeemLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
+              <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : redeemCode ? (
               <div className="space-y-4">
                 <div className="rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 p-6 text-center">

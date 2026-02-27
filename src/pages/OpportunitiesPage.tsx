@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Pencil } from "lucide-react";
+import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Handshake, TrendingUp, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -73,12 +73,7 @@ export default function OpportunitiesPage() {
     if (!user) return;
     setSaving(true);
     const { error } = await supabase.from("opportunities").insert({
-      user_id: user.id,
-      title: form.title,
-      type: form.type,
-      value: form.value,
-      description: form.description,
-      urgent: form.urgent,
+      user_id: user.id, title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent,
     });
     setSaving(false);
     if (error) {
@@ -110,39 +105,77 @@ export default function OpportunitiesPage() {
     return `Há ${days} dias`;
   };
 
-  return (
-    <div className="py-8">
-      <div className="container">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="mb-2 text-3xl font-extrabold text-foreground">Oportunidades</h1>
-            <p className="text-muted-foreground">Matchmaking empresarial — encontre o parceiro ideal.</p>
-          </div>
-          {user && (
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="default" size="lg"><Plus className="mr-1 h-4 w-4" /> Publicar Oportunidade</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Nova Oportunidade</DialogTitle></DialogHeader>
-                <div className="space-y-4">
-                  <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Procuro fornecedor de aço" /></div>
-                  <div><Label>Tipo *</Label>
-                    <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{types.filter(t => t.value !== "all").map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div><Label>Valor estimado</Label><Input value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="R$ 10.000" /></div>
-                  <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
-                  <div className="flex items-center gap-2"><Switch checked={form.urgent} onCheckedChange={(v) => setForm({ ...form, urgent: v })} /><Label>Urgente</Label></div>
-                  <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Publicar</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
+  const urgentCount = opportunities.filter(o => o.urgent).length;
 
+  return (
+    <div>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-secondary py-16 md:py-20">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary blur-3xl" />
+          <div className="absolute -bottom-10 left-10 h-64 w-64 rounded-full bg-accent blur-3xl" />
+        </div>
+        <div className="container relative">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
+              <Handshake className="h-4 w-4" /> Matchmaking Empresarial
+            </div>
+            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
+              Encontre o <span className="text-gradient">parceiro ideal</span> para seu negócio
+            </h1>
+            <p className="mb-8 text-lg text-secondary-foreground/70">
+              Conecte-se com fornecedores, parceiros e oportunidades de negócios da região.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {user && (
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="hero" size="xl"><Plus className="mr-1 h-5 w-5" /> Publicar Oportunidade</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Nova Oportunidade</DialogTitle></DialogHeader>
+                    <div className="space-y-4">
+                      <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Procuro fornecedor de aço" /></div>
+                      <div><Label>Tipo *</Label>
+                        <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{types.filter(t => t.value !== "all").map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div><Label>Valor estimado</Label><Input value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} placeholder="R$ 10.000" /></div>
+                      <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+                      <div className="flex items-center gap-2"><Switch checked={form.urgent} onCheckedChange={(v) => setForm({ ...form, urgent: v })} /><Label>Urgente</Label></div>
+                      <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Publicar</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+            {[
+              { label: "Oportunidades Ativas", value: `${opportunities.length}`, icon: TrendingUp },
+              { label: "Urgentes", value: `${urgentCount}`, icon: Zap },
+              { label: "Tipos", value: "4", icon: Briefcase },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+                  <stat.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-xl font-extrabold text-secondary-foreground">{stat.value}</div>
+                  <div className="text-xs text-secondary-foreground/60">{stat.label}</div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <div className="container py-8">
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input type="text" placeholder="Buscar oportunidade..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
@@ -163,7 +196,7 @@ export default function OpportunitiesPage() {
                 <div className="flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${typeColors[opp.type] || ""}`}>{types.find((t) => t.value === opp.type)?.label}</span>
-                    {opp.urgent && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">Urgente</span>}
+                    {opp.urgent && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive animate-pulse">🔥 Urgente</span>}
                   </div>
                   <h3 className="mb-1 text-lg font-bold text-card-foreground">{opp.title}</h3>
                   {opp.description && <p className="mb-1 text-sm text-muted-foreground line-clamp-2">{opp.description}</p>}
@@ -191,7 +224,10 @@ export default function OpportunitiesPage() {
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="py-16 text-center text-muted-foreground">Nenhuma oportunidade encontrada.</div>
+          <div className="py-16 text-center">
+            <Handshake className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <p className="text-muted-foreground">Nenhuma oportunidade encontrada.</p>
+          </div>
         )}
       </div>
     </div>
