@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -250,19 +250,81 @@ export default function MarketplacePage() {
   const canAddMore = allPreviews.length < 6;
 
   return (
-    <div className="py-8">
-      <div className="container">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="mb-2 text-3xl font-extrabold text-foreground">Marketplace</h1>
-            <p className="text-muted-foreground">Encontre empresas, produtos e serviços dos associados.</p>
-          </div>
-          {user && (
-            <Button onClick={openNewProduct}>
-              <Plus className="mr-1 h-4 w-4" /> Anunciar Produto
-            </Button>
-          )}
+    <div>
+      {/* Hero Banner */}
+      <section className="relative overflow-hidden bg-secondary py-16 md:py-24">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary blur-3xl" />
+          <div className="absolute -bottom-20 right-0 h-96 w-96 rounded-full bg-primary/60 blur-3xl" />
+          <div className="absolute left-1/2 top-1/3 h-48 w-48 rounded-full bg-accent blur-2xl" />
         </div>
+        <div className="container relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mx-auto max-w-3xl text-center"
+          >
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
+              <ShoppingBag className="h-4 w-4" />
+              Marketplace B2B Regional
+            </div>
+            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl lg:text-6xl">
+              Produtos & Serviços dos{" "}
+              <span className="text-gradient">Associados</span>
+            </h1>
+            <p className="mb-8 text-lg text-secondary-foreground/70 md:text-xl">
+              Descubra ofertas exclusivas, negocie direto com empresas da região e impulsione seus negócios.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              {user ? (
+                <Button variant="hero" size="xl" onClick={openNewProduct}>
+                  <Plus className="mr-1 h-5 w-5" /> Anunciar Produto
+                </Button>
+              ) : (
+                <Button variant="hero" size="xl" asChild>
+                  <Link to="/cadastro">
+                    Comece a Vender <ArrowRight className="ml-1 h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
+              <Button
+                variant="heroOutline"
+                size="xl"
+                onClick={() => { setActiveTab("produtos"); window.scrollTo({ top: 500, behavior: "smooth" }); }}
+              >
+                Explorar Ofertas
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Stat pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-6"
+          >
+            {[
+              { label: "Empresas", value: `${companies.length}+`, icon: Building2 },
+              { label: "Produtos Ativos", value: `${products.length}`, icon: Package },
+              { label: "Categorias", value: `${productCategories.length - 1}`, icon: Tag },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+                  <stat.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <div className="text-xl font-extrabold text-secondary-foreground">{stat.value}</div>
+                  <div className="text-xs text-secondary-foreground/60">{stat.label}</div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <div className="container py-8">
 
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setActiveCategory("Todos"); }}>
           <TabsList className="mb-6">
