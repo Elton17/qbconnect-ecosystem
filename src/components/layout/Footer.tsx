@@ -39,6 +39,7 @@ export default function Footer() {
               <li><Link to="/beneficios" className="hover:text-primary transition-colors">Benefícios</Link></li>
               <li><Link to="/cadastro" className="hover:text-primary transition-colors">Associe-se</Link></li>
               <li><Link to="/login" className="hover:text-primary transition-colors">Área do Associado</Link></li>
+              <li><Link to="/certificado" className="hover:text-primary transition-colors">Verificar Certificado</Link></li>
             </ul>
           </div>
           <div>

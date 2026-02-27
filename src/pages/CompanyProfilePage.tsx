@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CompanyMatchmaking from "@/components/CompanyMatchmaking";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 interface Profile {
   id: string; company_name: string; segment: string; city: string; description: string | null;
@@ -76,9 +77,10 @@ export default function CompanyProfilePage() {
           <div className="absolute -bottom-10 left-10 h-48 w-48 rounded-full bg-accent blur-3xl" />
         </div>
         <div className="container relative">
-          <Link to="/marketplace" className="mb-6 inline-flex items-center gap-1 text-sm text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Voltar ao Marketplace
-          </Link>
+          <Breadcrumbs items={[
+            { label: "Marketplace", href: "/marketplace" },
+            { label: profile.company_name },
+          ]} />
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 md:flex-row md:items-start">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-primary-foreground/10 text-4xl font-bold text-secondary-foreground overflow-hidden border-2 border-secondary-foreground/10">
               {profile.logo_url ? <img src={profile.logo_url} alt={profile.company_name} className="h-full w-full object-cover" /> : profile.company_name.charAt(0)}

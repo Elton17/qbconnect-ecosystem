@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import RegistrationFormDialog from "@/components/events/RegistrationFormDialog";
 import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 function generateTicketCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -178,9 +179,10 @@ export default function EventDetailPage() {
           {/* Main Content */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-2">
             <div className="rounded-2xl border border-border bg-card p-6 card-shadow md:p-8">
-              <Link to="/eventos" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <ArrowLeft className="h-4 w-4" /> Voltar aos eventos
-              </Link>
+              <Breadcrumbs items={[
+                { label: "Eventos", href: "/eventos" },
+                { label: event.title },
+              ]} />
 
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-primary/10 px-3 py-0.5 text-xs font-medium text-primary">{event.category}</span>

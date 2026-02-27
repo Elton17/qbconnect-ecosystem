@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 interface Product {
   id: string;
@@ -95,9 +96,10 @@ export default function ProductDetailPage() {
 
   return (
     <div className="container py-8">
-      <Link to="/marketplace" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-        <ArrowLeft className="h-4 w-4" /> Voltar ao Marketplace
-      </Link>
+      <Breadcrumbs items={[
+        { label: "Marketplace", href: "/marketplace" },
+        { label: product.title },
+      ]} />
 
       <div className="grid gap-8 lg:grid-cols-5">
         {/* Gallery — 3 cols */}

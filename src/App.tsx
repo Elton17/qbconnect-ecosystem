@@ -26,9 +26,10 @@ import EventOrganizerPage from "@/pages/EventOrganizerPage";
 import CourseDetailPage from "@/pages/CourseDetailPage";
 import CourseManagePage from "@/pages/CourseManagePage";
 import InstructorDashboardPage from "@/pages/InstructorDashboardPage";
+import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
+import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
 
 const queryClient = new QueryClient();
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -53,9 +54,12 @@ const App = () => (
               <Route path="/empresa/:id" element={<CompanyProfilePage />} />
               <Route path="/cadastro" element={<CompanyRegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/certificado" element={<CertificateVerifyPage />} />
+              <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
 
               {/* Protected routes - require authentication */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><CompanyDashboardPage /></ProtectedRoute>} />
               <Route path="/curso/:id/gerenciar" element={<ProtectedRoute><CourseManagePage /></ProtectedRoute>} />
               <Route path="/instrutor/dashboard" element={<ProtectedRoute><InstructorDashboardPage /></ProtectedRoute>} />
               <Route path="/evento/:id/painel" element={<ProtectedRoute><EventOrganizerPage /></ProtectedRoute>} />
