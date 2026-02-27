@@ -180,6 +180,7 @@ export type Database = {
           city: string
           cnpj: string
           company_name: string
+          complement: string | null
           contact_email: string
           contact_name: string
           contact_phone: string
@@ -189,12 +190,16 @@ export type Database = {
           email: string
           id: string
           logo_url: string | null
+          neighborhood: string | null
           phone: string
           plan: string
+          reference_point: string | null
           segment: string
+          state: string | null
           updated_at: string
           user_id: string
           website: string | null
+          zip_code: string | null
         }
         Insert: {
           address?: string | null
@@ -202,6 +207,7 @@ export type Database = {
           city?: string
           cnpj?: string
           company_name?: string
+          complement?: string | null
           contact_email?: string
           contact_name?: string
           contact_phone?: string
@@ -211,12 +217,16 @@ export type Database = {
           email?: string
           id?: string
           logo_url?: string | null
+          neighborhood?: string | null
           phone?: string
           plan?: string
+          reference_point?: string | null
           segment?: string
+          state?: string | null
           updated_at?: string
           user_id: string
           website?: string | null
+          zip_code?: string | null
         }
         Update: {
           address?: string | null
@@ -224,6 +234,7 @@ export type Database = {
           city?: string
           cnpj?: string
           company_name?: string
+          complement?: string | null
           contact_email?: string
           contact_name?: string
           contact_phone?: string
@@ -233,12 +244,16 @@ export type Database = {
           email?: string
           id?: string
           logo_url?: string | null
+          neighborhood?: string | null
           phone?: string
           plan?: string
+          reference_point?: string | null
           segment?: string
+          state?: string | null
           updated_at?: string
           user_id?: string
           website?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }

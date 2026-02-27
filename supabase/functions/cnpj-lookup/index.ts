@@ -30,10 +30,16 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
 
+    const street = [data.logradouro, data.numero].filter(Boolean).join(', ');
+
     const result = {
       companyName: data.razao_social || '',
-      address: [data.logradouro, data.numero, data.complemento, data.bairro].filter(Boolean).join(', '),
+      address: street,
+      neighborhood: data.bairro || '',
+      complement: data.complemento || '',
       city: data.municipio || '',
+      state: data.uf || '',
+      zipCode: data.cep ? data.cep.replace(/\D/g, '').replace(/^(\d{5})(\d{3})$/, '$1-$2') : '',
       phone: data.ddd_telefone_1 || '',
       email: data.email || '',
       segment: data.cnae_fiscal_descricao || '',

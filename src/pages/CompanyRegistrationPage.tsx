@@ -43,13 +43,7 @@ const segments = [
   "Outro",
 ];
 
-const cities = [
-  "Quatro Barras",
-  "Campina Grande do Sul",
-  "Colombo",
-  "Pinhais",
-  "Curitiba",
-];
+
 
 const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
 
@@ -57,14 +51,19 @@ const formSchema = z.object({
   companyName: z.string().trim().min(2, "Nome da empresa é obrigatório").max(120),
   cnpj: z.string().regex(cnpjRegex, "CNPJ inválido (XX.XXX.XXX/XXXX-XX)"),
   segment: z.string().min(1, "Selecione um segmento"),
-  city: z.string().min(1, "Selecione uma cidade"),
+  city: z.string().trim().min(1, "Cidade é obrigatória").max(100),
   website: z.string().url("URL inválida").optional().or(z.literal("")),
   phone: z.string().min(8, "Telefone inválido").max(20),
   email: z.string().email("E-mail inválido").max(255),
   password: z.string().min(6, "Mínimo 6 caracteres"),
   confirmPassword: z.string().min(6, "Confirme a senha"),
   description: z.string().trim().min(10, "Mínimo 10 caracteres").max(1000),
-  address: z.string().trim().min(5, "Endereço é obrigatório").max(200),
+  address: z.string().trim().min(3, "Endereço é obrigatório").max(200),
+  neighborhood: z.string().trim().min(2, "Bairro é obrigatório").max(100),
+  complement: z.string().trim().max(200).optional().or(z.literal("")),
+  referencePoint: z.string().trim().max(200).optional().or(z.literal("")),
+  zipCode: z.string().trim().min(8, "CEP inválido").max(10),
+  state: z.string().trim().min(2, "Estado é obrigatório").max(2),
   plan: z.enum(["basic", "premium"], { required_error: "Selecione um plano" }),
   contactName: z.string().trim().min(2, "Nome do responsável é obrigatório").max(100),
   contactRole: z.string().trim().min(2, "Cargo é obrigatório").max(100),
@@ -132,6 +131,11 @@ export default function CompanyRegistrationPage() {
 
       if (data.companyName) setValue("companyName", data.companyName, { shouldValidate: true });
       if (data.address) setValue("address", data.address, { shouldValidate: true });
+      if (data.neighborhood) setValue("neighborhood", data.neighborhood, { shouldValidate: true });
+      if (data.complement) setValue("complement", data.complement);
+      if (data.city) setValue("city", data.city, { shouldValidate: true });
+      if (data.state) setValue("state", data.state, { shouldValidate: true });
+      if (data.zipCode) setValue("zipCode", data.zipCode, { shouldValidate: true });
       if (data.phone) setValue("phone", data.phone, { shouldValidate: true });
       if (data.email) setValue("email", data.email, { shouldValidate: true });
 
@@ -166,6 +170,11 @@ export default function CompanyRegistrationPage() {
           website: data.website || "",
           description: data.description,
           address: data.address,
+          neighborhood: data.neighborhood,
+          complement: data.complement || "",
+          reference_point: data.referencePoint || "",
+          zip_code: data.zipCode,
+          state: data.state,
           plan: data.plan,
           contact_name: data.contactName,
           contact_role: data.contactRole,
@@ -253,16 +262,7 @@ export default function CompanyRegistrationPage() {
                 </div>
                 <div>
                   <Label htmlFor="city">Cidade *</Label>
-                  <Select onValueChange={(v) => setValue("city", v, { shouldValidate: true })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cities.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input id="city" placeholder="Ex: Quatro Barras" {...register("city")} />
                   {errors.city && <p className="mt-1 text-xs text-destructive">{errors.city.message}</p>}
                 </div>
                 <div>
@@ -328,10 +328,35 @@ export default function CompanyRegistrationPage() {
                   <Textarea id="description" placeholder="Conte sobre sua empresa..." rows={4} {...register("description")} />
                   {errors.description && <p className="mt-1 text-xs text-destructive">{errors.description.message}</p>}
                 </div>
-                <div>
-                  <Label htmlFor="address">Endereço *</Label>
-                  <Input id="address" placeholder="Rua, número, bairro" {...register("address")} />
-                  {errors.address && <p className="mt-1 text-xs text-destructive">{errors.address.message}</p>}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="address">Endereço (Logradouro) *</Label>
+                    <Input id="address" placeholder="Rua, Av. + Número" {...register("address")} />
+                    {errors.address && <p className="mt-1 text-xs text-destructive">{errors.address.message}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="neighborhood">Bairro *</Label>
+                    <Input id="neighborhood" placeholder="Bairro" {...register("neighborhood")} />
+                    {errors.neighborhood && <p className="mt-1 text-xs text-destructive">{errors.neighborhood.message}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="zipCode">CEP *</Label>
+                    <Input id="zipCode" placeholder="00000-000" {...register("zipCode")} />
+                    {errors.zipCode && <p className="mt-1 text-xs text-destructive">{errors.zipCode.message}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="state">Estado (UF) *</Label>
+                    <Input id="state" placeholder="PR" maxLength={2} {...register("state")} />
+                    {errors.state && <p className="mt-1 text-xs text-destructive">{errors.state.message}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="complement">Complemento</Label>
+                    <Input id="complement" placeholder="Sala, Andar, Bloco..." {...register("complement")} />
+                  </div>
+                  <div>
+                    <Label htmlFor="referencePoint">Ponto de Referência</Label>
+                    <Input id="referencePoint" placeholder="Próximo a..." {...register("referencePoint")} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
