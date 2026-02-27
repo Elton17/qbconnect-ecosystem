@@ -4,19 +4,10 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ShoppingBag,
-  Handshake,
-  GraduationCap,
-  Trophy,
-  ArrowRight,
-  Building2,
-  TrendingUp,
-  Users,
-  Coins,
-  Gift,
-  Briefcase,
-  CalendarDays,
+  ShoppingBag, Handshake, GraduationCap, Trophy, ArrowRight,
+  Building2, TrendingUp, Users, Coins, Gift, Briefcase, CalendarDays,
 } from "lucide-react";
+import ActivityFeed from "@/components/landing/ActivityFeed";
 
 const modules = [
   { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace", color: "bg-primary/10 text-primary" },
@@ -135,6 +126,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Activity Feed */}
+      <ActivityFeed />
 
       {/* CTA */}
       <section className="bg-secondary py-20">
