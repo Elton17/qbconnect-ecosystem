@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +54,10 @@ export default function MarketplacePage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ title: "", description: "", price: "", category: "", image_url: "", contact_phone: "", contact_email: "" });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchData();
@@ -87,13 +91,38 @@ export default function MarketplacePage() {
   function openNewProduct() {
     setEditingProduct(null);
     setForm({ title: "", description: "", price: "", category: "", image_url: "", contact_phone: "", contact_email: "" });
+    setImageFile(null);
+    setImagePreview("");
     setDialogOpen(true);
   }
 
   function openEditProduct(p: Product) {
     setEditingProduct(p);
     setForm({ title: p.title, description: p.description, price: String(p.price), category: p.category, image_url: p.image_url, contact_phone: p.contact_phone, contact_email: p.contact_email });
+    setImageFile(null);
+    setImagePreview(p.image_url || "");
     setDialogOpen(true);
+  }
+
+  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Imagem muito grande (máx. 5MB)", variant: "destructive" });
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  async function uploadImage(): Promise<string> {
+    if (!imageFile || !user) return form.image_url;
+    const ext = imageFile.name.split(".").pop();
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("products").upload(path, imageFile);
+    if (error) throw error;
+    const { data } = supabase.storage.from("products").getPublicUrl(path);
+    return data.publicUrl;
   }
 
   async function handleSaveProduct() {
@@ -103,29 +132,41 @@ export default function MarketplacePage() {
       return;
     }
 
-    const payload = {
-      user_id: user.id,
-      title: form.title,
-      description: form.description,
-      price: parseFloat(form.price),
-      category: form.category,
-      image_url: form.image_url,
-      contact_phone: form.contact_phone,
-      contact_email: form.contact_email,
-      active: true,
-    };
+    setUploading(true);
+    try {
+      let imageUrl = form.image_url;
+      if (imageFile) {
+        imageUrl = await uploadImage();
+      }
 
-    if (editingProduct) {
-      const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
-      if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
-      toast({ title: "Produto atualizado!" });
-    } else {
-      const { error } = await supabase.from("products").insert(payload);
-      if (error) { toast({ title: "Erro ao cadastrar", variant: "destructive" }); return; }
-      toast({ title: "Produto cadastrado!" });
+      const payload = {
+        user_id: user.id,
+        title: form.title,
+        description: form.description,
+        price: parseFloat(form.price),
+        category: form.category,
+        image_url: imageUrl,
+        contact_phone: form.contact_phone,
+        contact_email: form.contact_email,
+        active: true,
+      };
+
+      if (editingProduct) {
+        const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
+        if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
+        toast({ title: "Produto atualizado!" });
+      } else {
+        const { error } = await supabase.from("products").insert(payload);
+        if (error) { toast({ title: "Erro ao cadastrar", variant: "destructive" }); return; }
+        toast({ title: "Produto cadastrado!" });
+      }
+      setDialogOpen(false);
+      fetchData();
+    } catch {
+      toast({ title: "Erro ao enviar imagem", variant: "destructive" });
+    } finally {
+      setUploading(false);
     }
-    setDialogOpen(false);
-    fetchData();
   }
 
   async function handleDeleteProduct(id: string) {
@@ -304,8 +345,23 @@ export default function MarketplacePage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">URL da Imagem</label>
-                <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+                <label className="mb-1 block text-sm font-medium text-foreground">Imagem do Produto</label>
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageSelect} className="hidden" />
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-input bg-muted/50 transition-colors hover:border-primary/50 hover:bg-muted overflow-hidden"
+                  style={{ height: imagePreview ? "auto" : "120px" }}
+                >
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="max-h-48 w-full object-contain" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <ImagePlus className="h-8 w-8" />
+                      <span className="text-sm">Clique para adicionar imagem</span>
+                      <span className="text-xs">JPG, PNG ou WebP (máx. 5MB)</span>
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -317,7 +373,9 @@ export default function MarketplacePage() {
                   <Input value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} placeholder="email@empresa.com" />
                 </div>
               </div>
-              <Button onClick={handleSaveProduct} className="w-full">{editingProduct ? "Salvar alterações" : "Publicar anúncio"}</Button>
+              <Button onClick={handleSaveProduct} disabled={uploading} className="w-full">
+                {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando...</> : editingProduct ? "Salvar alterações" : "Publicar anúncio"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
