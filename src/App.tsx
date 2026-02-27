@@ -23,6 +23,8 @@ import NotFound from "@/pages/NotFound";
 import EventsPage from "@/pages/EventsPage";
 import EventDetailPage from "@/pages/EventDetailPage";
 import EventOrganizerPage from "@/pages/EventOrganizerPage";
+import CourseDetailPage from "@/pages/CourseDetailPage";
+import CourseManagePage from "@/pages/CourseManagePage";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/eventos" element={<EventsPage />} />
               <Route path="/evento/:id" element={<EventDetailPage />} />
               <Route path="/evento/:id/painel" element={<EventOrganizerPage />} />
+              <Route path="/curso/:id" element={<CourseDetailPage />} />
+              <Route path="/curso/:id/gerenciar" element={<CourseManagePage />} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
               <Route path="/cadastro" element={<CompanyRegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
