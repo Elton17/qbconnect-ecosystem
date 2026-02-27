@@ -20,6 +20,8 @@ import LoginPage from "@/pages/LoginPage";
 import ProfilePage from "@/pages/ProfilePage";
 import CompanyProfilePage from "@/pages/CompanyProfilePage";
 import NotFound from "@/pages/NotFound";
+import EventsPage from "@/pages/EventsPage";
+import EventDetailPage from "@/pages/EventDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
               <Route path="/academia" element={<AcademyPage />} />
               <Route path="/ranking" element={<RankingPage />} />
               <Route path="/beneficios" element={<BenefitsPage />} />
+              <Route path="/eventos" element={<EventsPage />} />
+              <Route path="/evento/:id" element={<EventDetailPage />} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
               <Route path="/cadastro" element={<CompanyRegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
