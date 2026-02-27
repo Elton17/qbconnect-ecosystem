@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload } from "lucide-react";
+import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,7 @@ export default function AcademyPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
   const [filter, setFilter] = useState("Todos");
+  const [searchQuery, setSearchQuery] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [uploadingThumb, setUploadingThumb] = useState(false);
@@ -150,7 +151,12 @@ export default function AcademyPage() {
     fetchData();
   };
 
-  const filteredCourses = filter === "Todos" ? courses : filter === "Premium" ? courses.filter(c => c.premium) : courses.filter(c => c.category === filter);
+  const filteredCourses = (filter === "Todos" ? courses : filter === "Premium" ? courses.filter(c => c.premium) : courses.filter(c => c.category === filter))
+    .filter(c => {
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return c.title.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q) || c.company_name?.toLowerCase().includes(q);
+    });
 
   return (
     <div>
@@ -238,8 +244,17 @@ export default function AcademyPage() {
         </div>
       </section>
 
-      {/* Filters */}
-      <div className="container pt-8 pb-4">
+      {/* Search & Filters */}
+      <div className="container pt-8 pb-4 space-y-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar cursos por título, descrição ou empresa..."
+            className="pl-10"
+          />
+        </div>
         <div className="flex flex-wrap gap-2">
           {["Todos", "Premium", ...courseCategories].map(cat => (
             <Button key={cat} variant={filter === cat ? "default" : "outline"} size="sm" onClick={() => setFilter(cat)} className="rounded-full">
