@@ -341,7 +341,9 @@ export default function MarketplacePage() {
                             {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Sob consulta"}
                           </span>
                         </div>
-                        <h3 className="mb-1 text-base font-bold text-card-foreground">{product.title}</h3>
+                        <Link to={`/produto/${product.id}`} className="hover:underline">
+                          <h3 className="mb-1 text-base font-bold text-card-foreground">{product.title}</h3>
+                        </Link>
                         <p className="mb-4 text-sm text-muted-foreground line-clamp-2">{product.description || "Sem descrição"}</p>
                         <div className="flex gap-2">
                           {product.contact_phone && (
