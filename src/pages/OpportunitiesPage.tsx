@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Handshake, TrendingUp, Zap } from "lucide-react";
+import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Handshake, TrendingUp, Zap, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +42,7 @@ interface Opportunity {
   urgent: boolean;
   created_at: string;
   company_name?: string;
+  contact_phone?: string;
 }
 
 export default function OpportunitiesPage() {
@@ -60,10 +61,14 @@ export default function OpportunitiesPage() {
     if (!opps) { setLoading(false); return; }
 
     const userIds = [...new Set(opps.map((o: any) => o.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.company_name]));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, contact_phone").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, contact_phone: p.contact_phone }]));
 
-    setOpportunities(opps.map((o: any) => ({ ...o, company_name: profileMap.get(o.user_id) || "Empresa" })));
+    setOpportunities(opps.map((o: any) => ({
+      ...o,
+      company_name: profileMap.get(o.user_id)?.company_name || "Empresa",
+      contact_phone: profileMap.get(o.user_id)?.contact_phone || "",
+    })));
     setLoading(false);
   };
 
@@ -215,7 +220,20 @@ export default function OpportunitiesPage() {
                   {user?.id === opp.user_id ? (
                     <Button variant="destructive" size="sm" onClick={() => handleDelete(opp.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                   ) : (
-                    <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
+                    <div className="flex items-center gap-2">
+                      {opp.contact_phone && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a
+                            href={`https://wa.me/55${opp.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Vi sua oportunidade "${opp.title}" na plataforma QBCAMP Conecta+ e gostaria de conversar.`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <MessageCircle className="mr-1 h-3.5 w-3.5" /> WhatsApp
+                          </a>
+                        </Button>
+                      )}
+                      <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
+                    </div>
                   )}
                 </div>
               </motion.div>
