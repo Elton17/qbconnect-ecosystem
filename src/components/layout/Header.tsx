@@ -1,13 +1,14 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2 } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+  { label: "Serviços", href: "/servicos", icon: Briefcase },
   { label: "Oportunidades", href: "/oportunidades", icon: Handshake },
   { label: "Academia", href: "/academia", icon: GraduationCap },
   { label: "Ranking", href: "/ranking", icon: Trophy },

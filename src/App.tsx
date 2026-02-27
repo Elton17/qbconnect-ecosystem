@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 import LandingPage from "@/pages/LandingPage";
 import MarketplacePage from "@/pages/MarketplacePage";
+import ServicosPage from "@/pages/ServicosPage";
 import OpportunitiesPage from "@/pages/OpportunitiesPage";
 import AcademyPage from "@/pages/AcademyPage";
 import RankingPage from "@/pages/RankingPage";
@@ -32,6 +33,7 @@ const App = () => (
             <Route element={<MainLayout />}>
               <Route path="/" element={<LandingPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/servicos" element={<ServicosPage />} />
               <Route path="/oportunidades" element={<OpportunitiesPage />} />
               <Route path="/academia" element={<AcademyPage />} />
               <Route path="/ranking" element={<RankingPage />} />
