@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,9 +37,51 @@ interface Product {
   price: number;
   category: string;
   image_url: string;
+  images: string[];
   contact_phone: string;
   contact_email: string;
   active: boolean;
+}
+
+// Mini carousel for product cards
+function ProductCarousel({ images, title }: { images: string[]; title: string }) {
+  const [current, setCurrent] = useState(0);
+  const hasMultiple = images.length > 1;
+
+  if (images.length === 0) {
+    return (
+      <div className="aspect-video bg-muted flex items-center justify-center">
+        <Package className="h-12 w-12 text-muted-foreground/40" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative aspect-video bg-muted overflow-hidden group/carousel">
+      <img src={images[current]} alt={title} className="h-full w-full object-cover" />
+      {hasMultiple && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c - 1 + images.length) % images.length); }}
+            className="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1 opacity-0 transition-opacity group-hover/carousel:opacity-100"
+          >
+            <ChevronLeft className="h-4 w-4 text-foreground" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setCurrent((c) => (c + 1) % images.length); }}
+            className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-card/80 p-1 opacity-0 transition-opacity group-hover/carousel:opacity-100"
+          >
+            <ChevronRight className="h-4 w-4 text-foreground" />
+          </button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, idx) => (
+              <span key={idx} className={`h-1.5 w-1.5 rounded-full transition-colors ${idx === current ? "bg-primary" : "bg-card/60"}`} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function MarketplacePage() {
@@ -53,9 +95,10 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState({ title: "", description: "", price: "", category: "", image_url: "", contact_phone: "", contact_email: "" });
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [form, setForm] = useState({ title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "" });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,41 +131,70 @@ export default function MarketplacePage() {
     return matchCat && matchSearch;
   });
 
+  function getProductImages(p: Product): string[] {
+    if (p.images && p.images.length > 0) return p.images;
+    if (p.image_url) return [p.image_url];
+    return [];
+  }
+
   function openNewProduct() {
     setEditingProduct(null);
-    setForm({ title: "", description: "", price: "", category: "", image_url: "", contact_phone: "", contact_email: "" });
-    setImageFile(null);
-    setImagePreview("");
+    setForm({ title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "" });
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImages([]);
     setDialogOpen(true);
   }
 
   function openEditProduct(p: Product) {
     setEditingProduct(p);
-    setForm({ title: p.title, description: p.description, price: String(p.price), category: p.category, image_url: p.image_url, contact_phone: p.contact_phone, contact_email: p.contact_email });
-    setImageFile(null);
-    setImagePreview(p.image_url || "");
+    setForm({ title: p.title, description: p.description, price: String(p.price), category: p.category, contact_phone: p.contact_phone, contact_email: p.contact_email });
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImages(getProductImages(p));
     setDialogOpen(true);
   }
 
   function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Imagem muito grande (máx. 5MB)", variant: "destructive" });
+    const files = Array.from(e.target.files || []);
+    const totalImages = existingImages.length + imagePreviews.length + files.length;
+    if (totalImages > 6) {
+      toast({ title: "Máximo de 6 imagens por produto", variant: "destructive" });
       return;
     }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    const validFiles = files.filter((f) => {
+      if (f.size > 5 * 1024 * 1024) {
+        toast({ title: `${f.name} é muito grande (máx. 5MB)`, variant: "destructive" });
+        return false;
+      }
+      return true;
+    });
+    setImageFiles((prev) => [...prev, ...validFiles]);
+    setImagePreviews((prev) => [...prev, ...validFiles.map((f) => URL.createObjectURL(f))]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  async function uploadImage(): Promise<string> {
-    if (!imageFile || !user) return form.image_url;
-    const ext = imageFile.name.split(".").pop();
-    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("products").upload(path, imageFile);
-    if (error) throw error;
-    const { data } = supabase.storage.from("products").getPublicUrl(path);
-    return data.publicUrl;
+  function removeNewImage(index: number) {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function removeExistingImage(index: number) {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function uploadImages(): Promise<string[]> {
+    if (!user) return [];
+    const urls: string[] = [];
+    for (const file of imageFiles) {
+      const ext = file.name.split(".").pop();
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("products").upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from("products").getPublicUrl(path);
+      urls.push(data.publicUrl);
+    }
+    return urls;
   }
 
   async function handleSaveProduct() {
@@ -134,10 +206,8 @@ export default function MarketplacePage() {
 
     setUploading(true);
     try {
-      let imageUrl = form.image_url;
-      if (imageFile) {
-        imageUrl = await uploadImage();
-      }
+      const newUrls = await uploadImages();
+      const allImages = [...existingImages, ...newUrls];
 
       const payload = {
         user_id: user.id,
@@ -145,7 +215,8 @@ export default function MarketplacePage() {
         description: form.description,
         price: parseFloat(form.price),
         category: form.category,
-        image_url: imageUrl,
+        image_url: allImages[0] || "",
+        images: allImages,
         contact_phone: form.contact_phone,
         contact_email: form.contact_email,
         active: true,
@@ -163,7 +234,7 @@ export default function MarketplacePage() {
       setDialogOpen(false);
       fetchData();
     } catch {
-      toast({ title: "Erro ao enviar imagem", variant: "destructive" });
+      toast({ title: "Erro ao enviar imagens", variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -174,6 +245,9 @@ export default function MarketplacePage() {
     toast({ title: "Produto removido" });
     fetchData();
   }
+
+  const allPreviews = [...existingImages, ...imagePreviews];
+  const canAddMore = allPreviews.length < 6;
 
   return (
     <div className="py-8">
@@ -196,7 +270,6 @@ export default function MarketplacePage() {
             <TabsTrigger value="produtos">Produtos & Serviços</TabsTrigger>
           </TabsList>
 
-          {/* Search & Filters */}
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -260,13 +333,7 @@ export default function MarketplacePage() {
                   {filteredProducts.map((product, i) => (
                     <motion.div key={product.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp}
                       className="group rounded-2xl border border-border bg-card overflow-hidden card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
-                      <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.title} className="h-full w-full object-cover" />
-                        ) : (
-                          <Package className="h-12 w-12 text-muted-foreground/40" />
-                        )}
-                      </div>
+                      <ProductCarousel images={getProductImages(product)} title={product.title} />
                       <div className="p-5">
                         <div className="mb-2 flex items-start justify-between">
                           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{product.category || "Geral"}</span>
@@ -316,7 +383,7 @@ export default function MarketplacePage() {
 
         {/* Product Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingProduct ? "Editar Produto" : "Anunciar Produto"}</DialogTitle>
             </DialogHeader>
@@ -344,25 +411,57 @@ export default function MarketplacePage() {
                   </Select>
                 </div>
               </div>
+
+              {/* Multi-image upload */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Imagem do Produto</label>
-                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageSelect} className="hidden" />
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-input bg-muted/50 transition-colors hover:border-primary/50 hover:bg-muted overflow-hidden"
-                  style={{ height: imagePreview ? "auto" : "120px" }}
-                >
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Preview" className="max-h-48 w-full object-contain" />
-                  ) : (
+                <label className="mb-1 block text-sm font-medium text-foreground">Imagens do Produto (até 6)</label>
+                <input type="file" accept="image/*" multiple ref={fileInputRef} onChange={handleImageSelect} className="hidden" />
+
+                {allPreviews.length > 0 && (
+                  <div className="mb-3 grid grid-cols-3 gap-2">
+                    {existingImages.map((url, idx) => (
+                      <div key={`existing-${idx}`} className="relative aspect-square rounded-lg overflow-hidden border border-border">
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          onClick={() => removeExistingImage(idx)}
+                          className="absolute right-1 top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        {idx === 0 && <span className="absolute bottom-1 left-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">Capa</span>}
+                      </div>
+                    ))}
+                    {imagePreviews.map((url, idx) => (
+                      <div key={`new-${idx}`} className="relative aspect-square rounded-lg overflow-hidden border-2 border-dashed border-primary/40">
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          onClick={() => removeNewImage(idx)}
+                          className="absolute right-1 top-1 rounded-full bg-destructive p-0.5 text-destructive-foreground"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <span className="absolute bottom-1 left-1 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">Nova</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {canAddMore && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-input bg-muted/50 py-6 transition-colors hover:border-primary/50 hover:bg-muted"
+                  >
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <ImagePlus className="h-8 w-8" />
-                      <span className="text-sm">Clique para adicionar imagem</span>
-                      <span className="text-xs">JPG, PNG ou WebP (máx. 5MB)</span>
+                      <span className="text-sm">
+                        {allPreviews.length === 0 ? "Clique para adicionar imagens" : "Adicionar mais imagens"}
+                      </span>
+                      <span className="text-xs">JPG, PNG ou WebP (máx. 5MB cada) · {allPreviews.length}/6</span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-foreground">WhatsApp</label>
