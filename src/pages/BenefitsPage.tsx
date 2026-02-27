@@ -32,6 +32,7 @@ interface Benefit {
   category: string;
   exclusive: boolean;
   company_name?: string;
+  logo_url?: string;
 }
 
 interface Redemption {
@@ -58,9 +59,9 @@ export default function BenefitsPage() {
     const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
     const userIds = [...new Set(items.map((b: any) => b.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.company_name]));
-    setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id) || "Empresa" })));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, logo_url: p.logo_url }]));
+    setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id)?.company_name || "Empresa", logo_url: profileMap.get(b.user_id)?.logo_url || "" })));
     if (user) {
       const { data: redemptions } = await supabase.from("redemptions").select("benefit_id, code").eq("user_id", user.id);
       if (redemptions) setUserRedemptions(new Map(redemptions.map((r: any) => [r.benefit_id, r.code])));
@@ -175,8 +176,12 @@ export default function BenefitsPage() {
               return (
                 <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1">
                   <div className="mb-4 flex items-start justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20">
-                      <Percent className="h-6 w-6 text-accent-foreground" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 overflow-hidden">
+                      {benefit.logo_url ? (
+                        <img src={benefit.logo_url} alt={benefit.company_name} className="h-full w-full object-contain" />
+                      ) : (
+                        <Percent className="h-6 w-6 text-accent-foreground" />
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       {benefit.exclusive && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Exclusivo Premium</span>}
