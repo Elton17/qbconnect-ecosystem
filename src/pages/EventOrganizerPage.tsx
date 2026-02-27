@@ -23,6 +23,7 @@ interface Attendee {
   ticket_code: string;
   status: string;
   created_at: string;
+  registration_data?: Record<string, string>;
   email?: string;
   company_name?: string;
   contact_name?: string;
@@ -88,12 +89,14 @@ export default function EventOrganizerPage() {
         setAttendees(
           regs.map((r: any) => {
             const profile = profileMap.get(r.user_id);
+            const rd = r.registration_data || {};
             return {
               ...r,
-              email: profile?.email || "",
-              company_name: profile?.company_name || "",
-              contact_name: profile?.contact_name || "",
-              contact_phone: profile?.contact_phone || "",
+              registration_data: rd,
+              email: rd.email || profile?.email || "",
+              company_name: rd.empresa || profile?.company_name || "",
+              contact_name: rd.nome || profile?.contact_name || "",
+              contact_phone: rd.whatsapp || profile?.contact_phone || "",
             };
           })
         );
@@ -130,12 +133,15 @@ export default function EventOrganizerPage() {
 
   const exportCSV = () => {
     const rows = [
-      ["Nome", "Empresa", "Email", "Telefone", "Código Ingresso", "Status", "Data Inscrição"],
+      ["Nome", "Empresa", "Email", "Telefone", "CPF", "CNPJ", "Cargo", "Código Ingresso", "Status", "Data Inscrição"],
       ...filtered.map((a) => [
         a.contact_name || "",
         a.company_name || "",
         a.email || "",
         a.contact_phone || "",
+        a.registration_data?.cpf || "",
+        a.registration_data?.cnpj || "",
+        a.registration_data?.cargo || "",
         a.ticket_code,
         a.status || "confirmed",
         a.created_at ? format(new Date(a.created_at), "dd/MM/yyyy HH:mm") : "",
