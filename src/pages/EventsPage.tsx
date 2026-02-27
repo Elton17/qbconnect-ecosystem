@@ -1,18 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays, MapPin, Search, Plus, Loader2, Users, Clock, Ticket, Star,
-  Filter, ArrowRight, Globe, Building2, Tag, Sparkles, ImagePlus, X
+  Filter, ArrowRight, Globe, Building2, Tag, Sparkles, Pencil
 } from "lucide-react";
-import RegistrationFieldsConfig, { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
+import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
+import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -20,11 +15,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const eventCategories = ["Todos", "Networking", "Palestra", "Workshop", "Feira", "Curso", "Assembleia", "Social", "Outro"];
-const eventTypes = [
-  { value: "presencial", label: "Presencial" },
-  { value: "online", label: "Online" },
-  { value: "hibrido", label: "Híbrido" },
-];
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -53,6 +43,7 @@ interface EventItem {
   featured: boolean;
   company_name?: string;
   registration_count?: number;
+  registration_fields?: RegistrationFieldKey[];
 }
 
 function formatEventDate(dateStr: string): string {
@@ -68,6 +59,30 @@ function formatShortDate(dateStr: string): { day: string; month: string } {
   };
 }
 
+function eventToFormData(event: EventItem): EventFormData {
+  return {
+    id: event.id,
+    title: event.title,
+    description: event.description,
+    short_description: event.short_description,
+    category: event.category,
+    event_type: event.event_type,
+    location: event.location,
+    address: event.address,
+    city: event.city,
+    state: event.state,
+    online_url: event.online_url,
+    image_url: event.image_url,
+    start_date: event.start_date,
+    end_date: event.end_date || "",
+    price: String(event.price || 0),
+    is_free: event.is_free,
+    max_attendees: event.max_attendees ? String(event.max_attendees) : "",
+    featured: event.featured,
+    registration_fields: event.registration_fields || ["nome"],
+  };
+}
+
 export default function EventsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -77,61 +92,9 @@ export default function EventsPage() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editData, setEditData] = useState<EventFormData | null>(null);
   const [userRegistrations, setUserRegistrations] = useState<Set<string>>(new Set());
 
-  const [form, setForm] = useState({
-    title: "", description: "", short_description: "", category: "Networking",
-    event_type: "presencial", location: "", address: "", city: "", state: "",
-    online_url: "", start_date: "", end_date: "", price: "0", is_free: true,
-    max_attendees: "", featured: false,
-  });
-  const [registrationFields, setRegistrationFields] = useState<RegistrationFieldKey[]>(["nome"]);
-
-  const fetchEvents = async () => {
-    const { data } = await supabase
-      .from("events")
-      .select("*")
-      .eq("active", true)
-      .gte("start_date", new Date().toISOString())
-      .order("start_date", { ascending: true });
-
-    if (!data) { setLoading(false); return; }
-
-    const userIds = [...new Set(data.map((e: any) => e.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.company_name]));
-
-    // Get registration counts
-    const eventIds = data.map((e: any) => e.id);
-    const { data: regCounts } = await supabase
-      .from("event_registrations")
-      .select("event_id")
-      .in("event_id", eventIds);
-
-    const countMap = new Map<string, number>();
-    (regCounts || []).forEach((r: any) => {
-      countMap.set(r.event_id, (countMap.get(r.event_id) || 0) + 1);
-    });
-
-    setEvents(data.map((e: any) => ({
-      ...e,
-      company_name: profileMap.get(e.user_id) || "QBCAMP",
-      registration_count: countMap.get(e.id) || 0,
-    })));
-
-    if (user) {
-      const { data: regs } = await supabase.from("event_registrations").select("event_id").eq("user_id", user.id);
-      if (regs) setUserRegistrations(new Set(regs.map((r: any) => r.event_id)));
-    }
-
-    setLoading(false);
-  };
-
-  // Also fetch past events for display
   const fetchAllEvents = async () => {
     const { data } = await supabase
       .from("events")
@@ -172,77 +135,6 @@ export default function EventsPage() {
 
   useEffect(() => { fetchAllEvents(); }, [user]);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Imagem muito grande (máx 5MB)", variant: "destructive" });
-      return;
-    }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const handleSubmit = async () => {
-    if (!user) return;
-    if (!form.title || !form.start_date) {
-      toast({ title: "Preencha título e data do evento", variant: "destructive" });
-      return;
-    }
-    setSaving(true);
-
-    let imageUrl = "";
-    if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
-      const path = `events/${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("products").upload(path, imageFile);
-      if (!uploadErr) {
-        const { data: urlData } = supabase.storage.from("products").getPublicUrl(path);
-        imageUrl = urlData.publicUrl;
-      }
-    }
-
-    const { error } = await supabase.from("events").insert({
-      user_id: user.id,
-      title: form.title,
-      description: form.description,
-      short_description: form.short_description,
-      category: form.category,
-      event_type: form.event_type,
-      location: form.location,
-      address: form.address,
-      city: form.city,
-      state: form.state,
-      online_url: form.online_url,
-      image_url: imageUrl,
-      start_date: new Date(form.start_date).toISOString(),
-      end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
-      price: form.is_free ? 0 : parseFloat(form.price) || 0,
-      is_free: form.is_free,
-      max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
-      featured: form.featured,
-      registration_fields: registrationFields,
-    } as any);
-
-    setSaving(false);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Evento criado com sucesso!" });
-      setDialogOpen(false);
-      setForm({
-        title: "", description: "", short_description: "", category: "Networking",
-        event_type: "presencial", location: "", address: "", city: "", state: "",
-        online_url: "", start_date: "", end_date: "", price: "0", is_free: true,
-        max_attendees: "", featured: false,
-      });
-      setRegistrationFields(["nome"]);
-      setImageFile(null);
-      setImagePreview("");
-      fetchAllEvents();
-    }
-  };
-
   const handleRegister = (event: EventItem) => {
     if (!user) {
       toast({ title: "Faça login", description: "Você precisa estar logado para se inscrever.", variant: "destructive" });
@@ -253,6 +145,16 @@ export default function EventsPage() {
       return;
     }
     navigate(`/evento/${event.id}`);
+  };
+
+  const handleEdit = (event: EventItem) => {
+    setEditData(eventToFormData(event));
+    setDialogOpen(true);
+  };
+
+  const handleCreate = () => {
+    setEditData(null);
+    setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -297,7 +199,7 @@ export default function EventsPage() {
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
               {user && (
-                <Button variant="hero" size="xl" onClick={() => setDialogOpen(true)}>
+                <Button variant="hero" size="xl" onClick={handleCreate}>
                   <Plus className="mr-1 h-5 w-5" /> Criar Evento
                 </Button>
               )}
@@ -456,7 +358,7 @@ export default function EventsPage() {
             <CalendarDays className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
             <p className="text-muted-foreground">Nenhum evento encontrado.</p>
             {user && (
-              <Button className="mt-4" onClick={() => setDialogOpen(true)}>
+              <Button className="mt-4" onClick={handleCreate}>
                 <Plus className="mr-1 h-4 w-4" /> Criar primeiro evento
               </Button>
             )}
@@ -535,6 +437,9 @@ export default function EventsPage() {
                             <Users className="mr-1 h-3 w-3" /> Gerenciar
                           </Button>
                         </Link>
+                        <Button variant="outline" size="sm" className="text-xs" onClick={() => handleEdit(event)}>
+                          <Pencil className="mr-1 h-3 w-3" /> Editar
+                        </Button>
                         <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(event.id)}>
                           Remover
                         </Button>
@@ -573,128 +478,12 @@ export default function EventsPage() {
         )}
       </div>
 
-      {/* Create Event Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-primary" /> Criar Evento
-            </DialogTitle>
-            <DialogDescription>Preencha os detalhes do seu evento.</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div>
-              <Label>Título do evento *</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Workshop de Marketing Digital" />
-            </div>
-            <div>
-              <Label>Descrição curta</Label>
-              <Input value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} placeholder="Resumo em uma frase" />
-            </div>
-            <div>
-              <Label>Descrição completa</Label>
-              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Detalhes, programação, palestrantes..." rows={3} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Categoria</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{eventCategories.filter(c => c !== "Todos").map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Tipo</Label>
-                <Select value={form.event_type} onValueChange={(v) => setForm({ ...form, event_type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{eventTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Data e hora de início *</Label>
-                <Input type="datetime-local" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} />
-              </div>
-              <div>
-                <Label>Data e hora de término</Label>
-                <Input type="datetime-local" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} />
-              </div>
-            </div>
-            {(form.event_type === "presencial" || form.event_type === "hibrido") && (
-              <>
-                <div>
-                  <Label>Local / Espaço</Label>
-                  <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Nome do local" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Cidade</Label>
-                    <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Cidade" />
-                  </div>
-                  <div>
-                    <Label>Estado</Label>
-                    <Input value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} placeholder="UF" maxLength={2} />
-                  </div>
-                </div>
-                <div>
-                  <Label>Endereço</Label>
-                  <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Rua, número" />
-                </div>
-              </>
-            )}
-            {(form.event_type === "online" || form.event_type === "hibrido") && (
-              <div>
-                <Label>Link do evento online</Label>
-                <Input value={form.online_url} onChange={(e) => setForm({ ...form, online_url: e.target.value })} placeholder="https://meet.google.com/..." />
-              </div>
-            )}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_free} onCheckedChange={(v) => setForm({ ...form, is_free: v })} />
-                <Label>Evento gratuito</Label>
-              </div>
-              {!form.is_free && (
-                <div className="flex-1">
-                  <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Preço R$" />
-                </div>
-              )}
-            </div>
-            <div>
-              <Label>Limite de vagas (deixe vazio para ilimitado)</Label>
-              <Input type="number" value={form.max_attendees} onChange={(e) => setForm({ ...form, max_attendees: e.target.value })} placeholder="Ex: 100" />
-            </div>
-
-            {/* Image upload */}
-            <div>
-              <Label>Imagem de capa</Label>
-              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageSelect} className="hidden" />
-              {imagePreview ? (
-                <div className="relative mt-1 aspect-[16/9] overflow-hidden rounded-lg border border-border">
-                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                  <button onClick={() => { setImageFile(null); setImagePreview(""); }} className="absolute right-2 top-2 rounded-full bg-destructive p-1 text-destructive-foreground">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <div onClick={() => fileInputRef.current?.click()} className="mt-1 flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-input bg-muted/50 py-8 transition-colors hover:border-primary/50">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <ImagePlus className="h-8 w-8" />
-                    <span className="text-sm">Clique para adicionar imagem</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <RegistrationFieldsConfig selected={registrationFields} onChange={setRegistrationFields} />
-
-            <Button onClick={handleSubmit} disabled={saving || !form.title || !form.start_date} className="w-full">
-              {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CalendarDays className="mr-1 h-4 w-4" />}
-              Publicar Evento
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EventFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initialData={editData}
+        onSuccess={fetchAllEvents}
+      />
     </div>
   );
 }

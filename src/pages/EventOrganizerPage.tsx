@@ -3,8 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Users, Download, Mail, Loader2, CalendarDays,
-  Ticket, Search, Check, X, MessageSquare, Clock, Copy
+  Ticket, Search, Check, X, MessageSquare, Clock, Copy, Pencil
 } from "lucide-react";
+import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
+import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,13 +55,15 @@ export default function EventOrganizerPage() {
   const [messageBody, setMessageBody] = useState("");
   const [selectedAttendees, setSelectedAttendees] = useState<Set<string>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [fullEvent, setFullEvent] = useState<any>(null);
 
   useEffect(() => {
     if (!id || !user) return;
     const fetch = async () => {
       const { data: ev } = await supabase
         .from("events")
-        .select("id, title, start_date, max_attendees, is_free, price, user_id")
+        .select("*")
         .eq("id", id)
         .single();
 
@@ -68,6 +72,7 @@ export default function EventOrganizerPage() {
         return;
       }
       setEvent(ev as EventInfo);
+      setFullEvent(ev);
 
       const { data: regs } = await supabase
         .from("event_registrations")
@@ -216,9 +221,14 @@ export default function EventOrganizerPage() {
               <h1 className="text-2xl font-extrabold text-foreground md:text-3xl">Painel do Organizador</h1>
               <p className="text-muted-foreground">{event.title}</p>
             </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <CalendarDays className="h-4 w-4 text-primary" />
-              {format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={() => setEditDialogOpen(true)}>
+                <Pencil className="mr-1 h-4 w-4" /> Editar Evento
+              </Button>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CalendarDays className="h-4 w-4 text-primary" />
+                {format(new Date(event.start_date), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+              </div>
             </div>
           </div>
         </div>
@@ -399,6 +409,38 @@ export default function EventOrganizerPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {fullEvent && (
+        <EventFormDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          initialData={{
+            id: fullEvent.id,
+            title: fullEvent.title || "",
+            description: fullEvent.description || "",
+            short_description: fullEvent.short_description || "",
+            category: fullEvent.category || "Networking",
+            event_type: fullEvent.event_type || "presencial",
+            location: fullEvent.location || "",
+            address: fullEvent.address || "",
+            city: fullEvent.city || "",
+            state: fullEvent.state || "",
+            online_url: fullEvent.online_url || "",
+            image_url: fullEvent.image_url || "",
+            start_date: fullEvent.start_date || "",
+            end_date: fullEvent.end_date || "",
+            price: String(fullEvent.price || 0),
+            is_free: fullEvent.is_free ?? true,
+            max_attendees: fullEvent.max_attendees ? String(fullEvent.max_attendees) : "",
+            featured: fullEvent.featured ?? false,
+            registration_fields: (fullEvent.registration_fields as RegistrationFieldKey[]) || ["nome"],
+          }}
+          onSuccess={() => {
+            setEditDialogOpen(false);
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

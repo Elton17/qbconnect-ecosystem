@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   CalendarDays, MapPin, Clock, Users, Globe, Ticket, ArrowLeft,
-  Building2, Share2, Loader2, Check, Copy
+  Building2, Share2, Loader2, Check, Copy, Pencil
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import RegistrationFormDialog from "@/components/events/RegistrationFormDialog";
+import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 
 function generateTicketCode(): string {
@@ -57,31 +58,31 @@ export default function EventDetailPage() {
   const [registering, setRegistering] = useState(false);
   const [copied, setCopied] = useState(false);
   const [regDialogOpen, setRegDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  useEffect(() => {
+  const fetchEvent = async () => {
     if (!id) return;
-    const fetchEvent = async () => {
-      const { data } = await supabase.from("events").select("*").eq("id", id).single();
-      if (!data) { setLoading(false); return; }
+    const { data } = await supabase.from("events").select("*").eq("id", id).single();
+    if (!data) { setLoading(false); return; }
 
-      const { data: profile } = await supabase.from("profiles").select("company_name").eq("user_id", data.user_id).single();
-      const { data: regCount } = await supabase.from("event_registrations").select("event_id").eq("event_id", id);
+    const { data: profile } = await supabase.from("profiles").select("company_name").eq("user_id", data.user_id).single();
+    const { data: regCount } = await supabase.from("event_registrations").select("event_id").eq("event_id", id);
 
-      setEvent({
-        ...data,
-        company_name: profile?.company_name || "QBCAMP",
-        registration_count: regCount?.length || 0,
-      } as EventDetail);
+    setEvent({
+      ...data,
+      company_name: profile?.company_name || "QBCAMP",
+      registration_count: regCount?.length || 0,
+    } as EventDetail);
 
-      if (user) {
-        const { data: reg } = await supabase.from("event_registrations")
-          .select("ticket_code").eq("event_id", id).eq("user_id", user.id).single();
-        if (reg) { setIsRegistered(true); setTicketCode(reg.ticket_code); }
-      }
-      setLoading(false);
-    };
-    fetchEvent();
-  }, [id, user]);
+    if (user) {
+      const { data: reg } = await supabase.from("event_registrations")
+        .select("ticket_code").eq("event_id", id).eq("user_id", user.id).single();
+      if (reg) { setIsRegistered(true); setTicketCode(reg.ticket_code); }
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchEvent(); }, [id, user]);
 
   const handleRegister = async (registrationData: Record<string, string>) => {
     if (!user || !event) return;
@@ -122,6 +123,31 @@ export default function EventDetailPage() {
       navigator.clipboard.writeText(window.location.href);
       toast({ title: "Link copiado!" });
     }
+  };
+
+  const getEditFormData = (): EventFormData | null => {
+    if (!event) return null;
+    return {
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      short_description: event.short_description,
+      category: event.category,
+      event_type: event.event_type,
+      location: event.location,
+      address: event.address,
+      city: event.city,
+      state: event.state,
+      online_url: event.online_url,
+      image_url: event.image_url,
+      start_date: event.start_date,
+      end_date: event.end_date || "",
+      price: String(event.price || 0),
+      is_free: event.is_free,
+      max_attendees: event.max_attendees ? String(event.max_attendees) : "",
+      featured: event.featured,
+      registration_fields: event.registration_fields || ["nome"],
+    };
   };
 
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -269,13 +295,18 @@ export default function EventDetailPage() {
               </div>
             </div>
 
-            {/* Organizer Panel */}
+            {/* Organizer Actions */}
             {user?.id === event.user_id && (
-              <Link to={`/evento/${event.id}/painel`}>
-                <Button variant="outline" className="w-full">
-                  <Users className="mr-1 h-4 w-4" /> Painel do Organizador
+              <div className="space-y-2">
+                <Link to={`/evento/${event.id}/painel`}>
+                  <Button variant="outline" className="w-full">
+                    <Users className="mr-1 h-4 w-4" /> Painel do Organizador
+                  </Button>
+                </Link>
+                <Button variant="outline" className="w-full" onClick={() => setEditDialogOpen(true)}>
+                  <Pencil className="mr-1 h-4 w-4" /> Editar Evento
                 </Button>
-              </Link>
+              </div>
             )}
 
             {/* Share */}
@@ -296,6 +327,16 @@ export default function EventDetailPage() {
           submitting={registering}
         />
       )}
+
+      <EventFormDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        initialData={getEditFormData()}
+        onSuccess={() => {
+          setEditDialogOpen(false);
+          fetchEvent();
+        }}
+      />
     </div>
   );
 }
