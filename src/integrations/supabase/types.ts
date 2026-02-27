@@ -257,6 +257,54 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          discount_percent: number
+          expires_at: string
+          id: string
+          image_url: string | null
+          original_price: number | null
+          promo_price: number | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_percent?: number
+          expires_at: string
+          id?: string
+          image_url?: string | null
+          original_price?: number | null
+          promo_price?: number | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_percent?: number
+          expires_at?: string
+          id?: string
+          image_url?: string | null
+          original_price?: number | null
+          promo_price?: number | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       redemptions: {
         Row: {
           benefit_id: string
