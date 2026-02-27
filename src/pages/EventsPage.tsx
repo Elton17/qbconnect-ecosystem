@@ -545,9 +545,14 @@ export default function EventsPage() {
                       </Button>
                     </div>
                     {user?.id === event.user_id && (
-                      <div className="mt-2 border-t border-border pt-2">
-                        <Button variant="ghost" size="sm" className="w-full text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(event.id)}>
-                          Remover evento
+                      <div className="mt-2 flex gap-2 border-t border-border pt-2">
+                        <Link to={`/evento/${event.id}/painel`} className="flex-1">
+                          <Button variant="outline" size="sm" className="w-full text-xs">
+                            <Users className="mr-1 h-3 w-3" /> Gerenciar
+                          </Button>
+                        </Link>
+                        <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(event.id)}>
+                          Remover
                         </Button>
                       </div>
                     )}

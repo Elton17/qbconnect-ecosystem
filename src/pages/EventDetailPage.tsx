@@ -263,6 +263,15 @@ export default function EventDetailPage() {
               </div>
             </div>
 
+            {/* Organizer Panel */}
+            {user?.id === event.user_id && (
+              <Link to={`/evento/${event.id}/painel`}>
+                <Button variant="outline" className="w-full">
+                  <Users className="mr-1 h-4 w-4" /> Painel do Organizador
+                </Button>
+              </Link>
+            )}
+
             {/* Share */}
             <Button variant="outline" className="w-full" onClick={handleShare}>
               <Share2 className="mr-1 h-4 w-4" /> Compartilhar evento
