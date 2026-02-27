@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag } from "lucide-react";
+import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +15,30 @@ import { useToast } from "@/hooks/use-toast";
 
 const companyCategories = ["Todos", "Tecnologia", "Construção", "Alimentação", "Saúde", "Serviços", "Indústria", "Educação", "Logística", "Outro"];
 const productCategories = ["Todos", "Produtos", "Serviços", "Alimentação", "Tecnologia", "Vestuário", "Saúde", "Educação", "Outro"];
+
+const promoBanners = [
+  {
+    title: "Ofertas Exclusivas para Associados",
+    subtitle: "Descontos de até 30% em produtos e serviços entre empresas da região",
+    icon: Flame,
+    gradient: "from-primary/90 to-primary/60",
+    cta: "Ver Ofertas",
+  },
+  {
+    title: "Novo no Marketplace? Anuncie Grátis!",
+    subtitle: "Cadastre seus produtos e serviços e alcance mais de 120 empresas associadas",
+    icon: Sparkles,
+    gradient: "from-secondary via-secondary/90 to-secondary/70",
+    cta: "Começar Agora",
+  },
+  {
+    title: "Oportunidades B2B em Destaque",
+    subtitle: "Encontre fornecedores e parceiros para os maiores projetos da região",
+    icon: Zap,
+    gradient: "from-accent/90 to-primary/80",
+    cta: "Explorar",
+  },
+];
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -100,7 +125,16 @@ export default function MarketplacePage() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [promoIndex, setPromoIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-rotate promo banners
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPromoIndex((prev) => (prev + 1) % promoBanners.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -324,8 +358,131 @@ export default function MarketplacePage() {
         </div>
       </section>
 
-      <div className="container py-8">
+      {/* Rotating Promo Banner */}
+      <section className="border-b border-border">
+        <div className="container py-6">
+          <div className="relative overflow-hidden rounded-2xl">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={promoIndex}
+                initial={{ opacity: 0, x: 60 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -60 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className={`flex items-center gap-6 rounded-2xl bg-gradient-to-r ${promoBanners[promoIndex].gradient} px-6 py-8 md:px-10 md:py-10`}
+              >
+                <div className="hidden shrink-0 md:flex">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-foreground/20 backdrop-blur-sm">
+                    {(() => { const Icon = promoBanners[promoIndex].icon; return <Icon className="h-8 w-8 text-primary-foreground" />; })()}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="mb-1 text-xl font-extrabold text-primary-foreground md:text-2xl">
+                    {promoBanners[promoIndex].title}
+                  </h3>
+                  <p className="text-sm text-primary-foreground/80 md:text-base">
+                    {promoBanners[promoIndex].subtitle}
+                  </p>
+                </div>
+                <Button
+                  variant="heroOutline"
+                  size="lg"
+                  className="shrink-0 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                  onClick={() => { setActiveTab("produtos"); window.scrollTo({ top: 800, behavior: "smooth" }); }}
+                >
+                  {promoBanners[promoIndex].cta} <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </motion.div>
+            </AnimatePresence>
+            {/* Dots */}
+            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2">
+              {promoBanners.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setPromoIndex(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${idx === promoIndex ? "w-6 bg-primary-foreground" : "w-2 bg-primary-foreground/40"}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
+      {/* Featured Products */}
+      {!loading && products.length > 0 && (
+        <section className="border-b border-border bg-muted/30 py-10">
+          <div className="container">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <Star className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-foreground md:text-2xl">Produtos em Destaque</h2>
+                  <p className="text-sm text-muted-foreground">Os mais recentes anúncios dos associados</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setActiveTab("produtos"); window.scrollTo({ top: 800, behavior: "smooth" }); }}
+              >
+                Ver todos <ArrowRight className="ml-1 h-3.5 w-3.5" />
+              </Button>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {products.slice(0, 4).map((product, i) => {
+                const imgs = getProductImages(product);
+                return (
+                  <motion.div
+                    key={product.id}
+                    custom={i}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeInUp}
+                  >
+                    <Link
+                      to={`/produto/${product.id}`}
+                      className="group block overflow-hidden rounded-2xl border border-border bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1"
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                        {imgs.length > 0 ? (
+                          <img src={imgs[0]} alt={product.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center">
+                            <Package className="h-10 w-10 text-muted-foreground/30" />
+                          </div>
+                        )}
+                        <div className="absolute left-3 top-3">
+                          <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-lg">
+                            Destaque
+                          </span>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/60 to-transparent p-4 pt-10">
+                          <span className="text-lg font-extrabold text-primary-foreground">
+                            {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Sob consulta"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="mb-1 text-sm font-bold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">{product.title}</h3>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{product.description || "Sem descrição"}</p>
+                        <div className="mt-3 flex items-center text-xs font-semibold text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                          Ver detalhes <ArrowRight className="ml-1 h-3 w-3" />
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <div className="container py-8">
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setActiveCategory("Todos"); }}>
           <TabsList className="mb-6">
             <TabsTrigger value="empresas">Empresas</TabsTrigger>
