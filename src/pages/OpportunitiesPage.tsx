@@ -61,8 +61,8 @@ export default function OpportunitiesPage() {
     if (!opps) { setLoading(false); return; }
 
     const userIds = [...new Set(opps.map((o: any) => o.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, contact_phone").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, contact_phone: p.contact_phone }]));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, contact_phone, phone").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, contact_phone: p.contact_phone || p.phone }]));
 
     setOpportunities(opps.map((o: any) => ({
       ...o,
