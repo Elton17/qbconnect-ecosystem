@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import PromotionsSection from "@/components/marketplace/PromotionsSection";
 
 const companyCategories = ["Todos", "Tecnologia", "Construção", "Alimentação", "Saúde", "Serviços", "Indústria", "Educação", "Logística", "Outro"];
 const productCategories = ["Todos", "Produtos", "Serviços", "Alimentação", "Tecnologia", "Vestuário", "Saúde", "Educação", "Outro"];
@@ -407,6 +408,9 @@ export default function MarketplacePage() {
           </div>
         </div>
       </section>
+
+      {/* Promotions Section */}
+      <PromotionsSection />
 
       {/* Featured Products */}
       {!loading && products.length > 0 && (
