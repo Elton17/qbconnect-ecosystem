@@ -1,19 +1,20 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
   { label: "Serviços", href: "/servicos", icon: Briefcase },
   { label: "Oportunidades", href: "/oportunidades", icon: Handshake },
   { label: "Academia", href: "/academia", icon: GraduationCap },
-  { label: "Ranking", href: "/ranking", icon: Trophy },
-  { label: "Benefícios", href: "/beneficios", icon: Gift },
   { label: "Eventos", href: "/eventos", icon: CalendarDays },
+  { label: "Benefícios", href: "/beneficios", icon: Gift },
+  { label: "Ranking", href: "/ranking", icon: Trophy },
 ];
 
 export default function Header() {
@@ -22,6 +23,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (!user) { setIsAdmin(false); return; }
@@ -34,6 +36,8 @@ export default function Header() {
     await signOut();
     navigate("/");
   };
+
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
@@ -49,7 +53,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -66,21 +70,19 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           {isAdmin && (
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/admin">
-                <LayoutDashboard className="mr-1 h-4 w-4" />
-                Admin
-              </Link>
+              <Link to="/admin"><LayoutDashboard className="mr-1 h-4 w-4" /> Admin</Link>
             </Button>
           )}
           {user ? (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/perfil">
-                  <Building2 className="mr-1 h-4 w-4" /> Meu Perfil
-                </Link>
+                <Link to="/perfil"><Building2 className="mr-1 h-4 w-4" /> Meu Perfil</Link>
               </Button>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="mr-1 h-4 w-4" /> Sair
@@ -99,12 +101,14 @@ export default function Header() {
         </div>
 
         {/* Mobile toggle */}
-        <button
-          className="md:hidden p-2 text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-1 lg:hidden">
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9">
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -114,7 +118,7 @@ export default function Header() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-border bg-card md:hidden"
+            className="overflow-hidden border-t border-border bg-card lg:hidden"
           >
             <nav className="container flex flex-col gap-1 py-4">
               {navItems.map((item) => (
@@ -136,8 +140,7 @@ export default function Header() {
                 {isAdmin && (
                   <Button variant="ghost" size="sm" asChild>
                     <Link to="/admin" onClick={() => setMobileOpen(false)}>
-                      <LayoutDashboard className="mr-1 h-4 w-4" />
-                      Painel Admin
+                      <LayoutDashboard className="mr-1 h-4 w-4" /> Painel Admin
                     </Link>
                   </Button>
                 )}

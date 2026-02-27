@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-secondary text-secondary-foreground">
       <div className="container py-12">
-        <div className="grid gap-8 md:grid-cols-4">
-          <div>
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+          <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <span className="text-xs font-extrabold text-primary-foreground">QB</span>
@@ -15,33 +15,38 @@ export default function Footer() {
                 <span className="text-xs font-medium text-primary">Conecta+</span>
               </div>
             </div>
-            <p className="text-sm text-secondary-foreground/70">
-              Ecossistema digital empresarial de Quatro Barras e Campina Grande do Sul.
+            <p className="text-sm text-secondary-foreground/70 max-w-xs">
+              Ecossistema digital empresarial de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba.
+            </p>
+            <p className="mt-3 text-xs text-secondary-foreground/50">
+              Desde 1988 fortalecendo o comércio regional.
             </p>
           </div>
           <div>
             <h4 className="mb-3 text-sm font-semibold">Plataforma</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
               <li><Link to="/marketplace" className="hover:text-primary transition-colors">Marketplace</Link></li>
+              <li><Link to="/servicos" className="hover:text-primary transition-colors">Serviços</Link></li>
               <li><Link to="/oportunidades" className="hover:text-primary transition-colors">Oportunidades</Link></li>
               <li><Link to="/academia" className="hover:text-primary transition-colors">Academia</Link></li>
+              <li><Link to="/eventos" className="hover:text-primary transition-colors">Eventos</Link></li>
               <li><Link to="/ranking" className="hover:text-primary transition-colors">Ranking</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="mb-3 text-sm font-semibold">Associação</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
-              <li><a href="#" className="hover:text-primary transition-colors">Sobre nós</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Associe-se</a></li>
               <li><Link to="/beneficios" className="hover:text-primary transition-colors">Benefícios</Link></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Contato</a></li>
+              <li><Link to="/cadastro" className="hover:text-primary transition-colors">Associe-se</Link></li>
+              <li><Link to="/login" className="hover:text-primary transition-colors">Área do Associado</Link></li>
             </ul>
           </div>
           <div>
-            <h4 className="mb-3 text-sm font-semibold">Legal</h4>
+            <h4 className="mb-3 text-sm font-semibold">Contato</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
-              <li><a href="#" className="hover:text-primary transition-colors">Termos de Uso</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Privacidade</a></li>
+              <li><a href="mailto:contato@qbcamp.com.br" className="hover:text-primary transition-colors">contato@qbcamp.com.br</a></li>
+              <li><a href="tel:+554136763288" className="hover:text-primary transition-colors">(41) 3676-3288</a></li>
+              <li><span>Quatro Barras - PR</span></li>
             </ul>
           </div>
         </div>
