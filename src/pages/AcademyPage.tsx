@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight } from "lucide-react";
+import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,27 +150,32 @@ export default function AcademyPage() {
               Cursos completos com vídeos, módulos e certificados. Aprenda com as melhores empresas da região.
             </p>
             {user && (
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="hero" size="xl"><Plus className="mr-1 h-5 w-5" /> Criar Curso</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Novo Curso</DialogTitle></DialogHeader>
-                  <div className="space-y-4">
-                    <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Nome do curso" /></div>
-                    <div><Label>Categoria *</Label>
-                      <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>{courseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                      </Select>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="hero" size="xl"><Plus className="mr-1 h-5 w-5" /> Criar Curso</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Novo Curso</DialogTitle></DialogHeader>
+                    <div className="space-y-4">
+                      <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Nome do curso" /></div>
+                      <div><Label>Categoria *</Label>
+                        <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>{courseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
+                      <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+                      <div className="flex items-center gap-2"><Switch checked={form.premium} onCheckedChange={(v) => setForm({ ...form, premium: v })} /><Label>Premium (exclusivo para assinantes)</Label></div>
+                      <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Criar e Gerenciar Conteúdo</Button>
                     </div>
-                    <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
-                    <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
-                    <div className="flex items-center gap-2"><Switch checked={form.premium} onCheckedChange={(v) => setForm({ ...form, premium: v })} /><Label>Premium (exclusivo para assinantes)</Label></div>
-                    <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Criar e Gerenciar Conteúdo</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="heroOutline" size="xl" onClick={() => navigate("/instrutor/dashboard")}>
+                  <BarChart3 className="mr-1 h-5 w-5" /> Meu Dashboard
+                </Button>
+              </div>
             )}
           </motion.div>
 
