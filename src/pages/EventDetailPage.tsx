@@ -11,6 +11,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import RegistrationFormDialog from "@/components/events/RegistrationFormDialog";
+import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 
 function generateTicketCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -41,6 +43,7 @@ interface EventDetail {
   featured: boolean;
   company_name?: string;
   registration_count?: number;
+  registration_fields?: RegistrationFieldKey[];
 }
 
 export default function EventDetailPage() {
@@ -53,6 +56,7 @@ export default function EventDetailPage() {
   const [ticketCode, setTicketCode] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [regDialogOpen, setRegDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -79,13 +83,14 @@ export default function EventDetailPage() {
     fetchEvent();
   }, [id, user]);
 
-  const handleRegister = async () => {
+  const handleRegister = async (registrationData: Record<string, string>) => {
     if (!user || !event) return;
     setRegistering(true);
     const code = generateTicketCode();
     const { error } = await supabase.from("event_registrations").insert({
       event_id: event.id, user_id: user.id, ticket_code: code,
-    });
+      registration_data: registrationData,
+    } as any);
     if (error) {
       if (error.code === "23505") {
         toast({ title: "Você já está inscrito!" });
@@ -97,6 +102,7 @@ export default function EventDetailPage() {
       setTicketCode(code);
       setEvent({ ...event, registration_count: (event.registration_count || 0) + 1 });
       toast({ title: "Inscrição confirmada!" });
+      setRegDialogOpen(false);
     }
     setRegistering(false);
   };
@@ -242,8 +248,8 @@ export default function EventDetailPage() {
               ) : isPast ? (
                 <Button disabled className="w-full">Evento encerrado</Button>
               ) : (
-                <Button onClick={handleRegister} disabled={registering || isFull} className="w-full" size="lg">
-                  {registering ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Ticket className="mr-1 h-4 w-4" />}
+                <Button onClick={() => setRegDialogOpen(true)} disabled={isFull} className="w-full" size="lg">
+                  <Ticket className="mr-1 h-4 w-4" />
                   {isFull ? "Vagas esgotadas" : "Inscrever-se"}
                 </Button>
               )}
@@ -279,6 +285,17 @@ export default function EventDetailPage() {
           </motion.div>
         </div>
       </div>
+
+      {event && (
+        <RegistrationFormDialog
+          open={regDialogOpen}
+          onOpenChange={setRegDialogOpen}
+          requiredFields={event.registration_fields || ["nome"]}
+          eventTitle={event.title}
+          onSubmit={handleRegister}
+          submitting={registering}
+        />
+      )}
     </div>
   );
 }

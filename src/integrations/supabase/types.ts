@@ -91,6 +91,7 @@ export type Database = {
           created_at: string | null
           event_id: string
           id: string
+          registration_data: Json | null
           status: string | null
           ticket_code: string
           user_id: string
@@ -99,6 +100,7 @@ export type Database = {
           created_at?: string | null
           event_id: string
           id?: string
+          registration_data?: Json | null
           status?: string | null
           ticket_code: string
           user_id: string
@@ -107,6 +109,7 @@ export type Database = {
           created_at?: string | null
           event_id?: string
           id?: string
+          registration_data?: Json | null
           status?: string | null
           ticket_code?: string
           user_id?: string
@@ -139,6 +142,7 @@ export type Database = {
           max_attendees: number | null
           online_url: string | null
           price: number | null
+          registration_fields: Json | null
           short_description: string | null
           start_date: string
           state: string | null
@@ -163,6 +167,7 @@ export type Database = {
           max_attendees?: number | null
           online_url?: string | null
           price?: number | null
+          registration_fields?: Json | null
           short_description?: string | null
           start_date: string
           state?: string | null
@@ -187,6 +192,7 @@ export type Database = {
           max_attendees?: number | null
           online_url?: string | null
           price?: number | null
+          registration_fields?: Json | null
           short_description?: string | null
           start_date?: string
           state?: string | null

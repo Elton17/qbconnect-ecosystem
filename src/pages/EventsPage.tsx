@@ -1,10 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays, MapPin, Search, Plus, Loader2, Users, Clock, Ticket, Star,
   Filter, ArrowRight, Globe, Building2, Tag, Sparkles, ImagePlus, X
 } from "lucide-react";
+import RegistrationFieldsConfig, { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,13 +55,6 @@ interface EventItem {
   registration_count?: number;
 }
 
-function generateTicketCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "EVT-";
-  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
 function formatEventDate(dateStr: string): string {
   const date = new Date(dateStr);
   return format(date, "EEE, dd 'de' MMM 'às' HH:mm", { locale: ptBR });
@@ -75,6 +69,7 @@ function formatShortDate(dateStr: string): { day: string; month: string } {
 }
 
 export default function EventsPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -94,6 +89,7 @@ export default function EventsPage() {
     online_url: "", start_date: "", end_date: "", price: "0", is_free: true,
     max_attendees: "", featured: false,
   });
+  const [registrationFields, setRegistrationFields] = useState<RegistrationFieldKey[]>(["nome"]);
 
   const fetchEvents = async () => {
     const { data } = await supabase
@@ -225,7 +221,8 @@ export default function EventsPage() {
       is_free: form.is_free,
       max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
       featured: form.featured,
-    });
+      registration_fields: registrationFields,
+    } as any);
 
     setSaving(false);
     if (error) {
@@ -239,13 +236,14 @@ export default function EventsPage() {
         online_url: "", start_date: "", end_date: "", price: "0", is_free: true,
         max_attendees: "", featured: false,
       });
+      setRegistrationFields(["nome"]);
       setImageFile(null);
       setImagePreview("");
       fetchAllEvents();
     }
   };
 
-  const handleRegister = async (event: EventItem) => {
+  const handleRegister = (event: EventItem) => {
     if (!user) {
       toast({ title: "Faça login", description: "Você precisa estar logado para se inscrever.", variant: "destructive" });
       return;
@@ -254,21 +252,7 @@ export default function EventsPage() {
       toast({ title: "Você já está inscrito neste evento!" });
       return;
     }
-    const code = generateTicketCode();
-    const { error } = await supabase.from("event_registrations").insert({
-      event_id: event.id, user_id: user.id, ticket_code: code,
-    });
-    if (error) {
-      if (error.code === "23505") {
-        toast({ title: "Você já está inscrito neste evento!" });
-      } else {
-        toast({ title: "Erro ao inscrever", description: error.message, variant: "destructive" });
-      }
-    } else {
-      toast({ title: "Inscrição confirmada!", description: `Seu código: ${code}` });
-      setUserRegistrations(new Set([...userRegistrations, event.id]));
-      fetchAllEvents();
-    }
+    navigate(`/evento/${event.id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -701,6 +685,8 @@ export default function EventsPage() {
                 </div>
               )}
             </div>
+
+            <RegistrationFieldsConfig selected={registrationFields} onChange={setRegistrationFields} />
 
             <Button onClick={handleSubmit} disabled={saving || !form.title || !form.start_date} className="w-full">
               {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <CalendarDays className="mr-1 h-4 w-4" />}
