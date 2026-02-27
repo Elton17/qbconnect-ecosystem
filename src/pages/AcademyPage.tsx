@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3 } from "lucide-react";
+import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +48,9 @@ export default function AcademyPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
   const [filter, setFilter] = useState("Todos");
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
 
   const fetchData = async () => {
     const { data: items } = await supabase.from("courses").select("*").eq("active", true).order("created_at", { ascending: false });
@@ -104,11 +107,29 @@ export default function AcademyPage() {
 
   useEffect(() => { fetchData(); }, []);
 
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setThumbnailFile(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async () => {
     if (!user) return;
     setSaving(true);
+
+    let thumbnail_url = "";
+    if (thumbnailFile) {
+      setUploadingThumb(true);
+      const path = `${user.id}/thumbnails/${Date.now()}-${thumbnailFile.name}`;
+      const { error: upErr } = await supabase.storage.from("courses").upload(path, thumbnailFile);
+      if (upErr) { toast({ title: "Erro no upload", description: upErr.message, variant: "destructive" }); setSaving(false); setUploadingThumb(false); return; }
+      thumbnail_url = supabase.storage.from("courses").getPublicUrl(path).data.publicUrl;
+      setUploadingThumb(false);
+    }
+
     const { data, error } = await supabase.from("courses").insert({
-      user_id: user.id, title: form.title, category: form.category, duration: form.duration, premium: form.premium, description: form.description,
+      user_id: user.id, title: form.title, category: form.category, duration: form.duration, premium: form.premium, description: form.description, thumbnail_url,
     }).select().single();
     setSaving(false);
     if (error) {
@@ -116,6 +137,7 @@ export default function AcademyPage() {
     } else {
       toast({ title: "Curso criado!" });
       setForm({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
+      setThumbnailFile(null); setThumbnailPreview(null);
       setDialogOpen(false);
       if (data) navigate(`/curso/${data.id}/gerenciar`);
       else fetchData();
@@ -167,8 +189,25 @@ export default function AcademyPage() {
                       </div>
                       <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
                       <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+                      <div>
+                        <Label>Imagem de Capa</Label>
+                        {thumbnailPreview ? (
+                          <div className="relative mt-1 rounded-lg overflow-hidden border border-border">
+                            <img src={thumbnailPreview} alt="Preview" className="h-36 w-full object-cover" />
+                            <Button variant="destructive" size="icon" className="absolute right-2 top-2 h-7 w-7" onClick={() => { setThumbnailFile(null); setThumbnailPreview(null); }}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <label className="mt-1 flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border p-6 hover:border-primary/50 transition-colors">
+                            <Upload className="h-8 w-8 text-muted-foreground/40" />
+                            <span className="text-sm text-muted-foreground">Clique para selecionar imagem</span>
+                            <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailSelect} />
+                          </label>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2"><Switch checked={form.premium} onCheckedChange={(v) => setForm({ ...form, premium: v })} /><Label>Premium (exclusivo para assinantes)</Label></div>
-                      <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Criar e Gerenciar Conteúdo</Button>
+                      <Button onClick={handleSubmit} disabled={saving || !form.title} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}{uploadingThumb ? "Enviando imagem..." : "Criar e Gerenciar Conteúdo"}</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
