@@ -66,6 +66,7 @@ export default function CourseManagePage() {
   const [savingLesson, setSavingLesson] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingMaterial, setUploadingMaterial] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [lessonMaterials, setLessonMaterials] = useState<any[]>([]);
 
   useEffect(() => { if (id) fetchAll(); }, [id]);
@@ -194,6 +195,27 @@ export default function CourseManagePage() {
     setUploadingMaterial(false);
   };
 
+  // Thumbnail upload
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingThumbnail(true);
+    const path = `${user.id}/thumbnails/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("courses").upload(path, file);
+    if (error) { toast({ title: "Erro no upload", description: error.message, variant: "destructive" }); setUploadingThumbnail(false); return; }
+    const publicUrl = supabase.storage.from("courses").getPublicUrl(path).data.publicUrl;
+    await supabase.from("courses").update({ thumbnail_url: publicUrl }).eq("id", id);
+    setCourse((c: any) => ({ ...c, thumbnail_url: publicUrl }));
+    setUploadingThumbnail(false);
+    toast({ title: "Imagem atualizada!" });
+  };
+
+  const handleThumbnailRemove = async () => {
+    await supabase.from("courses").update({ thumbnail_url: "" }).eq("id", id);
+    setCourse((c: any) => ({ ...c, thumbnail_url: "" }));
+    toast({ title: "Imagem removida" });
+  };
+
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!course) return <div className="container py-20 text-center"><p className="text-muted-foreground">Curso não encontrado.</p></div>;
 
@@ -209,6 +231,32 @@ export default function CourseManagePage() {
       </div>
 
       <div className="container max-w-3xl py-8 space-y-6">
+        {/* Thumbnail */}
+        <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+          <h3 className="text-sm font-bold text-foreground">Imagem de Capa</h3>
+          {course.thumbnail_url ? (
+            <div className="relative rounded-lg overflow-hidden border border-border">
+              <img src={course.thumbnail_url} alt={course.title} className="h-44 w-full object-cover" />
+              <div className="absolute right-2 top-2 flex gap-1.5">
+                <label className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md bg-card/90 backdrop-blur-sm border border-border hover:bg-muted transition-colors">
+                  <Pencil className="h-3.5 w-3.5" />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailUpload} disabled={uploadingThumbnail} />
+                </label>
+                <Button variant="destructive" size="icon" className="h-8 w-8" onClick={handleThumbnailRemove}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              {uploadingThumbnail && <div className="absolute inset-0 flex items-center justify-center bg-background/60"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
+            </div>
+          ) : (
+            <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-border p-8 hover:border-primary/50 transition-colors">
+              {uploadingThumbnail ? <Loader2 className="h-8 w-8 animate-spin text-primary" /> : <Upload className="h-8 w-8 text-muted-foreground/40" />}
+              <span className="text-sm text-muted-foreground">{uploadingThumbnail ? "Enviando..." : "Clique para adicionar imagem de capa"}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailUpload} disabled={uploadingThumbnail} />
+            </label>
+          )}
+        </div>
+
         {/* Add module button */}
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-bold text-foreground">Módulos & Aulas</h3>
