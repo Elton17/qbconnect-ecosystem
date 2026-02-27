@@ -38,6 +38,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route element={<MainLayout />}>
+              {/* Public routes */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
               <Route path="/servicos" element={<ServicosPage />} />
@@ -48,15 +49,19 @@ const App = () => (
               <Route path="/beneficios" element={<BenefitsPage />} />
               <Route path="/eventos" element={<EventsPage />} />
               <Route path="/evento/:id" element={<EventDetailPage />} />
-              <Route path="/evento/:id/painel" element={<EventOrganizerPage />} />
               <Route path="/curso/:id" element={<CourseDetailPage />} />
-              <Route path="/curso/:id/gerenciar" element={<CourseManagePage />} />
-              <Route path="/instrutor/dashboard" element={<InstructorDashboardPage />} />
-              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
+              <Route path="/empresa/:id" element={<CompanyProfilePage />} />
               <Route path="/cadastro" element={<CompanyRegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/perfil" element={<ProfilePage />} />
-              <Route path="/empresa/:id" element={<CompanyProfilePage />} />
+
+              {/* Protected routes - require authentication */}
+              <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/curso/:id/gerenciar" element={<ProtectedRoute><CourseManagePage /></ProtectedRoute>} />
+              <Route path="/instrutor/dashboard" element={<ProtectedRoute><InstructorDashboardPage /></ProtectedRoute>} />
+              <Route path="/evento/:id/painel" element={<ProtectedRoute><EventOrganizerPage /></ProtectedRoute>} />
+
+              {/* Admin routes */}
+              <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
