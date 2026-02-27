@@ -25,6 +25,7 @@ import EventDetailPage from "@/pages/EventDetailPage";
 import EventOrganizerPage from "@/pages/EventOrganizerPage";
 import CourseDetailPage from "@/pages/CourseDetailPage";
 import CourseManagePage from "@/pages/CourseManagePage";
+import InstructorDashboardPage from "@/pages/InstructorDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/evento/:id/painel" element={<EventOrganizerPage />} />
               <Route path="/curso/:id" element={<CourseDetailPage />} />
               <Route path="/curso/:id/gerenciar" element={<CourseManagePage />} />
+              <Route path="/instrutor/dashboard" element={<InstructorDashboardPage />} />
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
               <Route path="/cadastro" element={<CompanyRegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
