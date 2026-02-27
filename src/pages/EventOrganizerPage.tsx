@@ -291,7 +291,9 @@ export default function EventOrganizerPage() {
                       />
                     </TableHead>
                     <TableHead>Participante</TableHead>
+                    <TableHead>CPF</TableHead>
                     <TableHead>Empresa</TableHead>
+                    <TableHead>CNPJ</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Telefone</TableHead>
                     <TableHead>Ingresso</TableHead>
@@ -313,8 +315,14 @@ export default function EventOrganizerPage() {
                       <TableCell className="font-medium text-card-foreground">
                         {a.contact_name || "—"}
                       </TableCell>
+                      <TableCell className="text-muted-foreground font-mono text-xs">
+                        {a.registration_data?.cpf || "—"}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {a.company_name || "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground font-mono text-xs">
+                        {a.registration_data?.cnpj || "—"}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {a.email || "—"}
