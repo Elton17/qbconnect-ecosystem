@@ -86,6 +86,116 @@ export type Database = {
         }
         Relationships: []
       }
+      event_registrations: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          status: string | null
+          ticket_code: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          status?: string | null
+          ticket_code: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          status?: string | null
+          ticket_code?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          category: string | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          event_type: string | null
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          is_free: boolean | null
+          location: string | null
+          max_attendees: number | null
+          online_url: string | null
+          price: number | null
+          short_description: string | null
+          start_date: string
+          state: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          category?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          is_free?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          online_url?: string | null
+          price?: number | null
+          short_description?: string | null
+          start_date: string
+          state?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          category?: string | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          is_free?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          online_url?: string | null
+          price?: number | null
+          short_description?: string | null
+          start_date?: string
+          state?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           active: boolean | null
