@@ -217,23 +217,21 @@ export default function OpportunitiesPage() {
                       <div className="text-xs text-muted-foreground">Valor estimado</div>
                     </div>
                   )}
+                  {opp.contact_phone && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a
+                        href={`https://wa.me/55${opp.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Vi sua oportunidade "${opp.title}" na plataforma QBCAMP Conecta+ e gostaria de conversar.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="mr-1 h-3.5 w-3.5" /> WhatsApp
+                      </a>
+                    </Button>
+                  )}
                   {user?.id === opp.user_id ? (
                     <Button variant="destructive" size="sm" onClick={() => handleDelete(opp.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      {opp.contact_phone && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a
-                            href={`https://wa.me/55${opp.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Vi sua oportunidade "${opp.title}" na plataforma QBCAMP Conecta+ e gostaria de conversar.`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <MessageCircle className="mr-1 h-3.5 w-3.5" /> WhatsApp
-                          </a>
-                        </Button>
-                      )}
-                      <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
-                    </div>
+                    <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
                   )}
                 </div>
               </motion.div>
