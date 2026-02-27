@@ -9,6 +9,7 @@ import {
   CheckCircle2, Zap, Shield, Star,
 } from "lucide-react";
 import ActivityFeed from "@/components/landing/ActivityFeed";
+import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
 
 const modules = [
   { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace", accent: "from-primary/20 to-primary/5" },
@@ -264,6 +265,9 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ===== COMPANY LOGOS ===== */}
+      <CompanyLogosCarousel />
 
       {/* ===== ACTIVITY FEED ===== */}
       <ActivityFeed />
