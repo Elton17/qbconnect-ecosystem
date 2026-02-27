@@ -1,33 +1,49 @@
 
 
-## Status da Proposta Inicial
+# Endereço Completo no Cadastro
 
-| # | Item | Status |
-|---|------|--------|
-| 1 | CNPJ Auto-fill via BrasilAPI | Done |
-| 2 | Adicionar cidades (Colombo, Pinhais, Curitiba) | Done |
-| 3 | Tabelas no banco (opportunities, courses, benefits + RLS) | Done |
-| 4 | Marketplace com dados reais | Done |
-| 5 | Oportunidades — CRUD completo | Done |
-| 6 | Academia — CRUD completo | Done |
-| 7 | Benefícios — CRUD completo | Done |
-| 8 | Ranking com dados reais | Done |
+## Objetivo
+Expandir o formulário de cadastro para capturar o endereço completo da empresa em campos separados (Endereço/Logradouro, Bairro, Cidade, Complemento, Ponto de Referência, CEP e Estado), preenchendo automaticamente via CNPJ quando possível. O mapa com Google Maps será adicionado futuramente.
 
-**Todos os 8 itens da proposta foram implementados.**
+## O que muda para o usuário
+- Ao digitar o CNPJ, os campos de endereço (rua, bairro, cidade, CEP, estado) serão preenchidos automaticamente com os dados da Receita Federal.
+- Campos de Complemento e Ponto de Referência ficam disponíveis para preenchimento manual.
+- O campo "Cidade" deixa de ser um dropdown fixo e passa a aceitar a cidade retornada pelo CNPJ, mantendo as cidades da região como sugestões.
 
 ---
 
-## Pendencias fora da proposta, mas identificadas no projeto
+## Detalhes Técnicos
 
-1. **Painel Admin com dados mock** — O `AdminPage.tsx` exibe estatísticas, aprovacoes e transacoes com dados hardcoded. Os botoes "Aprovar" e "Rejeitar" nao funcionam. Precisa ser conectado ao backend real.
+### 1. Migração do Banco de Dados
+Adicionar novas colunas na tabela `profiles`:
 
-2. **Roadmap MVP (da memoria do projeto)** menciona itens ainda nao implementados:
-   - Sistema de comissao automatica
-   - Matchmaking simples entre empresas
-   - Sistema de creditos QBCoin (Fase 2)
+| Coluna | Tipo | Default |
+|--------|------|---------|
+| `neighborhood` | text | '' |
+| `complement` | text | '' |
+| `reference_point` | text | '' |
+| `zip_code` | text | '' |
+| `state` | text | '' |
 
-3. **Funcionalidades menores ausentes**:
-   - Botao "Ver perfil" no Marketplace nao leva a uma pagina de perfil publico da empresa
-   - Nao ha pagina publica de detalhes de oportunidade/curso/beneficio
-   - O admin nao consegue aprovar/rejeitar empresas pelo painel (so via query manual)
+### 2. Atualizar Edge Function `cnpj-lookup`
+Retornar campos separados em vez de concatenar tudo em `address`:
+
+```text
+Antes: address = "Rua X, 123, Sala 1, Centro"
+Depois: street, number, complement, neighborhood, city, state, zip_code (campos individuais)
+```
+
+Dados disponíveis na BrasilAPI: `logradouro`, `numero`, `complemento`, `bairro`, `municipio`, `uf`, `cep`.
+
+### 3. Atualizar Formulário de Cadastro (`CompanyRegistrationPage.tsx`)
+- Substituir o campo único "Endereço" por campos separados: Endereço (logradouro + numero), Bairro, Complemento, Ponto de Referência, CEP e Estado.
+- Mudar o campo "Cidade" para `Input` em vez de `Select` fixo, permitindo receber a cidade vinda do CNPJ.
+- Atualizar o schema Zod com os novos campos (CEP, bairro e estado obrigatórios; complemento e ponto de referência opcionais).
+- Atualizar `lookupCNPJ` para preencher cada campo individualmente.
+- Atualizar `onSubmit` para salvar os novos campos no banco.
+
+### 4. Sequencia de Implementacao
+1. Migrar banco (adicionar colunas)
+2. Atualizar edge function
+3. Atualizar formulario e logica de submit
 
