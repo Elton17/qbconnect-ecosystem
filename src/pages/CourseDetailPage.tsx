@@ -12,6 +12,7 @@ import {
   Play, Lock, CheckCircle2, ChevronDown, ChevronRight, Clock, Users, Star,
   BookOpen, Award, ArrowLeft, Loader2, Download, FileText, MessageSquare
 } from "lucide-react";
+import CertificateGenerator from "@/components/courses/CertificateGenerator";
 
 interface Module {
   id: string;
@@ -60,6 +61,7 @@ export default function CourseDetailPage() {
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
+  const [userName, setUserName] = useState("");
 
   const allLessons = useMemo(() => modules.flatMap(m => m.lessons), [modules]);
   const completedCount = useMemo(() => Object.values(progress).filter(Boolean).length, [progress]);
@@ -103,13 +105,18 @@ export default function CourseDetailPage() {
     }
 
     if (user) {
-      const { data: enr } = await supabase.from("course_enrollments").select("*").eq("course_id", id).eq("user_id", user.id).maybeSingle();
-      setEnrollment(enr);
-
-      const { data: prog } = await supabase.from("lesson_progress").select("lesson_id, completed").eq("user_id", user.id);
-      if (prog) {
+      const [enrRes, progRes, profileRes] = await Promise.all([
+        supabase.from("course_enrollments").select("*").eq("course_id", id).eq("user_id", user.id).maybeSingle(),
+        supabase.from("lesson_progress").select("lesson_id, completed").eq("user_id", user.id),
+        supabase.from("profiles").select("company_name, contact_name").eq("user_id", user.id).maybeSingle(),
+      ]);
+      setEnrollment(enrRes.data);
+      if (profileRes.data) {
+        setUserName(profileRes.data.contact_name || profileRes.data.company_name || "Aluno");
+      }
+      if (progRes.data) {
         const map: Record<string, boolean> = {};
-        prog.forEach((p: any) => { map[p.lesson_id] = p.completed; });
+        progRes.data.forEach((p: any) => { map[p.lesson_id] = p.completed; });
         setProgress(map);
       }
     }
@@ -361,10 +368,13 @@ export default function CourseDetailPage() {
                   <span className="text-muted-foreground">{completedCount}/{allLessons.length}</span>
                 </div>
                 <Progress value={progressPercent} className="h-2.5" />
-                {progressPercent === 100 && (
-                  <div className="mt-3 flex items-center gap-2 rounded-lg bg-primary/10 p-2 text-sm text-primary">
-                    <Award className="h-5 w-5" /> Curso concluído! 🎉
-                  </div>
+                {progressPercent === 100 && user && (
+                  <CertificateGenerator
+                    courseId={id!}
+                    courseTitle={course.title}
+                    userId={user.id}
+                    userName={userName}
+                  />
                 )}
               </div>
             )}
