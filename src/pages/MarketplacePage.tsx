@@ -127,7 +127,16 @@ export default function MarketplacePage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [promoIndex, setPromoIndex] = useState(0);
+  const [isAssociate, setIsAssociate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if user is an approved associate
+  useEffect(() => {
+    if (!user) { setIsAssociate(false); return; }
+    supabase.from("profiles").select("id").eq("user_id", user.id).eq("approved", true).maybeSingle().then(({ data }) => {
+      setIsAssociate(!!data);
+    });
+  }, [user]);
 
   // Auto-rotate promo banners
   useEffect(() => {
@@ -312,17 +321,17 @@ export default function MarketplacePage() {
               Descubra ofertas exclusivas, negocie direto com empresas da região e impulsione seus negócios.
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              {user ? (
+              {isAssociate ? (
                 <Button variant="hero" size="xl" onClick={openNewProduct}>
                   <Plus className="mr-1 h-5 w-5" /> Anunciar Produto
                 </Button>
-              ) : (
+              ) : !user ? (
                 <Button variant="hero" size="xl" asChild>
                   <Link to="/cadastro">
                     Comece a Vender <ArrowRight className="ml-1 h-5 w-5" />
                   </Link>
                 </Button>
-              )}
+              ) : null}
               <Button
                 variant="heroOutline"
                 size="xl"
