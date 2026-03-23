@@ -57,6 +57,7 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/certificado" element={<CertificateVerifyPage />} />
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
+              <Route path="/instalar" element={<InstallAppPage />} />
 
               {/* Protected routes - require authentication */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
