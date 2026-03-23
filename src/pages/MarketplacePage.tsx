@@ -127,7 +127,16 @@ export default function MarketplacePage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [promoIndex, setPromoIndex] = useState(0);
+  const [isAssociate, setIsAssociate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if user is an approved associate
+  useEffect(() => {
+    if (!user) { setIsAssociate(false); return; }
+    supabase.from("profiles").select("id").eq("user_id", user.id).eq("approved", true).maybeSingle().then(({ data }) => {
+      setIsAssociate(!!data);
+    });
+  }, [user]);
 
   // Auto-rotate promo banners
   useEffect(() => {
