@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ShoppingBag, Handshake, GraduationCap, Trophy, ArrowRight, ArrowUpRight,
   Building2, TrendingUp, Users, Gift, Briefcase, CalendarDays,
-  CheckCircle2, Zap, Shield, Star,
+  CheckCircle2, Zap, Shield, Star, Smartphone, Download,
 } from "lucide-react";
 import ActivityFeed from "@/components/landing/ActivityFeed";
 import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
