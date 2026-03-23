@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ShoppingBag, Handshake, GraduationCap, Trophy, ArrowRight, ArrowUpRight,
   Building2, TrendingUp, Users, Gift, Briefcase, CalendarDays,
-  CheckCircle2, Zap, Shield, Star,
+  CheckCircle2, Zap, Shield, Star, Smartphone, Download,
 } from "lucide-react";
 import ActivityFeed from "@/components/landing/ActivityFeed";
 import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
@@ -271,6 +271,58 @@ export default function LandingPage() {
 
       {/* ===== ACTIVITY FEED ===== */}
       <ActivityFeed />
+
+      {/* ===== APP DOWNLOAD BANNER ===== */}
+      <section className="py-16 bg-background">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-secondary via-secondary to-primary/10 p-8 md:p-12"
+          >
+            {/* Decorative glows */}
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-[80px]" />
+            <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-accent/10 blur-[60px]" />
+
+            <div className="relative flex flex-col items-center gap-8 md:flex-row md:justify-between">
+              <div className="flex-1 text-center md:text-left">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
+                  <Smartphone className="h-4 w-4" />
+                  Novo! App Mobile
+                </div>
+                <h2 className="mb-3 text-2xl font-extrabold text-secondary-foreground md:text-3xl">
+                  QBCAMP no seu <span className="text-gradient">celular</span>
+                </h2>
+                <p className="mb-6 max-w-md text-secondary-foreground/60">
+                  Instale o app direto do navegador — sem loja, sem ocupar espaço. Acesso rápido a toda a plataforma, funciona offline e sempre atualizado.
+                </p>
+                <Button variant="hero" size="xl" asChild>
+                  <Link to="/instalar">
+                    <Download className="mr-1.5 h-5 w-5" /> Instalar o App
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="flex shrink-0 gap-3">
+                {[
+                  { icon: Smartphone, label: "Como um app nativo" },
+                  { icon: Zap, label: "Rápido e leve" },
+                  { icon: Shield, label: "Funciona offline" },
+                ].map((item) => (
+                  <div key={item.label} className="flex flex-col items-center gap-2 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-4 py-5 backdrop-blur-sm">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="text-xs font-medium text-secondary-foreground/70 text-center">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* ===== CTA ===== */}
       <section className="relative overflow-hidden py-24">
