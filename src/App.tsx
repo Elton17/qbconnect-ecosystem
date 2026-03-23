@@ -28,6 +28,7 @@ import CourseManagePage from "@/pages/CourseManagePage";
 import InstructorDashboardPage from "@/pages/InstructorDashboardPage";
 import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
+import InstallAppPage from "@/pages/InstallAppPage";
 
 const queryClient = new QueryClient();
 const App = () => (
