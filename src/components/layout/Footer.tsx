@@ -37,7 +37,7 @@ export default function Footer() {
             <h4 className="mb-3 text-sm font-semibold">Associação</h4>
             <ul className="space-y-2 text-sm text-secondary-foreground/70">
               <li><Link to="/beneficios" className="hover:text-primary transition-colors">Benefícios</Link></li>
-              <li><Link to="/cadastro" className="hover:text-primary transition-colors">Associe-se</Link></li>
+              <li><a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Associe-se</a></li>
               <li><Link to="/login" className="hover:text-primary transition-colors">Área do Associado</Link></li>
               <li><Link to="/certificado" className="hover:text-primary transition-colors">Verificar Certificado</Link></li>
             </ul>

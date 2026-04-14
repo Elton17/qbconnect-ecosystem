@@ -104,7 +104,7 @@ export default function LandingPage() {
                   </Link>
                 </Button>
                 <Button variant="heroOutline" size="xl" asChild>
-                  <Link to="/cadastro">Quero me associar</Link>
+                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Quero me associar</a>
                 </Button>
               </div>
 
@@ -347,9 +347,9 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Button variant="hero" size="xl" asChild>
-                <Link to="/cadastro">
+                <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
                   Cadastrar minha empresa <ArrowRight className="ml-1 h-5 w-5" />
-                </Link>
+                </a>
               </Button>
               <Button variant="heroOutline" size="xl" asChild>
                 <Link to="/marketplace">Ver marketplace</Link>
