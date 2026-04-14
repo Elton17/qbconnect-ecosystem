@@ -49,7 +49,7 @@ export default function AdminPage() {
     const [
       profilesRes, productsRes, coursesRes, eventsRes,
       oppsRes, benefitsRes, promosRes, rolesRes,
-      enrollRes, eventRegRes,
+      enrollRes, eventRegRes, pathsRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("products").select("*").order("created_at", { ascending: false }),
@@ -61,6 +61,7 @@ export default function AdminPage() {
       supabase.from("user_roles").select("*"),
       supabase.from("course_enrollments").select("id", { count: "exact", head: true }),
       supabase.from("event_registrations").select("id", { count: "exact", head: true }),
+      supabase.from("learning_paths").select("*").order("sort_order"),
     ]);
 
     const p = profilesRes.data || [];
