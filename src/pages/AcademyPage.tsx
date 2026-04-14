@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload, Search } from "lucide-react";
+import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload, Search, Route, ChevronRight } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,12 @@ import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 
 const courseCategories = ["Marketing", "Finanças", "Gestão", "Vendas", "Jurídico", "Tecnologia", "RH", "Outro"];
+const courseLevels = ["iniciante", "intermediário", "avançado"];
+const levelColors: Record<string, string> = {
+  iniciante: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  intermediário: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  avançado: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+};
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -38,6 +45,16 @@ interface Course {
   lesson_count?: number;
   avg_rating?: number;
   enrollment_count?: number;
+  level?: string;
+  instructor_name?: string;
+}
+
+interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail_url: string;
+  course_count: number;
 }
 
 export default function AcademyPage() {
@@ -46,11 +63,12 @@ export default function AcademyPage() {
   const { approved } = useApprovedCompany();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const navigate = useNavigate();
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
+  const [form, setForm] = useState({ title: "", category: "Marketing", duration: "", premium: false, description: "", level: "iniciante", instructor_name: "" });
   const [filter, setFilter] = useState("Todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -58,6 +76,22 @@ export default function AcademyPage() {
   const [uploadingThumb, setUploadingThumb] = useState(false);
 
   const fetchData = async () => {
+    // Fetch learning paths
+    const { data: pathsData } = await supabase.from("learning_paths").select("*").eq("active", true).order("sort_order");
+    if (pathsData) {
+      const pathIds = pathsData.map((p: any) => p.id);
+      const { data: junctions } = pathIds.length > 0
+        ? await supabase.from("learning_path_courses").select("learning_path_id").in("learning_path_id", pathIds)
+        : { data: [] };
+      const pathCourseCounts: Record<string, number> = {};
+      (junctions || []).forEach((j: any) => { pathCourseCounts[j.learning_path_id] = (pathCourseCounts[j.learning_path_id] || 0) + 1; });
+      setLearningPaths(pathsData.map((p: any) => ({
+        ...p,
+        course_count: pathCourseCounts[p.id] || 0,
+      })));
+    }
+
+    // Fetch courses
     const { data: items } = await supabase.from("courses").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
 
@@ -74,7 +108,6 @@ export default function AcademyPage() {
     const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.user_id, p.company_name]));
     const moduleIds = (modulesRes.data || []).map((m: any) => m.id);
 
-    // Get lesson count per module
     let lessonCounts: Record<string, number> = {};
     if (moduleIds.length > 0) {
       const { data: lessons } = await supabase.from("course_lessons").select("module_id").in("module_id", moduleIds);
@@ -134,14 +167,14 @@ export default function AcademyPage() {
     }
 
     const { data, error } = await supabase.from("courses").insert({
-      user_id: user.id, title: form.title, category: form.category, duration: form.duration, premium: form.premium, description: form.description, thumbnail_url,
+      user_id: user.id, title: form.title, category: form.category, duration: form.duration, premium: form.premium, description: form.description, thumbnail_url, level: form.level, instructor_name: form.instructor_name,
     }).select().single();
     setSaving(false);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Curso criado!" });
-      setForm({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
+      setForm({ title: "", category: "Marketing", duration: "", premium: false, description: "", level: "iniciante", instructor_name: "" });
       setThumbnailFile(null); setThumbnailPreview(null);
       setDialogOpen(false);
       if (data) navigate(`/curso/${data.id}/gerenciar`);
@@ -197,7 +230,16 @@ export default function AcademyPage() {
                           <SelectContent>{courseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>Nível *</Label>
+                          <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>{courseLevels.map(l => <SelectItem key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
+                      </div>
+                      <div><Label>Nome do Instrutor</Label><Input value={form.instructor_name} onChange={(e) => setForm({ ...form, instructor_name: e.target.value })} placeholder="Ex: João Silva" /></div>
                       <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
                       <div>
                         <Label>Imagem de Capa</Label>
@@ -248,7 +290,40 @@ export default function AcademyPage() {
         </div>
       </section>
 
-      {/* Search & Filters */}
+      {/* Learning Paths */}
+      {learningPaths.length > 0 && (
+        <div className="container pt-10 pb-2">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+              <Route className="h-6 w-6 text-primary" /> Trilhas de Aprendizado
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {learningPaths.map((path, i) => (
+              <motion.div
+                key={path.id}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                onClick={() => navigate(`/trilha/${path.id}`)}
+                className="group cursor-pointer rounded-2xl border border-border bg-card p-5 transition-all hover:shadow-md hover:-translate-y-1"
+              >
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <Route className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="mb-1 text-lg font-bold text-card-foreground group-hover:text-primary transition-colors">{path.title}</h3>
+                {path.description && <p className="mb-3 text-sm text-muted-foreground line-clamp-2">{path.description}</p>}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{path.course_count} cursos</span>
+                  <ChevronRight className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="container pt-8 pb-4 space-y-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -315,8 +390,9 @@ export default function AcademyPage() {
 
                 {/* Info */}
                 <div className="flex flex-1 flex-col p-5">
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="mb-2 flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-semibold text-primary">{course.category}</span>
+                    {course.level && <Badge className={`text-[10px] ${levelColors[course.level] || ""}`}>{course.level}</Badge>}
                     {course.avg_rating! > 0 && (
                       <span className="ml-auto flex items-center gap-0.5 text-xs text-muted-foreground">
                         <Star className="h-3 w-3 fill-accent text-accent" /> {course.avg_rating!.toFixed(1)}

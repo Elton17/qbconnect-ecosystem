@@ -28,6 +28,7 @@ import CourseManagePage from "@/pages/CourseManagePage";
 import InstructorDashboardPage from "@/pages/InstructorDashboardPage";
 import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
+import LearningPathPage from "@/pages/LearningPathPage";
 import InstallAppPage from "@/pages/InstallAppPage";
 import SACPage from "@/pages/SACPage";
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/produto/:id" element={<ProductDetailPage />} />
               <Route path="/oportunidades" element={<OpportunitiesPage />} />
               <Route path="/academia" element={<AcademyPage />} />
+              <Route path="/trilha/:id" element={<LearningPathPage />} />
               <Route path="/ranking" element={<RankingPage />} />
               <Route path="/beneficios" element={<BenefitsPage />} />
               <Route path="/eventos" element={<EventsPage />} />
