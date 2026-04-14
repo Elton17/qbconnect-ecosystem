@@ -775,6 +775,7 @@ export default function MarketplacePage() {
         </Dialog>
       </div>
       {ConfirmDialog}
+      <PlanUpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} resourceType="produtos" currentLimit={planLimits.limits.products} />
     </div>
   );
 }
