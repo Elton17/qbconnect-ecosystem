@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, ArrowRight, Loader2, Package, Plus, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap } from "lucide-react";
+import { Search, MapPin, ArrowRight, Loader2, Package, Plus, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap, Crown } from "lucide-react";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import PromotionsSection from "@/components/marketplace/PromotionsSection";
+import PlanUpgradeModal from "@/components/PlanUpgradeModal";
+import PremiumBadge from "@/components/PremiumBadge";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 const companyCategories = ["Todos", "Tecnologia", "Construção", "Alimentação", "Saúde", "Serviços", "Indústria", "Educação", "Logística", "Outro"];
 const productCategories = ["Todos", "Produtos", "Serviços", "Alimentação", "Tecnologia", "Vestuário", "Saúde", "Educação", "Outro"];
@@ -49,11 +52,13 @@ const fadeInUp = {
 
 interface Company {
   id: string;
+  user_id: string;
   company_name: string;
   segment: string;
   city: string;
   description: string | null;
   logo_url: string | null;
+  plan: string;
 }
 
 interface Product {
