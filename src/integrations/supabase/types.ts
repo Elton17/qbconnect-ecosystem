@@ -565,9 +565,15 @@ export type Database = {
       opportunities: {
         Row: {
           active: boolean | null
+          closed_at: string | null
+          closed_with: string | null
           created_at: string | null
+          deal_feedback: string | null
+          deal_value: number | null
           description: string | null
           id: string
+          interested_count: number
+          status: string
           title: string
           type: string
           updated_at: string | null
@@ -577,9 +583,15 @@ export type Database = {
         }
         Insert: {
           active?: boolean | null
+          closed_at?: string | null
+          closed_with?: string | null
           created_at?: string | null
+          deal_feedback?: string | null
+          deal_value?: number | null
           description?: string | null
           id?: string
+          interested_count?: number
+          status?: string
           title: string
           type?: string
           updated_at?: string | null
@@ -589,9 +601,15 @@ export type Database = {
         }
         Update: {
           active?: boolean | null
+          closed_at?: string | null
+          closed_with?: string | null
           created_at?: string | null
+          deal_feedback?: string | null
+          deal_value?: number | null
           description?: string | null
           id?: string
+          interested_count?: number
+          status?: string
           title?: string
           type?: string
           updated_at?: string | null
