@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 
 const benefitCategories = ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"];
 
@@ -43,6 +44,7 @@ interface Redemption {
 export default function BenefitsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { approved } = useApprovedCompany();
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -196,7 +198,7 @@ export default function BenefitsPage() {
             <p className="mb-8 text-lg text-secondary-foreground/70">
               Descontos e condições exclusivas entre empresas associadas da QBCAMP.
             </p>
-            {user && (
+            {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
                   <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>

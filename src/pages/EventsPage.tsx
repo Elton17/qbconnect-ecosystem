@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -87,6 +88,7 @@ export default function EventsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { approved } = useApprovedCompany();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -198,7 +200,7 @@ export default function EventsPage() {
               Feiras, workshops, networking e capacitações exclusivas para associados e comunidade empresarial.
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              {user && (
+              {user && approved && (
                 <Button variant="hero" size="xl" onClick={handleCreate}>
                   <Plus className="mr-1 h-5 w-5" /> Criar Evento
                 </Button>
@@ -357,7 +359,7 @@ export default function EventsPage() {
           <div className="py-16 text-center">
             <CalendarDays className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
             <p className="text-muted-foreground">Nenhum evento encontrado.</p>
-            {user && (
+            {user && approved && (
               <Button className="mt-4" onClick={handleCreate}>
                 <Plus className="mr-1 h-4 w-4" /> Criar primeiro evento
               </Button>

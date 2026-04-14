@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 
 const courseCategories = ["Marketing", "Finanças", "Gestão", "Vendas", "Jurídico", "Tecnologia", "RH", "Outro"];
 
@@ -41,6 +42,7 @@ interface Course {
 export default function AcademyPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { approved } = useApprovedCompany();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -177,7 +179,7 @@ export default function AcademyPage() {
             <p className="mb-8 text-lg text-secondary-foreground/70">
               Cursos completos com vídeos, módulos e certificados. Aprenda com as melhores empresas da região.
             </p>
-            {user && (
+            {user && approved && (
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
