@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Check, X, Crown, ArrowRight } from "lucide-react";
 import { getUpgradeWhatsAppUrl } from "@/lib/plans";
@@ -18,6 +19,7 @@ const features = [
 ];
 
 export default function PlanosPage() {
+  usePageTitle("Planos");
   return (
     <div>
       <section className="relative overflow-hidden bg-secondary py-16 md:py-24">

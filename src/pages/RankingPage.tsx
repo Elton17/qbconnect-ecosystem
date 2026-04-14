@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Trophy, ShoppingBag, GraduationCap, Handshake, Loader2, Crown, Medal, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +20,7 @@ interface RankedCompany {
 }
 
 export default function RankingPage() {
+  usePageTitle("Ranking");
   const [ranking, setRanking] = useState<RankedCompany[]>([]);
   const [loading, setLoading] = useState(true);
 

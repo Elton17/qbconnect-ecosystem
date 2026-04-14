@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ interface Redemption {
 }
 
 export default function BenefitsPage() {
+  usePageTitle("Benefícios");
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
