@@ -198,7 +198,7 @@ export default function BenefitsPage() {
             <p className="mb-8 text-lg text-secondary-foreground/70">
               Descontos e condições exclusivas entre empresas associadas da QBCAMP.
             </p>
-            {user && (
+            {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
                   <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>

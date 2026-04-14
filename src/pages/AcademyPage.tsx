@@ -179,7 +179,7 @@ export default function AcademyPage() {
             <p className="mb-8 text-lg text-secondary-foreground/70">
               Cursos completos com vídeos, módulos e certificados. Aprenda com as melhores empresas da região.
             </p>
-            {user && (
+            {user && approved && (
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
