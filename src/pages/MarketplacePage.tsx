@@ -730,7 +730,6 @@ export default function MarketplacePage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
       {ConfirmDialog}
     </div>
   );

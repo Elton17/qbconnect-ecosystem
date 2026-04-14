@@ -323,7 +323,6 @@ export default function BenefitsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
       {ConfirmDialog}
     </div>
   );

@@ -347,7 +347,6 @@ export default function AcademyPage() {
           </div>
         )}
       </div>
-    </div>
       {ConfirmDialog}
     </div>
   );
