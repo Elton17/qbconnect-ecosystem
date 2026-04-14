@@ -331,7 +331,7 @@ export default function BenefitsPage() {
               const isExpired = benefit.expires_at && new Date(benefit.expires_at) < new Date();
               const expiresFormatted = benefit.expires_at ? format(new Date(benefit.expires_at), "dd/MM/yyyy", { locale: ptBR }) : null;
               return (
-                <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1">
+                <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className={`rounded-2xl border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1 ${benefit.plan === "premium" ? "border-2 border-amber-400" : "border-border"}`}>
                   <div className="mb-4 flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 overflow-hidden">
                       {benefit.logo_url ? (
@@ -341,6 +341,7 @@ export default function BenefitsPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      {benefit.plan === "premium" && <PremiumBadge />}
                       {benefit.exclusive && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Exclusivo Premium</span>}
                       {user?.id === benefit.user_id && (
                         <div className="flex gap-1">
@@ -432,6 +433,7 @@ export default function BenefitsPage() {
         </Dialog>
       </div>
       {ConfirmDialog}
+      <PlanUpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} resourceType="benefícios" currentLimit={planLimitsData.limits.benefits} />
     </div>
   );
 }
