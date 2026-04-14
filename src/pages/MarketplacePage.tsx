@@ -236,6 +236,10 @@ export default function MarketplacePage() {
   }
 
   function openNewProduct() {
+    if (!planLimits.canAddProduct) {
+      setUpgradeOpen(true);
+      return;
+    }
     setEditingProduct(null);
     setForm({ title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "" });
     setImageFiles([]);
