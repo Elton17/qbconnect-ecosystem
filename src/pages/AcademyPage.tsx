@@ -167,14 +167,14 @@ export default function AcademyPage() {
     }
 
     const { data, error } = await supabase.from("courses").insert({
-      user_id: user.id, title: form.title, category: form.category, duration: form.duration, premium: form.premium, description: form.description, thumbnail_url,
+      user_id: user.id, title: form.title, category: form.category, duration: form.duration, premium: form.premium, description: form.description, thumbnail_url, level: form.level, instructor_name: form.instructor_name,
     }).select().single();
     setSaving(false);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Curso criado!" });
-      setForm({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
+      setForm({ title: "", category: "Marketing", duration: "", premium: false, description: "", level: "iniciante", instructor_name: "" });
       setThumbnailFile(null); setThumbnailPreview(null);
       setDialogOpen(false);
       if (data) navigate(`/curso/${data.id}/gerenciar`);
