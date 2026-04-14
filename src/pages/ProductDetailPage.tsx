@@ -37,6 +37,20 @@ interface Seller {
   website: string | null;
   description: string | null;
   id: string;
+  contact_phone: string;
+}
+
+interface SellerOld {
+  company_name: string;
+  segment: string;
+  city: string;
+  logo_url: string | null;
+  phone: string;
+  email: string;
+  website: string | null;
+  description: string | null;
+  id: string;
+  contact_phone: string;
 }
 
 export default function ProductDetailPage() {
