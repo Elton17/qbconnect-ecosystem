@@ -136,6 +136,7 @@ export default function MarketplacePage() {
   const location = useLocation();
   const { toast } = useToast();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const planLimits = usePlanLimits();
   const [activeTab, setActiveTab] = useState("empresas");
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [search, setSearch] = useState("");
@@ -152,6 +153,9 @@ export default function MarketplacePage() {
   const [promoIndex, setPromoIndex] = useState(0);
   const [isAssociate, setIsAssociate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  // company plan map for product premium sorting
+  const [companyPlanMap, setCompanyPlanMap] = useState<Map<string, string>>(new Map());
 
   // Check if user is an approved associate
   useEffect(() => {
