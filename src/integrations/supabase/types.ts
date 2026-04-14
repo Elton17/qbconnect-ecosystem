@@ -24,6 +24,7 @@ export type Database = {
           offer: string
           updated_at: string | null
           user_id: string
+          whatsapp: string
         }
         Insert: {
           active?: boolean | null
@@ -34,6 +35,7 @@ export type Database = {
           offer: string
           updated_at?: string | null
           user_id: string
+          whatsapp?: string
         }
         Update: {
           active?: boolean | null
@@ -44,6 +46,7 @@ export type Database = {
           offer?: string
           updated_at?: string | null
           user_id?: string
+          whatsapp?: string
         }
         Relationships: []
       }

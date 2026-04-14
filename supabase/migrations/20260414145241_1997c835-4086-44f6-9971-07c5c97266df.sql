@@ -1,0 +1,1 @@
+ALTER TABLE public.benefits ADD COLUMN whatsapp text DEFAULT '' NOT NULL;
