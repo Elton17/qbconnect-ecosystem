@@ -111,7 +111,7 @@ export default function CompanyProfilePage() {
 
       {/* Content */}
       <div className="container py-8">
-        <Tabs defaultValue="opportunities" className="w-full">
+        <Tabs defaultValue="contacts" className="w-full">
           <TabsList className="mb-6 w-full justify-start">
             <TabsTrigger value="contacts" className="gap-1.5"><Users className="h-4 w-4" /> Contatos</TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-1.5"><Briefcase className="h-4 w-4" /> Oportunidades ({opportunities.length})</TabsTrigger>
