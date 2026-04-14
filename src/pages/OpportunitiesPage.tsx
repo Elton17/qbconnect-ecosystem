@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Pencil, Handshake, TrendingUp, Zap, MessageCircle } from "lucide-react";
+import { getWhatsAppContactUrl } from "@/lib/constants";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -262,9 +263,9 @@ export default function OpportunitiesPage() {
                     </div>
                   )}
                   {opp.contact_phone && (
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="whatsapp" size="sm" asChild>
                       <a
-                        href={`https://wa.me/55${opp.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Vi sua oportunidade "${opp.title}" na plataforma QBCAMP Conecta+ e gostaria de conversar.`)}`}
+                        href={getWhatsAppContactUrl(opp.contact_phone, `Olá! Vi sua oportunidade "${opp.title}" na plataforma QBCAMP Conecta+ e gostaria de conversar.`)}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

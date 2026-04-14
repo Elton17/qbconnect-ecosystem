@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getWhatsAppUrl } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -212,7 +213,7 @@ export default function CompanyRegistrationPage() {
               O cadastro no QBCAMP Conecta+ é exclusivo para empresas associadas à QBCAMP. Se sua empresa ainda não é associada, fale conosco antes de prosseguir.
             </p>
             <a
-              href={`https://wa.me/5541999999999?text=${encodeURIComponent("Olá! Tenho interesse em me associar à QBCAMP e usar o Conecta+. Podem me ajudar?")}`}
+              href={getWhatsAppUrl("Olá! Tenho interesse em me associar à QBCAMP e usar o Conecta+. Podem me ajudar?")}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#25D366] px-4 py-2 text-sm font-bold text-white hover:bg-[#1da851] transition-colors"

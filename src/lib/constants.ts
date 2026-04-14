@@ -32,6 +32,12 @@ export function getWhatsAppUrl(message: string) {
   return `https://wa.me/${QBCAMP_WHATSAPP}?text=${encodeURIComponent(message)}`;
 }
 
+export function getWhatsAppContactUrl(phone: string, message: string) {
+  const cleanPhone = phone.replace(/\D/g, "");
+  const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
+  return `https://wa.me/${fullPhone}?text=${encodeURIComponent(message)}`;
+}
+
 export function getUpgradeWhatsAppUrl() {
   return getWhatsAppUrl(
     "Olá QBCAMP! Tenho interesse em fazer upgrade para o plano Premium do Conecta+. Podem me passar as informações?"

@@ -51,8 +51,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 function getWhatsAppUrl(phone: string, productTitle: string) {
   const cleanPhone = phone.replace(/\D/g, "");
   const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
-  const message = encodeURIComponent(`Olá! Vi seu produto *${productTitle}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`);
-  return `https://wa.me/${fullPhone}?text=${message}`;
+  return `https://wa.me/${fullPhone}?text=${encodeURIComponent(`Olá! Vi seu produto *${productTitle}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`)}`;
 }
 
 export default function ProductDetailPage() {
@@ -222,8 +221,7 @@ export default function ProductDetailPage() {
                 className="block"
               >
                 <button
-                  className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-white font-bold text-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ backgroundColor: "#25D366" }}
+                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#25D366] px-6 py-4 text-white font-bold text-lg shadow-lg transition-all duration-200 hover:bg-[#1ea952] hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <WhatsAppIcon className="h-6 w-6" />
                   <div className="flex flex-col items-start">
