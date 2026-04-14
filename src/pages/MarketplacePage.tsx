@@ -194,10 +194,15 @@ export default function MarketplacePage() {
   async function fetchData() {
     setLoading(true);
     const [companiesRes, productsRes] = await Promise.all([
-      supabase.from("profiles").select("id, company_name, segment, city, description, logo_url").eq("approved", true),
+      supabase.from("profiles").select("id, user_id, company_name, segment, city, description, logo_url, plan").eq("approved", true),
       supabase.from("products").select("*").eq("active", true),
     ]);
-    setCompanies(companiesRes.data || []);
+    const comps = (companiesRes.data || []) as Company[];
+    setCompanies(comps);
+    // Build plan map for product premium sorting
+    const planMap = new Map<string, string>();
+    comps.forEach(c => planMap.set(c.user_id, c.plan));
+    setCompanyPlanMap(planMap);
     setProducts((productsRes.data as Product[]) || []);
     setLoading(false);
   }
