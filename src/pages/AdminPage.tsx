@@ -31,6 +31,7 @@ export default function AdminPage() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [benefits, setBenefits] = useState<any[]>([]);
   const [promotions, setPromotions] = useState<any[]>([]);
+  const [learningPaths, setLearningPaths] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
