@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
