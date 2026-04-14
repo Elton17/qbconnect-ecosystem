@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,7 @@ interface LearningPath {
 }
 
 export default function AcademyPage() {
+  usePageTitle("Academia");
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();

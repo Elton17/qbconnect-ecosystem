@@ -1,12 +1,20 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Moon, Sun, Search, Phone, Crown, Link2, Bell } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Search, Phone, Crown, Link2, Bell, User, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useTheme } from "next-themes";
 import GlobalSearch from "./GlobalSearch";
+import { QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, QBCAMP_REGION } from "@/lib/constants";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { label: "Marketplace", href: "/marketplace" },
@@ -14,18 +22,17 @@ const navItems = [
   { label: "Academia", href: "/academia" },
   { label: "Eventos", href: "/eventos" },
   { label: "Benefícios", href: "/beneficios" },
+  { label: "Ranking", href: "/ranking" },
   { label: "Planos", href: "/planos" },
 ];
 
 const mobileNavItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
-  { label: "Serviços", href: "/servicos", icon: Briefcase },
   { label: "Oportunidades", href: "/oportunidades", icon: Handshake },
   { label: "Academia", href: "/academia", icon: GraduationCap },
   { label: "Eventos", href: "/eventos", icon: CalendarDays },
   { label: "Benefícios", href: "/beneficios", icon: Gift },
   { label: "Ranking", href: "/ranking", icon: Trophy },
-  { label: "SAC", href: "/sac", icon: Phone },
   { label: "Planos", href: "/planos", icon: Crown },
 ];
 
@@ -36,7 +43,6 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -58,7 +64,7 @@ export default function Header() {
     navigate("/");
   };
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
+  const userInitials = user?.email?.slice(0, 2).toUpperCase() || "U";
 
   return (
     <>
@@ -67,12 +73,12 @@ export default function Header() {
         <div className="container flex items-center justify-center gap-4 h-9">
           <span className="flex items-center gap-1.5">
             <Phone className="h-3.5 w-3.5" />
-            (41) 3672-1041
+            {QBCAMP_PHONE_DISPLAY}
           </span>
           <span className="text-white/40">·</span>
-          <span>Seg-Sex 08h às 17h</span>
+          <span>{QBCAMP_HOURS}</span>
           <span className="text-white/40">·</span>
-          <span>Quatro Barras & Campina Grande do Sul</span>
+          <span>{QBCAMP_REGION}</span>
         </div>
       </div>
 
@@ -102,6 +108,16 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`px-3 py-2 text-sm font-bold transition-colors rounded-md text-primary ${
+                  location.pathname === "/admin" ? "bg-primary/5" : "hover:bg-primary/5"
+                }`}
+              >
+                Admin
+              </Link>
+            )}
           </nav>
 
           {/* Desktop right */}
@@ -110,22 +126,38 @@ export default function Header() {
               <Search className="h-4 w-4" /> Buscar...
               <kbd className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 text-foreground">
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-            {isAdmin && (
-              <Button variant="ghost" size="sm" asChild className="text-foreground">
-                <Link to="/admin"><LayoutDashboard className="mr-1 h-4 w-4" /> Admin</Link>
-              </Button>
-            )}
             {user ? (
               <>
-                <Button variant="ghost" size="sm" asChild className="text-foreground">
-                  <Link to="/perfil"><Building2 className="mr-1 h-4 w-4" /> Meu Perfil</Link>
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground relative">
+                  <Bell className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleSignOut} className="text-foreground">
-                  <LogOut className="mr-1 h-4 w-4" /> Sair
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <Avatar className="h-7 w-7">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                          {userInitials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      <Building2 className="mr-2 h-4 w-4" /> Minha Empresa
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/perfil")}>
+                      <User className="mr-2 h-4 w-4" /> Meu Perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/instrutor/dashboard")}>
+                      <GraduationCap className="mr-2 h-4 w-4" /> Painel Instrutor
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" /> Sair
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <>
@@ -141,8 +173,8 @@ export default function Header() {
 
           {/* Mobile toggle */}
           <div className="flex items-center gap-1 lg:hidden">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-9 w-9 text-foreground">
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" onClick={() => setSearchOpen(true)} className="h-9 w-9 text-foreground">
+              <Search className="h-4 w-4" />
             </Button>
             <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -177,17 +209,22 @@ export default function Header() {
                 ))}
                 <div className="mt-2 flex flex-col gap-2 border-t border-border pt-2">
                   {isAdmin && (
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="ghost" size="sm" asChild className="justify-start text-primary font-bold">
                       <Link to="/admin" onClick={() => setMobileOpen(false)}>
-                        <LayoutDashboard className="mr-1 h-4 w-4" /> Painel Admin
+                        <LayoutDashboard className="mr-1 h-4 w-4" /> Admin
                       </Link>
                     </Button>
                   )}
                   {user ? (
                     <>
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button variant="ghost" size="sm" asChild className="justify-start">
+                        <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
+                          <Building2 className="mr-1 h-4 w-4" /> Minha Empresa
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild className="justify-start">
                         <Link to="/perfil" onClick={() => setMobileOpen(false)}>
-                          <Building2 className="mr-1 h-4 w-4" /> Meu Perfil
+                          <User className="mr-1 h-4 w-4" /> Meu Perfil
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>

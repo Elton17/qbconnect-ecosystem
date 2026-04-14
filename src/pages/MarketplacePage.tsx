@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, ArrowRight, Loader2, Package, Plus, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap, Crown } from "lucide-react";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
@@ -132,6 +133,7 @@ function ProductCarousel({ images, title }: { images: string[]; title: string })
 }
 
 export default function MarketplacePage() {
+  usePageTitle("Marketplace");
   const { user } = useAuth();
   const location = useLocation();
   const { toast } = useToast();

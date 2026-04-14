@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -86,6 +87,7 @@ function eventToFormData(event: EventItem): EventFormData {
 }
 
 export default function EventsPage() {
+  usePageTitle("Eventos");
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();

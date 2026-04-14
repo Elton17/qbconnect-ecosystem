@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2 } from "lucide-react";
+import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,6 +87,7 @@ function formatCNPJ(value: string) {
 }
 
 export default function CompanyRegistrationPage() {
+  usePageTitle("Cadastro");
   const { toast } = useToast();
   const navigate = useNavigate();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -188,8 +190,8 @@ export default function CompanyRegistrationPage() {
       }
     }
 
-    toast({ title: "Cadastro realizado com sucesso!", description: "Verifique seu e-mail para confirmar a conta." });
-    setTimeout(() => navigate("/login"), 2000);
+    toast({ title: "Cadastro enviado!", description: "Nossa equipe vai analisar os dados da sua empresa em até 2 dias úteis. Você receberá uma notificação por email quando for aprovado." });
+    setTimeout(() => navigate("/login"), 3000);
   };
 
   const fadeIn = {
@@ -200,6 +202,26 @@ export default function CompanyRegistrationPage() {
   return (
     <div className="py-12">
       <div className="container max-w-3xl">
+        {/* Association notice */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              O cadastro no QBCAMP Conecta+ é exclusivo para empresas associadas à QBCAMP. Se sua empresa ainda não é associada, fale conosco antes de prosseguir.
+            </p>
+            <a
+              href={`https://wa.me/5541999999999?text=${encodeURIComponent("Olá! Tenho interesse em me associar à QBCAMP e usar o Conecta+. Podem me ajudar?")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-[#25D366] px-4 py-2 text-sm font-bold text-white hover:bg-[#1da851] transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" /> Quero me associar primeiro
+            </a>
+          </div>
+        </motion.div>
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 text-center">
           <h1 className="mb-3 text-3xl font-extrabold text-foreground md:text-4xl">
             Cadastre sua <span className="text-primary">Empresa</span>

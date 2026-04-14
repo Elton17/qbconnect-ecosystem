@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -37,6 +38,7 @@ const stagger = {
 };
 
 export default function LandingPage() {
+  usePageTitle("Início");
   const [stats, setStats] = useState({ companies: 0, opportunities: 0, courses: 0 });
 
   useEffect(() => {
