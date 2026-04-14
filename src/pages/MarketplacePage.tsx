@@ -209,17 +209,25 @@ export default function MarketplacePage() {
 
   const categories = activeTab === "empresas" ? companyCategories : productCategories;
 
-  const filteredCompanies = companies.filter((c) => {
-    const matchCat = activeCategory === "Todos" || c.segment === activeCategory;
-    const matchSearch = c.company_name.toLowerCase().includes(search.toLowerCase()) || c.segment.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filteredCompanies = companies
+    .filter((c) => {
+      const matchCat = activeCategory === "Todos" || c.segment === activeCategory;
+      const matchSearch = c.company_name.toLowerCase().includes(search.toLowerCase()) || c.segment.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    })
+    .sort((a, b) => (a.plan === "premium" ? -1 : 0) - (b.plan === "premium" ? -1 : 0));
 
-  const filteredProducts = products.filter((p) => {
-    const matchCat = activeCategory === "Todos" || p.category === activeCategory;
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filteredProducts = products
+    .filter((p) => {
+      const matchCat = activeCategory === "Todos" || p.category === activeCategory;
+      const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    })
+    .sort((a, b) => {
+      const aPrem = companyPlanMap.get(a.user_id) === "premium" ? -1 : 0;
+      const bPrem = companyPlanMap.get(b.user_id) === "premium" ? -1 : 0;
+      return aPrem - bPrem;
+    });
 
   function getProductImages(p: Product): string[] {
     if (p.images && p.images.length > 0) return p.images;
