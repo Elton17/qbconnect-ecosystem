@@ -211,6 +211,25 @@ export default function ProductDetailPage() {
                 </a>
               )}
             </div>
+
+            {/* Owner actions */}
+            {isOwner && (
+              <div className="mt-4 flex gap-2 border-t border-border pt-4">
+                <Link to="/marketplace" state={{ editProductId: product.id }} className="flex-1">
+                  <Button variant="outline" size="lg" className="w-full">
+                    <Pencil className="mr-2 h-4 w-4" /> Editar
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Seller card */}
