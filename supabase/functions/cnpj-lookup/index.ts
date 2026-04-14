@@ -1,5 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -8,22 +6,18 @@ const corsHeaders = {
 function isValidCNPJ(cnpj: string): boolean {
   if (cnpj.length !== 14) return false;
   if (/^(\d)\1{13}$/.test(cnpj)) return false;
-
   const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
   const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-
   let sum = 0;
   for (let i = 0; i < 12; i++) sum += parseInt(cnpj[i]) * weights1[i];
   let rem = sum % 11;
   const d1 = rem < 2 ? 0 : 11 - rem;
   if (parseInt(cnpj[12]) !== d1) return false;
-
   sum = 0;
   for (let i = 0; i < 13; i++) sum += parseInt(cnpj[i]) * weights2[i];
   rem = sum % 11;
   const d2 = rem < 2 ? 0 : 11 - rem;
   if (parseInt(cnpj[13]) !== d2) return false;
-
   return true;
 }
 
@@ -33,30 +27,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth check
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Não autorizado' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Não autorizado' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Input validation
     const body = await req.json();
     if (!body.cnpj || typeof body.cnpj !== 'string') {
       return new Response(JSON.stringify({ error: 'CNPJ inválido' }), {
@@ -91,7 +61,6 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-
     const street = [data.logradouro, data.numero].filter(Boolean).join(', ');
 
     const result = {
