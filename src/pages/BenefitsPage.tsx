@@ -326,9 +326,15 @@ export default function BenefitsPage() {
                     <Building2 className="h-3.5 w-3.5" />{benefit.company_name}
                     <span className="ml-auto flex items-center gap-1"><Tag className="h-3.5 w-3.5" />{benefit.category}</span>
                   </div>
-                  <Button variant={alreadyRedeemed ? "secondary" : "outline"} size="sm" className="w-full" onClick={() => handleRedeem(benefit)}>
+                  {expiresFormatted && (
+                    <div className={cn("mb-3 flex items-center gap-1.5 text-xs", isExpired ? "text-destructive" : "text-muted-foreground")}>
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {isExpired ? "Expirado em " : "Válido até "}{expiresFormatted}
+                    </div>
+                  )}
+                  <Button variant={alreadyRedeemed ? "secondary" : "outline"} size="sm" className="w-full" onClick={() => handleRedeem(benefit)} disabled={!!isExpired}>
                     <Ticket className="mr-1.5 h-3.5 w-3.5" />
-                    {alreadyRedeemed ? "Ver meu cupom" : "Resgatar benefício"}
+                    {isExpired ? "Expirado" : alreadyRedeemed ? "Ver meu cupom" : "Resgatar benefício"}
                   </Button>
                 </motion.div>
               );
