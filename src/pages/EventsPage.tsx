@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
