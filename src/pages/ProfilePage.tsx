@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -67,6 +68,12 @@ function MeusAnuncios({ userId }: { userId: string }) {
     else { toast({ title: `${label} removido!` }); fetchAll(); }
   };
 
+  const handleToggleActive = async (table: string, id: string, currentActive: boolean, label: string) => {
+    const { error } = await (supabase.from(table as any) as any).update({ active: !currentActive }).eq("id", id);
+    if (error) { toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" }); }
+    else { toast({ title: `${label} ${!currentActive ? "ativado" : "desativado"}!` }); fetchAll(); }
+  };
+
   const formatDate = (d: string) => new Date(d).toLocaleDateString("pt-BR");
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -87,12 +94,13 @@ function MeusAnuncios({ userId }: { userId: string }) {
     <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3 mb-2 hover:bg-muted/50 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground truncate">{title}</span>
+          <span className={`text-sm font-medium truncate ${active === false ? "text-muted-foreground line-through" : "text-foreground"}`}>{title}</span>
           {active === false && <Badge variant="outline" className="text-[10px] border-destructive/30 text-destructive">Inativo</Badge>}
         </div>
         {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-1 ml-2 shrink-0">
+      <div className="flex items-center gap-2 ml-2 shrink-0">
+        <Switch checked={active !== false} onCheckedChange={() => handleToggleActive(table, id, active !== false, label)} className="scale-90" />
         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
           <Link to={link}><ExternalLink className="h-3.5 w-3.5" /></Link>
         </Button>
