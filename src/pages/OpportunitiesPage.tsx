@@ -173,7 +173,10 @@ export default function OpportunitiesPage() {
               {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                   <DialogTrigger asChild>
-                    <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false }); }}><Plus className="mr-1 h-5 w-5" /> Publicar Oportunidade</Button>
+                    <Button variant="hero" size="xl" onClick={() => {
+                      if (!planLimitsData.canAddOpportunity) { setUpgradeOpen(true); return; }
+                      setEditingId(null); setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
+                    }}><Plus className="mr-1 h-5 w-5" /> Publicar Oportunidade</Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader><DialogTitle>{editingId ? "Editar Oportunidade" : "Nova Oportunidade"}</DialogTitle></DialogHeader>
@@ -239,6 +242,7 @@ export default function OpportunitiesPage() {
                 <div className="flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${typeColors[opp.type] || ""}`}>{types.find((t) => t.value === opp.type)?.label}</span>
+                    {opp.plan === "premium" && <PremiumBadge />}
                     {opp.urgent && <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive animate-pulse">🔥 Urgente</span>}
                   </div>
                   <h3 className="mb-1 text-lg font-bold text-card-foreground">{opp.title}</h3>
