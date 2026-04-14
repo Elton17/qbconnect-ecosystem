@@ -16,7 +16,9 @@ import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
   ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList, Route, Plus,
+  MessageCircle, Download,
 } from "lucide-react";
+import { getWhatsAppContactUrl } from "@/lib/constants";
 
 interface Stat { label: string; value: number; icon: any; }
 
@@ -33,6 +35,7 @@ export default function AdminPage() {
   const [promotions, setPromotions] = useState<any[]>([]);
   const [learningPaths, setLearningPaths] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
@@ -56,7 +59,7 @@ export default function AdminPage() {
     const [
       profilesRes, productsRes, coursesRes, eventsRes,
       oppsRes, benefitsRes, promosRes, rolesRes,
-      enrollRes, eventRegRes, pathsRes,
+      enrollRes, eventRegRes, pathsRes, waitlistRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("products").select("*").order("created_at", { ascending: false }),
@@ -69,6 +72,7 @@ export default function AdminPage() {
       supabase.from("course_enrollments").select("id", { count: "exact", head: true }),
       supabase.from("event_registrations").select("id", { count: "exact", head: true }),
       supabase.from("learning_paths").select("*").order("sort_order"),
+      supabase.from("waitlist").select("*").order("created_at", { ascending: false }),
     ]);
 
     const p = profilesRes.data || [];
@@ -83,6 +87,7 @@ export default function AdminPage() {
     setOpportunities(op); setBenefits(b); setPromotions(pm);
     setLearningPaths(pathsRes.data || []);
     setUserRoles(rolesRes.data || []);
+    setWaitlist(waitlistRes.data || []);
 
     setStats([
       { label: "Empresas", value: p.length, icon: Building2 },
@@ -336,6 +341,7 @@ export default function AdminPage() {
             <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
             <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
+            <TabsTrigger value="waitlist">Lista de Espera ({waitlist.length})</TabsTrigger>
           </TabsList>
 
           {/* ── OVERVIEW ── */}
@@ -735,6 +741,84 @@ export default function AdminPage() {
                   );
                 })}
               </div>
+            </div>
+          </TabsContent>
+
+          {/* ── WAITLIST ── */}
+          <TabsContent value="waitlist">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+                <h2 className="text-lg font-bold text-card-foreground flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-primary" /> Lista de Espera
+                  <Badge variant="secondary" className="ml-2">{waitlist.length} cadastros</Badge>
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const headers = "Empresa,Responsável,WhatsApp,Segmento,Data de Cadastro\n";
+                    const rows = waitlist.map((w: any) =>
+                      `"${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
+                    ).join("\n");
+                    const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url; a.download = "waitlist-qbcamp.csv"; a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success("CSV exportado!");
+                  }}
+                >
+                  <Download className="mr-1 h-3.5 w-3.5" /> Exportar CSV
+                </Button>
+              </div>
+              {waitlist.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-muted/50 border-b border-border">
+                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
+                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
+                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
+                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
+                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
+                        <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filterBySearch(waitlist, ["company_name", "contact_name", "whatsapp", "segment"]).map((w: any) => (
+                        <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                          <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
+                          <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
+                          <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
+                          <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>
+                          <td className="px-4 py-3 text-muted-foreground">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button size="sm" variant="whatsapp" asChild>
+                                <a
+                                  href={getWhatsAppContactUrl(
+                                    w.whatsapp,
+                                    `Olá ${w.contact_name}! O QBCAMP Conecta+ está abrindo e sua empresa ${w.company_name} está na lista. Vamos ativar seu acesso?`
+                                  )}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <MessageCircle className="mr-1 h-3.5 w-3.5" /> Chamar
+                                </a>
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => deleteRecord("waitlist", w.id, setWaitlist)}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

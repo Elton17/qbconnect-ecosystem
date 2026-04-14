@@ -849,6 +849,33 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          company_name: string
+          contact_name: string
+          created_at: string
+          id: string
+          segment: string
+          whatsapp: string
+        }
+        Insert: {
+          company_name: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          segment?: string
+          whatsapp: string
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          segment?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
