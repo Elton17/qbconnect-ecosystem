@@ -20,6 +20,7 @@ export type Database = {
           category: string | null
           created_at: string | null
           exclusive: boolean | null
+          expires_at: string | null
           id: string
           offer: string
           updated_at: string | null
@@ -31,6 +32,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           exclusive?: boolean | null
+          expires_at?: string | null
           id?: string
           offer: string
           updated_at?: string | null
@@ -42,6 +44,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           exclusive?: boolean | null
+          expires_at?: string | null
           id?: string
           offer?: string
           updated_at?: string | null

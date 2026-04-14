@@ -1,11 +1,17 @@
 import { motion } from "framer-motion";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,6 +40,7 @@ interface Benefit {
   category: string;
   exclusive: boolean;
   whatsapp: string;
+  expires_at: string | null;
   company_name?: string;
   logo_url?: string;
 }
@@ -53,7 +60,7 @@ export default function BenefitsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "" });
+  const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null as Date | null });
   const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [redeemingBenefit, setRedeemingBenefit] = useState<Benefit | null>(null);
   const [redeemCode, setRedeemCode] = useState<string | null>(null);
@@ -82,12 +89,12 @@ export default function BenefitsPage() {
     if (!user) return;
     setSaving(true);
     if (editingId) {
-      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp }).eq("id", editingId);
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null }).eq("id", editingId);
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
       else { toast({ title: "Benefício atualizado!" }); resetForm(); fetchData(); }
     } else {
-      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp });
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null });
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
       else { toast({ title: "Benefício criado!" }); resetForm(); fetchData(); }
@@ -95,14 +102,14 @@ export default function BenefitsPage() {
   };
 
   const resetForm = () => {
-    setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "" });
+    setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null });
     setEditingId(null);
     setDialogOpen(false);
   };
 
   const handleEdit = (benefit: Benefit) => {
     setEditingId(benefit.id);
-    setForm({ offer: benefit.offer, category: benefit.category, exclusive: benefit.exclusive, whatsapp: benefit.whatsapp || "" });
+    setForm({ offer: benefit.offer, category: benefit.category, exclusive: benefit.exclusive, whatsapp: benefit.whatsapp || "", expires_at: benefit.expires_at ? new Date(benefit.expires_at) : null });
     setDialogOpen(true);
   };
 
@@ -209,7 +216,7 @@ export default function BenefitsPage() {
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
-                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "" }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
+                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle></DialogHeader>
@@ -222,6 +229,21 @@ export default function BenefitsPage() {
                       </Select>
                     </div>
                     <div className="flex items-center gap-2"><Switch checked={form.exclusive} onCheckedChange={(v) => setForm({ ...form, exclusive: v })} /><Label>Exclusivo Premium</Label></div>
+                    <div>
+                      <Label>Validade</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.expires_at && "text-muted-foreground")}>
+                            <CalendarDays className="mr-2 h-4 w-4" />
+                            {form.expires_at ? format(form.expires_at, "dd/MM/yyyy", { locale: ptBR }) : "Sem validade (permanente)"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar mode="single" selected={form.expires_at || undefined} onSelect={(d) => setForm({ ...form, expires_at: d || null })} disabled={(date) => date < new Date()} initialFocus className={cn("p-3 pointer-events-auto")} />
+                        </PopoverContent>
+                      </Popover>
+                      {form.expires_at && <Button variant="ghost" size="sm" className="mt-1 h-auto p-0 text-xs text-muted-foreground" onClick={() => setForm({ ...form, expires_at: null })}>Remover validade</Button>}
+                    </div>
                     <div><Label>WhatsApp da empresa</Label><Input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} placeholder="Ex: 5541999999999" /></div>
                     <Button onClick={handleSubmit} disabled={saving || !form.offer} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}{editingId ? "Salvar" : "Criar Benefício"}</Button>
                   </div>
@@ -277,6 +299,8 @@ export default function BenefitsPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredBenefits.map((benefit, i) => {
               const alreadyRedeemed = userRedemptions.has(benefit.id);
+              const isExpired = benefit.expires_at && new Date(benefit.expires_at) < new Date();
+              const expiresFormatted = benefit.expires_at ? format(new Date(benefit.expires_at), "dd/MM/yyyy", { locale: ptBR }) : null;
               return (
                 <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1">
                   <div className="mb-4 flex items-start justify-between">
@@ -302,9 +326,15 @@ export default function BenefitsPage() {
                     <Building2 className="h-3.5 w-3.5" />{benefit.company_name}
                     <span className="ml-auto flex items-center gap-1"><Tag className="h-3.5 w-3.5" />{benefit.category}</span>
                   </div>
-                  <Button variant={alreadyRedeemed ? "secondary" : "outline"} size="sm" className="w-full" onClick={() => handleRedeem(benefit)}>
+                  {expiresFormatted && (
+                    <div className={cn("mb-3 flex items-center gap-1.5 text-xs", isExpired ? "text-destructive" : "text-muted-foreground")}>
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      {isExpired ? "Expirado em " : "Válido até "}{expiresFormatted}
+                    </div>
+                  )}
+                  <Button variant={alreadyRedeemed ? "secondary" : "outline"} size="sm" className="w-full" onClick={() => handleRedeem(benefit)} disabled={!!isExpired}>
                     <Ticket className="mr-1.5 h-3.5 w-3.5" />
-                    {alreadyRedeemed ? "Ver meu cupom" : "Resgatar benefício"}
+                    {isExpired ? "Expirado" : alreadyRedeemed ? "Ver meu cupom" : "Resgatar benefício"}
                   </Button>
                 </motion.div>
               );
