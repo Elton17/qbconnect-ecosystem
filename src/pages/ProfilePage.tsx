@@ -307,6 +307,7 @@ export default function ProfilePage() {
             <TabsTrigger value="contact" className="gap-1.5"><User className="h-4 w-4" /> Contato</TabsTrigger>
             <TabsTrigger value="details" className="gap-1.5"><Globe className="h-4 w-4" /> Detalhes</TabsTrigger>
             <TabsTrigger value="listings" className="gap-1.5"><Megaphone className="h-4 w-4" /> Meus Anúncios</TabsTrigger>
+            <TabsTrigger value="contacts" className="gap-1.5"><Users className="h-4 w-4" /> Contatos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company">
