@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Loader2, Phone, Mail, MessageCircle, User, Building2, StickyNote, Star } from "lucide-react";
+import CsvContactImport from "./CsvContactImport";
 
 interface Contact {
   id: string;
