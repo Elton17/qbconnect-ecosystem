@@ -8,7 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CompanyMatchmaking from "@/components/CompanyMatchmaking";
+import CompanyContacts from "@/components/company/CompanyContacts";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+
 
 interface Profile {
   id: string; company_name: string; segment: string; city: string; description: string | null;
