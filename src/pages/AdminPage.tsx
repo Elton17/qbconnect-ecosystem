@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
-  ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList,
+  ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList, Route, Plus,
 } from "lucide-react";
 
 interface Stat { label: string; value: number; icon: any; }
