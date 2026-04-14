@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Copy, Check, Ticket, Gift, Sparkles } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +47,7 @@ export default function BenefitsPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false });
   const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [redeemingBenefit, setRedeemingBenefit] = useState<Benefit | null>(null);
@@ -74,13 +75,32 @@ export default function BenefitsPage() {
   const handleSubmit = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive });
-    setSaving(false);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-    else { toast({ title: "Benefício criado!" }); setForm({ offer: "", category: "Tecnologia", exclusive: false }); setDialogOpen(false); fetchData(); }
+    if (editingId) {
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive }).eq("id", editingId);
+      setSaving(false);
+      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+      else { toast({ title: "Benefício atualizado!" }); resetForm(); fetchData(); }
+    } else {
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive });
+      setSaving(false);
+      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+      else { toast({ title: "Benefício criado!" }); resetForm(); fetchData(); }
+    }
   };
 
-  const handleDelete = async (id: string) => { await supabase.from("benefits").delete().eq("id", id); fetchData(); };
+  const resetForm = () => {
+    setForm({ offer: "", category: "Tecnologia", exclusive: false });
+    setEditingId(null);
+    setDialogOpen(false);
+  };
+
+  const handleEdit = (benefit: Benefit) => {
+    setEditingId(benefit.id);
+    setForm({ offer: benefit.offer, category: benefit.category, exclusive: benefit.exclusive });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => { await supabase.from("benefits").delete().eq("id", id); toast({ title: "Benefício removido!" }); fetchData(); };
 
   const handleRedeem = async (benefit: Benefit) => {
     if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios.", variant: "destructive" }); return; }
