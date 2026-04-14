@@ -76,6 +76,22 @@ export default function AcademyPage() {
   const [uploadingThumb, setUploadingThumb] = useState(false);
 
   const fetchData = async () => {
+    // Fetch learning paths
+    const { data: pathsData } = await supabase.from("learning_paths").select("*").eq("active", true).order("sort_order");
+    if (pathsData) {
+      const pathIds = pathsData.map((p: any) => p.id);
+      const { data: junctions } = pathIds.length > 0
+        ? await supabase.from("learning_path_courses").select("learning_path_id").in("learning_path_id", pathIds)
+        : { data: [] };
+      const pathCourseCounts: Record<string, number> = {};
+      (junctions || []).forEach((j: any) => { pathCourseCounts[j.learning_path_id] = (pathCourseCounts[j.learning_path_id] || 0) + 1; });
+      setLearningPaths(pathsData.map((p: any) => ({
+        ...p,
+        course_count: pathCourseCounts[p.id] || 0,
+      })));
+    }
+
+    // Fetch courses
     const { data: items } = await supabase.from("courses").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
 
@@ -92,7 +108,6 @@ export default function AcademyPage() {
     const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.user_id, p.company_name]));
     const moduleIds = (modulesRes.data || []).map((m: any) => m.id);
 
-    // Get lesson count per module
     let lessonCounts: Record<string, number> = {};
     if (moduleIds.length > 0) {
       const { data: lessons } = await supabase.from("course_lessons").select("module_id").in("module_id", moduleIds);
