@@ -74,6 +74,7 @@ export default function AdminPage() {
 
     setProfiles(p); setProducts(pr); setCourses(c); setEvents(ev);
     setOpportunities(op); setBenefits(b); setPromotions(pm);
+    setLearningPaths(pathsRes.data || []);
     setUserRoles(rolesRes.data || []);
 
     setStats([
