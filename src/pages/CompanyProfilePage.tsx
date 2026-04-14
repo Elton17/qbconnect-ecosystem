@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { MapPin, Globe, Phone, Mail, Building2, ArrowLeft, Loader2, Briefcase, GraduationCap, Gift } from "lucide-react";
+import { MapPin, Globe, Phone, Mail, Building2, ArrowLeft, Loader2, Briefcase, GraduationCap, Gift, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
