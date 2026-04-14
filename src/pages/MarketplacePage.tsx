@@ -112,6 +112,7 @@ function ProductCarousel({ images, title }: { images: string[]; title: string })
 
 export default function MarketplacePage() {
   const { user } = useAuth();
+  const location = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("empresas");
   const [activeCategory, setActiveCategory] = useState("Todos");
