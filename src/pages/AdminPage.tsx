@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
-  ToggleRight, Shield, Loader2, Tag,
+  ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList,
 } from "lucide-react";
 
 interface Stat { label: string; value: number; icon: any; }
 
 export default function AdminPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<Stat[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -30,11 +36,12 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
 
-  // Fetch all data
-  useEffect(() => {
-    if (!user) return;
-    fetchAll();
-  }, [user]);
+  // Edit state
+  const [editDialog, setEditDialog] = useState<{ open: boolean; table: string; item: any }>({ open: false, table: "", item: null });
+  const [editForm, setEditForm] = useState<Record<string, any>>({});
+  const [editSaving, setEditSaving] = useState(false);
+
+  useEffect(() => { if (user) fetchAll(); }, [user]);
 
   async function fetchAll() {
     setLoading(true);
@@ -63,13 +70,8 @@ export default function AdminPage() {
     const b = benefitsRes.data || [];
     const pm = promosRes.data || [];
 
-    setProfiles(p);
-    setProducts(pr);
-    setCourses(c);
-    setEvents(ev);
-    setOpportunities(op);
-    setBenefits(b);
-    setPromotions(pm);
+    setProfiles(p); setProducts(pr); setCourses(c); setEvents(ev);
+    setOpportunities(op); setBenefits(b); setPromotions(pm);
     setUserRoles(rolesRes.data || []);
 
     setStats([
@@ -83,7 +85,6 @@ export default function AdminPage() {
       { label: "Matrículas", value: enrollRes.count || 0, icon: Users },
       { label: "Inscrições Eventos", value: eventRegRes.count || 0, icon: Trophy },
     ]);
-
     setLoading(false);
   }
 
@@ -103,7 +104,7 @@ export default function AdminPage() {
   }
 
   async function deleteRecord(table: string, id: string, setter: Function) {
-    if (!confirm("Tem certeza que deseja excluir este registro?")) return;
+    if (!confirm("Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.")) return;
     const { error } = await (supabase.from(table as any) as any).delete().eq("id", id);
     if (error) { toast.error("Erro ao excluir"); return; }
     toast.success("Excluído com sucesso");
@@ -113,11 +114,34 @@ export default function AdminPage() {
   async function setRole(userId: string, role: "admin" | "moderator" | "user") {
     const existing = userRoles.find((r: any) => r.user_id === userId && r.role === role);
     if (existing) { toast.info("Usuário já possui esse papel"); return; }
-
     await supabase.from("user_roles").delete().eq("user_id", userId as any);
     const { error } = await supabase.from("user_roles").insert({ user_id: userId, role } as any);
     if (error) { toast.error("Erro ao definir papel"); return; }
     toast.success(`Papel definido como ${role}`);
+    fetchAll();
+  }
+
+  // ── Edit ──
+  function openEdit(table: string, item: any) {
+    setEditForm({ ...item });
+    setEditDialog({ open: true, table, item });
+  }
+
+  async function saveEdit() {
+    const { table, item } = editDialog;
+    if (!item) return;
+    setEditSaving(true);
+    const updates = { ...editForm };
+    delete updates.id;
+    delete updates.created_at;
+    delete updates.updated_at;
+    delete updates.user_id;
+
+    const { error } = await (supabase.from(table as any) as any).update(updates).eq("id", item.id);
+    setEditSaving(false);
+    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
+    toast.success("Registro atualizado!");
+    setEditDialog({ open: false, table: "", item: null });
     fetchAll();
   }
 
@@ -129,14 +153,88 @@ export default function AdminPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
   const pendingProfiles = profiles.filter((p) => !p.approved);
+
+  // ── Edit form field configs per table ──
+  const editFields: Record<string, { key: string; label: string; type?: string; options?: string[] }[]> = {
+    profiles: [
+      { key: "company_name", label: "Empresa" },
+      { key: "cnpj", label: "CNPJ" },
+      { key: "email", label: "E-mail" },
+      { key: "phone", label: "Telefone" },
+      { key: "city", label: "Cidade" },
+      { key: "state", label: "Estado" },
+      { key: "segment", label: "Segmento" },
+      { key: "address", label: "Endereço" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "website", label: "Website" },
+      { key: "plan", label: "Plano", type: "select", options: ["basic", "premium", "enterprise"] },
+    ],
+    products: [
+      { key: "title", label: "Título" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "category", label: "Categoria" },
+      { key: "price", label: "Preço", type: "number" },
+      { key: "contact_email", label: "E-mail contato" },
+      { key: "contact_phone", label: "Telefone contato" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
+    courses: [
+      { key: "title", label: "Título" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "category", label: "Categoria" },
+      { key: "duration", label: "Duração" },
+      { key: "premium", label: "Premium", type: "switch" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
+    events: [
+      { key: "title", label: "Título" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "short_description", label: "Descrição curta" },
+      { key: "category", label: "Categoria", type: "select", options: ["Networking", "Palestra", "Workshop", "Feira", "Curso", "Assembleia", "Social", "Outro"] },
+      { key: "event_type", label: "Tipo", type: "select", options: ["presencial", "online", "hibrido"] },
+      { key: "location", label: "Local" },
+      { key: "address", label: "Endereço" },
+      { key: "city", label: "Cidade" },
+      { key: "state", label: "Estado" },
+      { key: "online_url", label: "URL Online" },
+      { key: "start_date", label: "Data início", type: "datetime" },
+      { key: "end_date", label: "Data fim", type: "datetime" },
+      { key: "max_attendees", label: "Máx. participantes", type: "number" },
+      { key: "price", label: "Preço", type: "number" },
+      { key: "is_free", label: "Gratuito", type: "switch" },
+      { key: "featured", label: "Destaque", type: "switch" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
+    opportunities: [
+      { key: "title", label: "Título" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "type", label: "Tipo", type: "select", options: ["fornecedor", "cliente", "parceiro", "investidor"] },
+      { key: "value", label: "Valor" },
+      { key: "urgent", label: "Urgente", type: "switch" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
+    benefits: [
+      { key: "offer", label: "Oferta", type: "textarea" },
+      { key: "category", label: "Categoria", type: "select", options: ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"] },
+      { key: "whatsapp", label: "WhatsApp" },
+      { key: "exclusive", label: "Exclusivo Premium", type: "switch" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
+    promotions: [
+      { key: "title", label: "Título" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "category", label: "Categoria" },
+      { key: "discount_percent", label: "Desconto (%)", type: "number" },
+      { key: "original_price", label: "Preço original", type: "number" },
+      { key: "promo_price", label: "Preço promocional", type: "number" },
+      { key: "expires_at", label: "Expira em", type: "datetime" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
+  };
 
   return (
     <div className="py-8">
@@ -167,12 +265,7 @@ export default function AdminPage() {
         {/* Search */}
         <div className="mb-6 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar em todos os módulos..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+          <Input placeholder="Buscar em todos os módulos..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
         </div>
 
         {/* Tabs */}
@@ -192,7 +285,6 @@ export default function AdminPage() {
           {/* ── OVERVIEW ── */}
           <TabsContent value="overview">
             <div className="grid gap-6 lg:grid-cols-2">
-              {/* Pending approvals */}
               <div className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="mb-4 text-lg font-bold text-card-foreground flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" /> Aprovações Pendentes
@@ -208,6 +300,9 @@ export default function AdminPage() {
                           <div className="text-xs text-muted-foreground">{p.cnpj} · {p.city}</div>
                         </div>
                         <div className="flex gap-2 shrink-0">
+                          <Button size="sm" variant="outline" onClick={() => openEdit("profiles", p)}>
+                            <Eye className="mr-1 h-3 w-3" /> Ver
+                          </Button>
                           <Button size="sm" onClick={() => toggleApproval(p.id, p.approved)}>
                             <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Aprovar
                           </Button>
@@ -218,25 +313,25 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {/* Recent items */}
               <div className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="mb-4 text-lg font-bold text-card-foreground flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary" /> Itens Recentes
                 </h2>
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                   {[
-                    ...products.slice(0, 3).map((p) => ({ type: "Produto", title: p.title, active: p.active })),
-                    ...courses.slice(0, 3).map((c) => ({ type: "Curso", title: c.title, active: c.active })),
-                    ...events.slice(0, 3).map((e) => ({ type: "Evento", title: e.title, active: e.active })),
+                    ...products.slice(0, 3).map((p) => ({ type: "Produto", title: p.title, active: p.active, link: `/produto/${p.id}` })),
+                    ...courses.slice(0, 3).map((c) => ({ type: "Curso", title: c.title, active: c.active, link: `/curso/${c.id}` })),
+                    ...events.slice(0, 3).map((e) => ({ type: "Evento", title: e.title, active: e.active, link: `/evento/${e.id}` })),
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                    <div key={i} className="flex items-center justify-between rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(item.link)}>
                       <div className="flex items-center gap-2 min-w-0">
                         <Badge variant="secondary" className="text-[10px] shrink-0">{item.type}</Badge>
                         <span className="text-sm text-card-foreground truncate">{item.title}</span>
                       </div>
-                      <Badge variant={item.active ? "default" : "outline"} className="text-[10px]">
-                        {item.active ? "Ativo" : "Inativo"}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={item.active ? "default" : "outline"} className="text-[10px]">{item.active ? "Ativo" : "Inativo"}</Badge>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -262,6 +357,12 @@ export default function AdminPage() {
               )}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/empresa/${item.user_id}`)} title="Ver perfil">
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("profiles", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <Button size="sm" variant={item.approved ? "outline" : "default"} onClick={() => toggleApproval(item.id, item.approved)}>
                     {item.approved ? <XCircle className="mr-1 h-3 w-3" /> : <CheckCircle2 className="mr-1 h-3 w-3" />}
                     {item.approved ? "Revogar" : "Aprovar"}
@@ -287,6 +388,12 @@ export default function AdminPage() {
               renderStatus={(item) => <ActiveBadge active={item.active} />}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/produto/${item.id}`)} title="Ver">
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("products", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("products", item.id, item.active, setProducts)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("products", item.id, setProducts)}>
                     <Trash2 className="h-3 w-3" />
@@ -313,6 +420,15 @@ export default function AdminPage() {
               )}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/curso/${item.id}`)} title="Ver curso">
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/curso/${item.id}/gerenciar`)} title="Gerenciar módulos">
+                    <ClipboardList className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("courses", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("courses", item.id, item.active, setCourses)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("courses", item.id, setCourses)}>
                     <Trash2 className="h-3 w-3" />
@@ -331,10 +447,25 @@ export default function AdminPage() {
                 { key: "category", label: "Categoria" },
                 { key: "city", label: "Cidade" },
                 { key: "event_type", label: "Tipo" },
+                { key: "start_date", label: "Data", render: (v: string) => v ? new Date(v).toLocaleDateString("pt-BR") : "—" },
               ]}
-              renderStatus={(item) => <ActiveBadge active={item.active} />}
+              renderStatus={(item) => (
+                <div className="flex gap-1">
+                  <ActiveBadge active={item.active} />
+                  {item.featured && <Badge className="text-[10px] bg-amber-500">Destaque</Badge>}
+                </div>
+              )}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/evento/${item.id}`)} title="Ver evento">
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/evento/${item.id}/painel`)} title="Painel do organizador">
+                    <ClipboardList className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("events", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("events", item.id, item.active, setEvents)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("events", item.id, setEvents)}>
                     <Trash2 className="h-3 w-3" />
@@ -361,6 +492,9 @@ export default function AdminPage() {
               )}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("opportunities", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("opportunities", item.id, item.active, setOpportunities)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("opportunities", item.id, setOpportunities)}>
                     <Trash2 className="h-3 w-3" />
@@ -386,6 +520,9 @@ export default function AdminPage() {
               )}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("benefits", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("benefits", item.id, item.active, setBenefits)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("benefits", item.id, setBenefits)}>
                     <Trash2 className="h-3 w-3" />
@@ -407,6 +544,9 @@ export default function AdminPage() {
               renderStatus={(item) => <ActiveBadge active={item.active} />}
               actions={(item) => (
                 <>
+                  <Button size="sm" variant="outline" onClick={() => openEdit("promotions", item)} title="Editar">
+                    <Pencil className="h-3 w-3" />
+                  </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("promotions", item.id, item.active, setPromotions)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("promotions", item.id, setPromotions)}>
                     <Trash2 className="h-3 w-3" />
@@ -425,7 +565,7 @@ export default function AdminPage() {
               </p>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {profiles.map((p) => {
-                  const role = userRoles.find((r) => r.user_id === p.user_id);
+                  const role = userRoles.find((r: any) => r.user_id === p.user_id);
                   return (
                     <div key={p.id} className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
                       <div>
@@ -445,6 +585,66 @@ export default function AdminPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* ── EDIT DIALOG ── */}
+        <Dialog open={editDialog.open} onOpenChange={(open) => { if (!open) setEditDialog({ open: false, table: "", item: null }); }}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Pencil className="h-5 w-5" /> Editar Registro
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {(editFields[editDialog.table] || []).map((field) => (
+                <div key={field.key}>
+                  <Label className="mb-1.5 block text-sm font-medium">{field.label}</Label>
+                  {field.type === "textarea" ? (
+                    <Textarea
+                      value={editForm[field.key] || ""}
+                      onChange={(e) => setEditForm({ ...editForm, [field.key]: e.target.value })}
+                      rows={3}
+                    />
+                  ) : field.type === "switch" ? (
+                    <Switch
+                      checked={!!editForm[field.key]}
+                      onCheckedChange={(v) => setEditForm({ ...editForm, [field.key]: v })}
+                    />
+                  ) : field.type === "select" ? (
+                    <Select value={editForm[field.key] || ""} onValueChange={(v) => setEditForm({ ...editForm, [field.key]: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(field.options || []).map((opt) => (
+                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : field.type === "number" ? (
+                    <Input
+                      type="number"
+                      value={editForm[field.key] ?? ""}
+                      onChange={(e) => setEditForm({ ...editForm, [field.key]: e.target.value })}
+                    />
+                  ) : field.type === "datetime" ? (
+                    <Input
+                      type="datetime-local"
+                      value={editForm[field.key] ? new Date(editForm[field.key]).toISOString().slice(0, 16) : ""}
+                      onChange={(e) => setEditForm({ ...editForm, [field.key]: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                    />
+                  ) : (
+                    <Input
+                      value={editForm[field.key] || ""}
+                      onChange={(e) => setEditForm({ ...editForm, [field.key]: e.target.value })}
+                    />
+                  )}
+                </div>
+              ))}
+              <Button onClick={saveEdit} disabled={editSaving} className="w-full">
+                {editSaving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                Salvar Alterações
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
@@ -469,7 +669,7 @@ function ToggleActiveBtn({ active, onClick }: { active: boolean; onClick: () => 
 }
 
 function RoleSelector({ userId, roles, onSetRole }: { userId: string; roles: any[]; onSetRole: (uid: string, role: "admin" | "moderator" | "user") => void }) {
-  const current = roles.find((r) => r.user_id === userId)?.role || "user";
+  const current = roles.find((r: any) => r.user_id === userId)?.role || "user";
   return (
     <Select value={current} onValueChange={(v) => onSetRole(userId, v as any)}>
       <SelectTrigger className="h-8 w-28 text-xs">
@@ -518,7 +718,7 @@ function AdminTable({ items, columns, renderStatus, actions }: {
               ))}
               <td className="px-4 py-3">{renderStatus(item)}</td>
               <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-1">{actions(item)}</div>
+                <div className="flex items-center justify-end gap-1 flex-wrap">{actions(item)}</div>
               </td>
             </tr>
           ))}
