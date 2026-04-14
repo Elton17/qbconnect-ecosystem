@@ -29,6 +29,7 @@ import InstructorDashboardPage from "@/pages/InstructorDashboardPage";
 import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
 import InstallAppPage from "@/pages/InstallAppPage";
+import SACPage from "@/pages/SACPage";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/certificado" element={<CertificateVerifyPage />} />
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
               <Route path="/instalar" element={<InstallAppPage />} />
+              <Route path="/sac" element={<SACPage />} />
 
               {/* Protected routes - require authentication */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
