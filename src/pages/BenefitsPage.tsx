@@ -283,20 +283,31 @@ export default function BenefitsPage() {
       <div className="container py-10">
         {/* Category Filter */}
         {!loading && benefits.length > 0 && (
-          <div className="mb-6 flex flex-wrap gap-2">
-            {activeCategories.map((cat) => (
-              <Button
-                key={cat}
-                variant={selectedCategory === cat ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(cat)}
-                className="rounded-full"
-              >
-                {cat === "Todas" && <Tag className="mr-1.5 h-3.5 w-3.5" />}
-                {cat}
-                {cat === "Todas" ? ` (${benefits.length})` : ` (${benefits.filter(b => b.category === cat).length})`}
-              </Button>
-            ))}
+          <div className="mb-6 space-y-4">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar benefício, empresa ou categoria..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {activeCategories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={selectedCategory === cat ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(cat)}
+                  className="rounded-full"
+                >
+                  {cat === "Todas" && <Tag className="mr-1.5 h-3.5 w-3.5" />}
+                  {cat}
+                  {cat === "Todas" ? ` (${benefits.length})` : ` (${benefits.filter(b => b.category === cat).length})`}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
 
