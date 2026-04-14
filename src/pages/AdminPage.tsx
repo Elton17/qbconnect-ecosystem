@@ -197,6 +197,8 @@ export default function AdminPage() {
       { key: "description", label: "Descrição", type: "textarea" },
       { key: "category", label: "Categoria" },
       { key: "duration", label: "Duração" },
+      { key: "level", label: "Nível", type: "select", options: ["iniciante", "intermediário", "avançado"] },
+      { key: "instructor_name", label: "Instrutor" },
       { key: "premium", label: "Premium", type: "switch" },
       { key: "active", label: "Ativo", type: "switch" },
     ],
