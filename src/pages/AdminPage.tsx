@@ -332,6 +332,7 @@ export default function AdminPage() {
             <TabsTrigger value="opportunities">Oportunidades ({opportunities.length})</TabsTrigger>
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
             <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
+            <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
           </TabsList>
 
