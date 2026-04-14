@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Copy, Check, Ticket, Gift, Sparkles } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +47,7 @@ export default function BenefitsPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false });
   const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [redeemingBenefit, setRedeemingBenefit] = useState<Benefit | null>(null);
@@ -74,13 +75,32 @@ export default function BenefitsPage() {
   const handleSubmit = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive });
-    setSaving(false);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-    else { toast({ title: "Benefício criado!" }); setForm({ offer: "", category: "Tecnologia", exclusive: false }); setDialogOpen(false); fetchData(); }
+    if (editingId) {
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive }).eq("id", editingId);
+      setSaving(false);
+      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+      else { toast({ title: "Benefício atualizado!" }); resetForm(); fetchData(); }
+    } else {
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive });
+      setSaving(false);
+      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+      else { toast({ title: "Benefício criado!" }); resetForm(); fetchData(); }
+    }
   };
 
-  const handleDelete = async (id: string) => { await supabase.from("benefits").delete().eq("id", id); fetchData(); };
+  const resetForm = () => {
+    setForm({ offer: "", category: "Tecnologia", exclusive: false });
+    setEditingId(null);
+    setDialogOpen(false);
+  };
+
+  const handleEdit = (benefit: Benefit) => {
+    setEditingId(benefit.id);
+    setForm({ offer: benefit.offer, category: benefit.category, exclusive: benefit.exclusive });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => { await supabase.from("benefits").delete().eq("id", id); toast({ title: "Benefício removido!" }); fetchData(); };
 
   const handleRedeem = async (benefit: Benefit) => {
     if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios.", variant: "destructive" }); return; }
@@ -177,12 +197,12 @@ export default function BenefitsPage() {
               Descontos e condições exclusivas entre empresas associadas da QBCAMP.
             </p>
             {user && (
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
-                  <Button variant="hero" size="xl"><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
+                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
                 </DialogTrigger>
                 <DialogContent>
-                  <DialogHeader><DialogTitle>Novo Benefício</DialogTitle></DialogHeader>
+                  <DialogHeader><DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle></DialogHeader>
                   <div className="space-y-4">
                     <div><Label>Oferta *</Label><Input value={form.offer} onChange={(e) => setForm({ ...form, offer: e.target.value })} placeholder="Ex: 20% de desconto em consultoria" /></div>
                     <div><Label>Categoria *</Label>
@@ -240,7 +260,10 @@ export default function BenefitsPage() {
                     <div className="flex items-center gap-2">
                       {benefit.exclusive && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Exclusivo Premium</span>}
                       {user?.id === benefit.user_id && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(benefit.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(benefit)}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(benefit.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                        </div>
                       )}
                     </div>
                   </div>
