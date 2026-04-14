@@ -292,6 +292,7 @@ export default function OpportunitiesPage() {
         )}
       </div>
       {ConfirmDialog}
+      <PlanUpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} resourceType="oportunidades" currentLimit={planLimitsData.limits.opportunities} />
     </div>
   );
 }
