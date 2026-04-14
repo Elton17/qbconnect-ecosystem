@@ -43,6 +43,7 @@ export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [seller, setSeller] = useState<Seller | null>(null);
@@ -225,7 +226,7 @@ export default function ProductDetailPage() {
                   variant="outline"
                   size="lg"
                   className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={handleDelete}
+                  onClick={() => confirmDelete(handleDelete)}
                 >
                   <Trash2 className="mr-2 h-4 w-4" /> Excluir
                 </Button>
@@ -303,6 +304,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       )}
+      {ConfirmDialog}
     </div>
   );
 }
