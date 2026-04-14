@@ -390,8 +390,9 @@ export default function AcademyPage() {
 
                 {/* Info */}
                 <div className="flex flex-1 flex-col p-5">
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="mb-2 flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-semibold text-primary">{course.category}</span>
+                    {course.level && <Badge className={`text-[10px] ${levelColors[course.level] || ""}`}>{course.level}</Badge>}
                     {course.avg_rating! > 0 && (
                       <span className="ml-auto flex items-center gap-0.5 text-xs text-muted-foreground">
                         <Star className="h-3 w-3 fill-accent text-accent" /> {course.avg_rating!.toFixed(1)}
