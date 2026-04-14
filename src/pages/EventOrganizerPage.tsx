@@ -61,13 +61,17 @@ export default function EventOrganizerPage() {
   useEffect(() => {
     if (!id || !user) return;
     const fetch = async () => {
+      // Check if user is admin
+      const { data: isAdminData } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      const isUserAdmin = !!isAdminData;
+
       const { data: ev } = await supabase
         .from("events")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (!ev || ev.user_id !== user.id) {
+      if (!ev || (!isUserAdmin && ev.user_id !== user.id)) {
         setLoading(false);
         return;
       }
