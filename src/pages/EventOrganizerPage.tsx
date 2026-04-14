@@ -297,7 +297,10 @@ export default function EventOrganizerPage() {
               <Copy className="mr-1 h-4 w-4" /> Copiar Emails
             </Button>
             <Button variant="outline" size="sm" onClick={exportCSV}>
-              <Download className="mr-1 h-4 w-4" /> Exportar CSV
+              <Download className="mr-1 h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportExcel}>
+              <FileSpreadsheet className="mr-1 h-4 w-4" /> Excel
             </Button>
             <Button
               size="sm"
