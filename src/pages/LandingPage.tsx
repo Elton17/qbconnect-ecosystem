@@ -12,13 +12,13 @@ import ActivityFeed from "@/components/landing/ActivityFeed";
 import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
 
 const modules = [
-  { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace", accent: "from-primary/20 to-primary/5" },
-  { title: "Serviços", description: "Serviços institucionais de apoio ao empresário.", icon: Briefcase, href: "/servicos", accent: "from-muted to-muted/50" },
-  { title: "Oportunidades", description: "Encontre fornecedores, parceiros e feche negócios.", icon: Handshake, href: "/oportunidades", accent: "from-accent/20 to-accent/5" },
-  { title: "Academia", description: "Cursos e capacitações para sua empresa crescer.", icon: GraduationCap, href: "/academia", accent: "from-secondary/30 to-secondary/10" },
-  { title: "Eventos", description: "Networking, feiras e encontros empresariais.", icon: CalendarDays, href: "/eventos", accent: "from-primary/20 to-primary/5" },
-  { title: "Benefícios", description: "Descontos e vantagens exclusivas para associados.", icon: Gift, href: "/beneficios", accent: "from-accent/20 to-accent/5" },
-  { title: "Ranking", description: "Gamificação e reconhecimento das melhores empresas.", icon: Trophy, href: "/ranking", accent: "from-muted to-muted/50" },
+  { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace" },
+  { title: "Serviços", description: "Serviços institucionais de apoio ao empresário.", icon: Briefcase, href: "/servicos" },
+  { title: "Oportunidades", description: "Encontre fornecedores, parceiros e feche negócios.", icon: Handshake, href: "/oportunidades" },
+  { title: "Academia", description: "Cursos e capacitações para sua empresa crescer.", icon: GraduationCap, href: "/academia" },
+  { title: "Eventos", description: "Networking, feiras e encontros empresariais.", icon: CalendarDays, href: "/eventos" },
+  { title: "Benefícios", description: "Descontos e vantagens exclusivas para associados.", icon: Gift, href: "/beneficios" },
+  { title: "Ranking", description: "Gamificação e reconhecimento das melhores empresas.", icon: Trophy, href: "/ranking" },
 ];
 
 const benefits = [
@@ -65,51 +65,47 @@ export default function LandingPage() {
     <div className="overflow-x-hidden">
       {/* ===== HERO ===== */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-        {/* Background layers */}
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/hero-bg.jpg')" }} />
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary/95 via-secondary/85 to-secondary/60" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_-20%,hsl(var(--primary)/0.15),transparent)]" />
-
-        {/* Decorative elements */}
-        <div className="absolute top-20 right-[10%] h-72 w-72 rounded-full bg-primary/10 blur-[100px]" />
-        <div className="absolute bottom-10 left-[5%] h-48 w-48 rounded-full bg-primary/5 blur-[80px]" />
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(to right, rgba(26,26,26,0.92) 40%, rgba(26,26,26,0.60) 100%)"
+        }} />
 
         <div className="container relative z-10 py-20 md:py-32">
           <div className="grid items-center gap-12 lg:grid-cols-2">
-            {/* Left: Copy */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary-foreground/90 backdrop-blur-sm">
+              {/* Badge */}
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
                 Desde 1988 · Quatro Barras & Campina Grande do Sul
               </div>
 
-              <h1 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-secondary-foreground sm:text-5xl md:text-6xl">
-                Conecte sua empresa ao{" "}
-                <span className="text-gradient">futuro dos negócios</span>{" "}
-                regionais
+              {/* H1 */}
+              <h1 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl font-heading">
+                <span className="text-white">Sua parceira no</span><br />
+                <span className="text-primary">desenvolvimento</span><br />
+                <span className="text-white">empresarial.</span>
               </h1>
 
-              <p className="mb-8 max-w-lg text-lg leading-relaxed text-secondary-foreground/70 md:text-xl">
+              <p className="mb-8 max-w-lg text-lg leading-relaxed text-white/70 md:text-xl">
                 A plataforma B2B que une empresas de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba. Marketplace, oportunidades, capacitação e muito mais.
               </p>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button variant="hero" size="xl" asChild>
+                <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
                   <Link to="/marketplace">
                     Explorar Marketplace <ArrowRight className="ml-1 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button variant="heroOutline" size="xl" asChild>
+                <Button size="xl" asChild className="border-2 border-white/50 text-white bg-transparent hover:border-white hover:bg-white/10 backdrop-blur-sm font-heading font-bold">
                   <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Quero me associar</a>
                 </Button>
               </div>
 
-              {/* Quick trust badges */}
-              <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-secondary-foreground/50">
+              <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/50">
                 {["Acesso gratuito", "Empresas verificadas", "Suporte dedicado"].map((t) => (
                   <span key={t} className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-4 w-4 text-primary/70" />
@@ -119,7 +115,7 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Right: Stats cards floating */}
+            {/* Stats cards */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -133,14 +129,14 @@ export default function LandingPage() {
                     initial={{ opacity: 0, y: 20, x: 20 }}
                     animate={{ opacity: 1, y: 0, x: 0 }}
                     transition={{ delay: 0.5 + i * 0.15, duration: 0.5 }}
-                    className={`${i === 0 ? "ml-0" : i === 1 ? "ml-16 mt-4" : "ml-8 mt-4"} flex items-center gap-4 rounded-2xl border border-border/20 bg-card/10 px-6 py-5 backdrop-blur-xl`}
+                    className={`${i === 0 ? "ml-0" : i === 1 ? "ml-16 mt-4" : "ml-8 mt-4"} flex items-center gap-4 rounded-2xl border border-white/20 bg-white/10 px-6 py-5 backdrop-blur-xl`}
                   >
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/20">
                       <stat.icon className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <div className="text-3xl font-extrabold text-secondary-foreground">{stat.value}</div>
-                      <div className="text-sm text-secondary-foreground/60">{stat.label}</div>
+                      <div className="text-3xl font-extrabold text-primary font-heading">{stat.value}</div>
+                      <div className="text-sm text-white/70">{stat.label}</div>
                     </div>
                   </motion.div>
                 ))}
@@ -150,7 +146,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== MOBILE STATS (shown only on mobile) ===== */}
+      {/* ===== MOBILE STATS ===== */}
       <section className="border-b border-border bg-card lg:hidden">
         <div className="container grid grid-cols-3 divide-x divide-border">
           {displayStats.map((stat, i) => (
@@ -164,7 +160,7 @@ export default function LandingPage() {
               className="flex flex-col items-center px-3 py-6 text-center"
             >
               <stat.icon className="mb-2 h-5 w-5 text-primary" />
-              <div className="text-xl font-extrabold text-foreground">{stat.value}</div>
+              <div className="text-xl font-extrabold text-foreground font-heading">{stat.value}</div>
               <div className="text-[11px] text-muted-foreground">{stat.label}</div>
             </motion.div>
           ))}
@@ -174,13 +170,8 @@ export default function LandingPage() {
       {/* ===== WHY JOIN ===== */}
       <section className="py-20 bg-background">
         <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-14 text-center"
-          >
-            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14 text-center">
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary font-heading">
               Por que participar?
             </span>
             <h2 className="mb-4 text-3xl font-extrabold text-foreground md:text-4xl">
@@ -200,9 +191,9 @@ export default function LandingPage() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeInUp}
-                className="group relative rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:border-primary/30 hover:card-shadow-hover"
+                className="group relative rounded-lg border border-border bg-card p-8 transition-all duration-300 hover:border-primary/30 hover:shadow-xl"
               >
-                <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 transition-colors group-hover:bg-primary/20">
                   <b.icon className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="mb-2 text-lg font-bold text-card-foreground">{b.title}</h3>
@@ -216,13 +207,8 @@ export default function LandingPage() {
       {/* ===== MODULES ===== */}
       <section className="py-20 bg-muted/30">
         <div className="container">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-14 text-center"
-          >
-            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14 text-center">
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary font-heading">
               Plataforma completa
             </span>
             <h2 className="mb-4 text-3xl font-extrabold text-foreground md:text-4xl">
@@ -244,18 +230,16 @@ export default function LandingPage() {
               <motion.div key={mod.title} custom={i} variants={fadeInUp}>
                 <Link
                   to={mod.href}
-                  className="group relative flex flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-primary/30 hover:-translate-y-1 hover:card-shadow-hover"
+                  className="group relative flex flex-col rounded-lg border-l-4 border-l-primary border border-border bg-card p-6 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                 >
                   {/* Icon */}
-                  <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${mod.accent}`}>
-                    <mod.icon className="h-6 w-6 text-foreground" />
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <mod.icon className="h-6 w-6 text-primary" />
                   </div>
 
-                  {/* Content */}
                   <h3 className="mb-1.5 text-base font-bold text-card-foreground">{mod.title}</h3>
                   <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{mod.description}</p>
 
-                  {/* Arrow */}
                   <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-primary opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
                     Acessar <ArrowUpRight className="h-4 w-4" />
                   </div>
@@ -270,12 +254,12 @@ export default function LandingPage() {
       <section className="py-20 bg-background">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14 text-center">
-            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary">Planos</span>
+            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary font-heading">Planos</span>
             <h2 className="mb-4 text-3xl font-extrabold text-foreground md:text-4xl">Escolha o plano para sua empresa</h2>
             <p className="mx-auto max-w-xl text-muted-foreground">Todos os associados têm acesso completo. O Premium desbloqueia mais capacidade e visibilidade.</p>
           </motion.div>
           <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-border bg-card p-6">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-lg border border-border bg-card p-6">
               <h3 className="mb-2 text-xl font-bold text-card-foreground">Associado</h3>
               <p className="mb-4 text-sm text-muted-foreground">Incluído na associação</p>
               <ul className="space-y-2 text-sm">
@@ -284,16 +268,16 @@ export default function LandingPage() {
                 ))}
               </ul>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="rounded-2xl border-2 border-amber-400 bg-card p-6 relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-amber-500 px-3 py-0.5 text-xs font-bold text-white"><Crown className="h-3 w-3" /> PREMIUM</span>
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="rounded-lg border-2 border-premium bg-card p-6 relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-premium px-3 py-0.5 text-xs font-bold text-white font-heading"><Crown className="h-3 w-3" /> PREMIUM</span>
               <h3 className="mb-2 text-xl font-bold text-card-foreground">Premium</h3>
               <p className="mb-4 text-sm text-muted-foreground">Máxima visibilidade</p>
               <ul className="space-y-2 text-sm">
                 {["Até 10 produtos", "Até 10 oportunidades", "Benefícios ilimitados", "Destaque nas listagens", "Badge e borda dourada"].map(f => (
-                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />{f}</li>
+                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-premium" />{f}</li>
                 ))}
               </ul>
-              <Button className="mt-4 w-full gap-2 bg-amber-500 hover:bg-amber-600 text-white" size="sm" asChild>
+              <Button className="mt-4 w-full gap-2 bg-premium hover:bg-premium/90 text-white font-heading font-bold" size="sm" asChild>
                 <Link to="/planos">Ver detalhes <ArrowRight className="ml-1 h-4 w-4" /></Link>
               </Button>
             </motion.div>
@@ -315,11 +299,10 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-secondary via-secondary to-primary/10 p-8 md:p-12"
+            className="relative overflow-hidden rounded-lg border border-primary/20 bg-secondary p-8 md:p-12"
           >
-            {/* Decorative glows */}
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-[80px]" />
-            <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-accent/10 blur-[60px]" />
+            <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-primary/10 blur-[60px]" />
 
             <div className="relative flex flex-col items-center gap-8 md:flex-row md:justify-between">
               <div className="flex-1 text-center md:text-left">
@@ -327,13 +310,13 @@ export default function LandingPage() {
                   <Smartphone className="h-4 w-4" />
                   Novo! App Mobile
                 </div>
-                <h2 className="mb-3 text-2xl font-extrabold text-secondary-foreground md:text-3xl">
-                  QBCAMP no seu <span className="text-gradient">celular</span>
+                <h2 className="mb-3 text-2xl font-extrabold text-white md:text-3xl">
+                  QBCAMP no seu <span className="text-primary">celular</span>
                 </h2>
-                <p className="mb-6 max-w-md text-secondary-foreground/60">
-                  Instale o app direto do navegador — sem loja, sem ocupar espaço. Acesso rápido a toda a plataforma, funciona offline e sempre atualizado.
+                <p className="mb-6 max-w-md text-white/60">
+                  Instale o app direto do navegador — sem loja, sem ocupar espaço. Acesso rápido a toda a plataforma.
                 </p>
-                <Button variant="hero" size="xl" asChild>
+                <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg">
                   <Link to="/instalar">
                     <Download className="mr-1.5 h-5 w-5" /> Instalar o App
                   </Link>
@@ -346,11 +329,11 @@ export default function LandingPage() {
                   { icon: Zap, label: "Rápido e leve" },
                   { icon: Shield, label: "Funciona offline" },
                 ].map((item) => (
-                  <div key={item.label} className="flex flex-col items-center gap-2 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-4 py-5 backdrop-blur-sm">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+                  <div key={item.label} className="flex flex-col items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-5 backdrop-blur-sm">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="text-xs font-medium text-secondary-foreground/70 text-center">{item.label}</span>
+                    <span className="text-xs font-medium text-white/70 text-center">{item.label}</span>
                   </div>
                 ))}
               </div>
@@ -371,22 +354,22 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-widest text-primary">
+            <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-widest text-primary font-heading">
               Comece agora
             </span>
-            <h2 className="mb-4 text-3xl font-extrabold text-secondary-foreground md:text-5xl">
+            <h2 className="mb-4 text-3xl font-extrabold text-white md:text-5xl">
               Faça parte do maior ecossistema<br className="hidden md:inline" /> empresarial da região
             </h2>
-            <p className="mx-auto mb-10 max-w-lg text-lg text-secondary-foreground/60">
+            <p className="mx-auto mb-10 max-w-lg text-lg text-white/60">
               Junte-se às empresas que já estão gerando negócios na plataforma. Cadastre-se gratuitamente.
             </p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Button variant="hero" size="xl" asChild>
+              <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
                 <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
                   Cadastrar minha empresa <ArrowRight className="ml-1 h-5 w-5" />
                 </a>
               </Button>
-              <Button variant="heroOutline" size="xl" asChild>
+              <Button size="xl" asChild className="border-2 border-white/50 text-white bg-transparent hover:border-white hover:bg-white/10 font-heading font-bold">
                 <Link to="/marketplace">Ver marketplace</Link>
               </Button>
             </div>
