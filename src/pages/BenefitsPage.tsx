@@ -143,12 +143,14 @@ export default function BenefitsPage() {
 
   const exclusiveCount = benefits.filter(b => b.exclusive).length;
   const catFiltered = selectedCategory === "Todas" ? benefits : benefits.filter(b => b.category === selectedCategory);
-  const filteredBenefits = searchTerm.trim()
+  const searchFiltered = searchTerm.trim()
     ? catFiltered.filter(b => {
         const q = searchTerm.toLowerCase();
         return b.offer.toLowerCase().includes(q) || b.company_name?.toLowerCase().includes(q) || b.category?.toLowerCase().includes(q);
       })
     : catFiltered;
+  // Premium first
+  const filteredBenefits = [...searchFiltered].sort((a, b) => (a.plan === "premium" ? -1 : 0) - (b.plan === "premium" ? -1 : 0));
   const activeCategories = ["Todas", ...new Set(benefits.map(b => b.category).filter(Boolean))];
 
   // Non-authenticated users see a CTA to join
