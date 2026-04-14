@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -89,6 +90,7 @@ export default function EventsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -442,7 +444,7 @@ export default function EventsPage() {
                         <Button variant="outline" size="sm" className="text-xs" onClick={() => handleEdit(event)}>
                           <Pencil className="mr-1 h-3 w-3" /> Editar
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={() => handleDelete(event.id)}>
+                        <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(event.id))}>
                           Remover
                         </Button>
                       </div>
@@ -486,6 +488,7 @@ export default function EventsPage() {
         initialData={editData}
         onSuccess={fetchAllEvents}
       />
+      {ConfirmDialog}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 
 const benefitCategories = ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"];
 
@@ -45,6 +46,7 @@ export default function BenefitsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -264,7 +266,7 @@ export default function BenefitsPage() {
                       {user?.id === benefit.user_id && (
                         <div className="flex gap-1">
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(benefit)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(benefit.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => confirmDelete(() => handleDelete(benefit.id))}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </div>
                       )}
                     </div>
@@ -321,6 +323,7 @@ export default function BenefitsPage() {
           </DialogContent>
         </Dialog>
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

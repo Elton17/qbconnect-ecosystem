@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 
 const types = [
   { label: "Todos", value: "all" },
@@ -50,6 +51,7 @@ export default function OpportunitiesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [activeType, setActiveType] = useState("all");
   const [search, setSearch] = useState("");
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -250,7 +252,7 @@ export default function OpportunitiesPage() {
                   {user?.id === opp.user_id ? (
                     <div className="flex gap-1">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(opp)}><Pencil className="h-3.5 w-3.5" /></Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(opp.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                      <Button variant="destructive" size="sm" onClick={() => confirmDelete(() => handleDelete(opp.id))}><Trash2 className="h-3.5 w-3.5" /></Button>
                     </div>
                   ) : (
                     <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
@@ -268,6 +270,7 @@ export default function OpportunitiesPage() {
           </div>
         )}
       </div>
+      {ConfirmDialog}
     </div>
   );
 }

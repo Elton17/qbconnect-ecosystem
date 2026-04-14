@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 
 const courseCategories = ["Marketing", "Finanças", "Gestão", "Vendas", "Jurídico", "Tecnologia", "RH", "Outro"];
 
@@ -43,6 +44,7 @@ export default function AcademyPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -305,7 +307,7 @@ export default function AcademyPage() {
                     {course.lesson_count! > 0 && <Badge variant="secondary" className="text-[10px]">{course.lesson_count} aulas</Badge>}
                   </div>
                   {user?.id === course.user_id && (
-                    <Button variant="destructive" size="icon" className="absolute right-3 top-3 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => handleDelete(e, course.id)}>
+                    <Button variant="destructive" size="icon" className="absolute right-3 top-3 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); confirmDelete(() => handleDelete(e, course.id)); }}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   )}
@@ -345,6 +347,7 @@ export default function AcademyPage() {
           </div>
         )}
       </div>
+      {ConfirmDialog}
     </div>
   );
 }
