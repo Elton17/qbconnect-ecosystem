@@ -13,10 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone } from "lucide-react";
+import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import CompanyContacts from "@/components/company/CompanyContacts";
+
 
 type Profile = Tables<"profiles">;
 
@@ -305,6 +307,7 @@ export default function ProfilePage() {
             <TabsTrigger value="contact" className="gap-1.5"><User className="h-4 w-4" /> Contato</TabsTrigger>
             <TabsTrigger value="details" className="gap-1.5"><Globe className="h-4 w-4" /> Detalhes</TabsTrigger>
             <TabsTrigger value="listings" className="gap-1.5"><Megaphone className="h-4 w-4" /> Meus Anúncios</TabsTrigger>
+            <TabsTrigger value="contacts" className="gap-1.5"><Users className="h-4 w-4" /> Contatos</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company">
@@ -359,6 +362,10 @@ export default function ProfilePage() {
 
           <TabsContent value="listings">
             {user && <MeusAnuncios userId={user.id} />}
+          </TabsContent>
+
+          <TabsContent value="contacts">
+            {user && <CompanyContacts companyUserId={user.id} editable={true} />}
           </TabsContent>
         </Tabs>
       </div>

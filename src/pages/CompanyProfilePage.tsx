@@ -2,13 +2,15 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { MapPin, Globe, Phone, Mail, Building2, ArrowLeft, Loader2, Briefcase, GraduationCap, Gift } from "lucide-react";
+import { MapPin, Globe, Phone, Mail, Building2, ArrowLeft, Loader2, Briefcase, GraduationCap, Gift, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CompanyMatchmaking from "@/components/CompanyMatchmaking";
+import CompanyContacts from "@/components/company/CompanyContacts";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+
 
 interface Profile {
   id: string; company_name: string; segment: string; city: string; description: string | null;
@@ -109,12 +111,17 @@ export default function CompanyProfilePage() {
 
       {/* Content */}
       <div className="container py-8">
-        <Tabs defaultValue="opportunities" className="w-full">
+        <Tabs defaultValue="contacts" className="w-full">
           <TabsList className="mb-6 w-full justify-start">
+            <TabsTrigger value="contacts" className="gap-1.5"><Users className="h-4 w-4" /> Contatos</TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-1.5"><Briefcase className="h-4 w-4" /> Oportunidades ({opportunities.length})</TabsTrigger>
             <TabsTrigger value="courses" className="gap-1.5"><GraduationCap className="h-4 w-4" /> Cursos ({courses.length})</TabsTrigger>
             <TabsTrigger value="benefits" className="gap-1.5"><Gift className="h-4 w-4" /> Benefícios ({benefits.length})</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="contacts">
+            <CompanyContacts companyUserId={profile.user_id} editable={false} />
+          </TabsContent>
 
           <TabsContent value="opportunities">
             {opportunities.length === 0 ? (
