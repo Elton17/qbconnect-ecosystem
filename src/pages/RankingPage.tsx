@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trophy, ShoppingBag, GraduationCap, Handshake, Loader2, Crown, Medal, Star, Gift, CheckCircle2 } from "lucide-react";
+import { Trophy, ShoppingBag, GraduationCap, Handshake, Loader2, Crown, Medal, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,7 +13,6 @@ interface RankedCompany {
   name: string;
   score: number;
   opportunities: number;
-  closedDeals: number;
   courses: number;
   benefits: number;
   badge: string;
@@ -31,31 +30,18 @@ export default function RankingPage() {
       const userIds = profiles.map((p: any) => p.user_id);
 
       const [{ data: opps }, { data: coursesData }, { data: benefitsData }] = await Promise.all([
-        supabase.from("opportunities").select("user_id, status").in("user_id", userIds),
+        supabase.from("opportunities").select("user_id").eq("active", true).in("user_id", userIds),
         supabase.from("courses").select("user_id").eq("active", true).in("user_id", userIds),
         supabase.from("benefits").select("user_id").eq("active", true).in("user_id", userIds),
       ]);
 
-      const countBy = (arr: any[] | null, uid: string, filter?: (r: any) => boolean) =>
-        (arr || []).filter((r: any) => r.user_id === uid && (!filter || filter(r))).length;
+      const count = (arr: any[] | null, uid: string) => (arr || []).filter((r: any) => r.user_id === uid).length;
 
       const ranked = profiles.map((p: any) => {
-        const totalOpps = countBy(opps, p.user_id);
-        const closed = countBy(opps, p.user_id, (r) => r.status === "closed");
-        const c = countBy(coursesData, p.user_id);
-        const b = countBy(benefitsData, p.user_id);
-        // New scoring: opportunities published * 10 + closed deals * 50 + courses * 40 + benefits * 20
-        const score = totalOpps * 10 + closed * 50 + c * 40 + b * 20;
-        return {
-          name: p.company_name || "Empresa",
-          opportunities: totalOpps,
-          closedDeals: closed,
-          courses: c,
-          benefits: b,
-          score,
-          rank: 0,
-          badge: "",
-        };
+        const o = count(opps, p.user_id);
+        const c = count(coursesData, p.user_id);
+        const b = count(benefitsData, p.user_id);
+        return { name: p.company_name || "Empresa", opportunities: o, courses: c, benefits: b, score: o * 30 + c * 40 + b * 20, rank: 0, badge: "" };
       }).sort((a, b) => b.score - a.score).map((item, i) => ({
         ...item,
         rank: i + 1,
@@ -110,17 +96,6 @@ export default function RankingPage() {
               </div>
             ))}
           </motion.div>
-
-          {/* Scoring legend */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-secondary-foreground/60">
-            <span className="flex items-center gap-1"><Handshake className="h-3 w-3" /> Oportunidade: 10 pts</span>
-            <span>•</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Negócio fechado: 50 pts</span>
-            <span>•</span>
-            <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" /> Curso: 40 pts</span>
-            <span>•</span>
-            <span className="flex items-center gap-1"><Gift className="h-3 w-3" /> Benefício: 20 pts</span>
-          </motion.div>
         </div>
       </section>
 
@@ -144,11 +119,10 @@ export default function RankingPage() {
                   <h3 className="mb-2 text-xl font-bold text-card-foreground">{company.name}</h3>
                   <div className="mb-4 text-3xl font-extrabold text-primary">{company.score}</div>
                   <div className="text-xs text-muted-foreground">pontos</div>
-                  <div className="mt-4 grid grid-cols-4 gap-2 text-xs text-muted-foreground border-t border-border pt-4">
-                    <div className="flex flex-col items-center gap-1"><Handshake className="h-3.5 w-3.5" /><span>{company.opportunities} oport.</span></div>
-                    <div className="flex flex-col items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /><span>{company.closedDeals} fechados</span></div>
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground border-t border-border pt-4">
+                    <div className="flex flex-col items-center gap-1"><ShoppingBag className="h-3.5 w-3.5" /><span>{company.opportunities} oport.</span></div>
                     <div className="flex flex-col items-center gap-1"><GraduationCap className="h-3.5 w-3.5" /><span>{company.courses} cursos</span></div>
-                    <div className="flex flex-col items-center gap-1"><Gift className="h-3.5 w-3.5" /><span>{company.benefits} benef.</span></div>
+                    <div className="flex flex-col items-center gap-1"><Handshake className="h-3.5 w-3.5" /><span>{company.benefits} benef.</span></div>
                   </div>
                 </motion.div>
               ))}
@@ -163,7 +137,6 @@ export default function RankingPage() {
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Empresa</th>
                     <th className="px-6 py-4 text-center font-semibold text-muted-foreground">Pontuação</th>
                     <th className="hidden px-6 py-4 text-center font-semibold text-muted-foreground md:table-cell">Oportunidades</th>
-                    <th className="hidden px-6 py-4 text-center font-semibold text-muted-foreground md:table-cell">Fechados</th>
                     <th className="hidden px-6 py-4 text-center font-semibold text-muted-foreground md:table-cell">Cursos</th>
                     <th className="hidden px-6 py-4 text-center font-semibold text-muted-foreground lg:table-cell">Benefícios</th>
                   </tr>
@@ -180,7 +153,6 @@ export default function RankingPage() {
                       </td>
                       <td className="px-6 py-4 text-center font-bold text-primary">{company.score}</td>
                       <td className="hidden px-6 py-4 text-center text-muted-foreground md:table-cell">{company.opportunities}</td>
-                      <td className="hidden px-6 py-4 text-center text-muted-foreground md:table-cell">{company.closedDeals}</td>
                       <td className="hidden px-6 py-4 text-center text-muted-foreground md:table-cell">{company.courses}</td>
                       <td className="hidden px-6 py-4 text-center text-muted-foreground lg:table-cell">{company.benefits}</td>
                     </motion.tr>

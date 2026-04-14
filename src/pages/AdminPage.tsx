@@ -335,7 +335,6 @@ export default function AdminPage() {
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
             <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
             <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
-            <TabsTrigger value="deals">Negócios Fechados</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
           </TabsList>
 
@@ -398,6 +397,11 @@ export default function AdminPage() {
 
           {/* ── COMPANIES ── */}
           <TabsContent value="companies">
+            <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{profiles.filter(p => p.plan === "premium").length} empresas Premium</span>
+              <span>·</span>
+              <span>{profiles.filter(p => p.plan !== "premium").length} empresas Associado</span>
+            </div>
             <AdminTable
               items={filterBySearch(profiles, ["company_name", "cnpj", "city", "email", "segment"])}
               columns={[
@@ -405,7 +409,7 @@ export default function AdminPage() {
                 { key: "cnpj", label: "CNPJ" },
                 { key: "city", label: "Cidade" },
                 { key: "segment", label: "Segmento" },
-                { key: "plan", label: "Plano" },
+                { key: "plan", label: "Plano", render: (v: string) => v === "premium" ? "⭐ Premium" : "Associado" },
               ]}
               renderStatus={(item) => (
                 <Badge variant={item.approved ? "default" : "destructive"} className="text-[10px]">
@@ -419,6 +423,18 @@ export default function AdminPage() {
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit("profiles", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant={item.plan === "premium" ? "outline" : "default"}
+                    className={item.plan === "premium" ? "" : "bg-amber-500 hover:bg-amber-600 text-white"}
+                    onClick={async () => {
+                      const newPlan = item.plan === "premium" ? "basic" : "premium";
+                      const { error } = await supabase.from("profiles").update({ plan: newPlan }).eq("id", item.id);
+                      if (error) { toast.error("Erro ao alterar plano"); return; }
+                      toast.success(`Plano alterado para ${newPlan === "premium" ? "Premium" : "Associado"}`);
+                      setProfiles(prev => prev.map(p => p.id === item.id ? { ...p, plan: newPlan } : p));
+                    }}
+                  >
+                    {item.plan === "premium" ? "Rebaixar" : "⭐ Premium"}
                   </Button>
                   <Button size="sm" variant={item.approved ? "outline" : "default"} onClick={() => toggleApproval(item.id, item.approved)}>
                     {item.approved ? <XCircle className="mr-1 h-3 w-3" /> : <CheckCircle2 className="mr-1 h-3 w-3" />}
@@ -692,74 +708,7 @@ export default function AdminPage() {
               </DialogContent>
             </Dialog>
           </TabsContent>
-          {/* ── DEALS TAB ── */}
-          <TabsContent value="deals">
-            {(() => {
-              const closedOpps = opportunities.filter((o: any) => o.status === "closed");
-              const totalValue = closedOpps.reduce((sum: number, o: any) => sum + (parseFloat(o.deal_value) || 0), 0);
-              return (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
-                    <Handshake className="h-8 w-8 text-primary" />
-                    <div>
-                      <div className="text-2xl font-extrabold text-foreground">{closedOpps.length} negócios fechados</div>
-                      {totalValue > 0 && (
-                        <div className="text-sm text-muted-foreground">
-                          Total movimentado: <span className="font-bold text-primary">R$ {totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {closedOpps.length === 0 ? (
-                    <p className="py-8 text-center text-muted-foreground">Nenhum negócio fechado ainda.</p>
-                  ) : (
-                    <div className="rounded-xl border border-border overflow-hidden">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border bg-muted/50">
-                            <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Oportunidade</th>
-                            <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
-                            <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Parceiro</th>
-                            <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Valor</th>
-                            <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Data</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {closedOpps.map((o: any) => {
-                            const ownerProfile = profiles.find((p: any) => p.user_id === o.user_id);
-                            return (
-                              <tr key={o.id} className="border-b border-border last:border-0 hover:bg-muted/30">
-                                <td className="px-4 py-3 font-medium text-foreground">{o.title}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{ownerProfile?.company_name || "—"}</td>
-                                <td className="px-4 py-3 text-muted-foreground">{o.closed_with || "—"}</td>
-                                <td className="px-4 py-3 text-right font-bold text-primary">
-                                  {o.deal_value ? `R$ ${parseFloat(o.deal_value).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "—"}
-                                </td>
-                                <td className="px-4 py-3 text-right text-muted-foreground">
-                                  {o.closed_at ? new Date(o.closed_at).toLocaleDateString("pt-BR") : "—"}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                        <tfoot>
-                          <tr className="bg-muted/30">
-                            <td colSpan={3} className="px-4 py-3 font-bold text-foreground">Total</td>
-                            <td className="px-4 py-3 text-right font-extrabold text-primary">
-                              R$ {totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                            </td>
-                            <td />
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-          </TabsContent>
 
-          
           {/* ── ROLES ── */}
           <TabsContent value="roles">
             <div className="rounded-2xl border border-border bg-card p-6">

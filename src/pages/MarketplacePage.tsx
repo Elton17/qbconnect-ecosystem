@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, ArrowRight, Loader2, Package, Plus, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap } from "lucide-react";
+import { Search, MapPin, ArrowRight, Loader2, Package, Plus, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap, Crown } from "lucide-react";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import PromotionsSection from "@/components/marketplace/PromotionsSection";
+import PlanUpgradeModal from "@/components/PlanUpgradeModal";
+import PremiumBadge from "@/components/PremiumBadge";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 const companyCategories = ["Todos", "Tecnologia", "Construção", "Alimentação", "Saúde", "Serviços", "Indústria", "Educação", "Logística", "Outro"];
 const productCategories = ["Todos", "Produtos", "Serviços", "Alimentação", "Tecnologia", "Vestuário", "Saúde", "Educação", "Outro"];
@@ -49,11 +52,13 @@ const fadeInUp = {
 
 interface Company {
   id: string;
+  user_id: string;
   company_name: string;
   segment: string;
   city: string;
   description: string | null;
   logo_url: string | null;
+  plan: string;
 }
 
 interface Product {
@@ -131,6 +136,7 @@ export default function MarketplacePage() {
   const location = useLocation();
   const { toast } = useToast();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const planLimits = usePlanLimits();
   const [activeTab, setActiveTab] = useState("empresas");
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [search, setSearch] = useState("");
@@ -147,6 +153,9 @@ export default function MarketplacePage() {
   const [promoIndex, setPromoIndex] = useState(0);
   const [isAssociate, setIsAssociate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  // company plan map for product premium sorting
+  const [companyPlanMap, setCompanyPlanMap] = useState<Map<string, string>>(new Map());
 
   // Check if user is an approved associate
   useEffect(() => {
@@ -185,27 +194,40 @@ export default function MarketplacePage() {
   async function fetchData() {
     setLoading(true);
     const [companiesRes, productsRes] = await Promise.all([
-      supabase.from("profiles").select("id, company_name, segment, city, description, logo_url").eq("approved", true),
+      supabase.from("profiles").select("id, user_id, company_name, segment, city, description, logo_url, plan").eq("approved", true),
       supabase.from("products").select("*").eq("active", true),
     ]);
-    setCompanies(companiesRes.data || []);
+    const comps = (companiesRes.data || []) as Company[];
+    setCompanies(comps);
+    // Build plan map for product premium sorting
+    const planMap = new Map<string, string>();
+    comps.forEach(c => planMap.set(c.user_id, c.plan));
+    setCompanyPlanMap(planMap);
     setProducts((productsRes.data as Product[]) || []);
     setLoading(false);
   }
 
   const categories = activeTab === "empresas" ? companyCategories : productCategories;
 
-  const filteredCompanies = companies.filter((c) => {
-    const matchCat = activeCategory === "Todos" || c.segment === activeCategory;
-    const matchSearch = c.company_name.toLowerCase().includes(search.toLowerCase()) || c.segment.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filteredCompanies = companies
+    .filter((c) => {
+      const matchCat = activeCategory === "Todos" || c.segment === activeCategory;
+      const matchSearch = c.company_name.toLowerCase().includes(search.toLowerCase()) || c.segment.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    })
+    .sort((a, b) => (a.plan === "premium" ? -1 : 0) - (b.plan === "premium" ? -1 : 0));
 
-  const filteredProducts = products.filter((p) => {
-    const matchCat = activeCategory === "Todos" || p.category === activeCategory;
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filteredProducts = products
+    .filter((p) => {
+      const matchCat = activeCategory === "Todos" || p.category === activeCategory;
+      const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    })
+    .sort((a, b) => {
+      const aPrem = companyPlanMap.get(a.user_id) === "premium" ? -1 : 0;
+      const bPrem = companyPlanMap.get(b.user_id) === "premium" ? -1 : 0;
+      return aPrem - bPrem;
+    });
 
   function getProductImages(p: Product): string[] {
     if (p.images && p.images.length > 0) return p.images;
@@ -214,6 +236,10 @@ export default function MarketplacePage() {
   }
 
   function openNewProduct() {
+    if (!planLimits.canAddProduct) {
+      setUpgradeOpen(true);
+      return;
+    }
     setEditingProduct(null);
     setForm({ title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "" });
     setImageFiles([]);
@@ -571,7 +597,10 @@ export default function MarketplacePage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredCompanies.map((company, i) => (
                     <motion.div key={company.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp}
-                      className="group rounded-2xl border border-border bg-card p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
+                      className={`group rounded-2xl border bg-card p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 ${company.plan === "premium" ? "border-2 border-amber-400" : "border-border"}`}>
+                      {company.plan === "premium" && (
+                        <div className="mb-3"><PremiumBadge /></div>
+                      )}
                       <div className="mb-4 flex items-start justify-between">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary overflow-hidden">
                           {company.logo_url ? <img src={company.logo_url} alt={company.company_name} className="h-full w-full object-cover" /> : company.company_name.charAt(0)}
@@ -596,7 +625,10 @@ export default function MarketplacePage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {filteredProducts.map((product, i) => (
                     <motion.div key={product.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp}
-                      className="group rounded-2xl border border-border bg-card overflow-hidden card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
+                      className={`group rounded-2xl border bg-card overflow-hidden card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 ${companyPlanMap.get(product.user_id) === "premium" ? "border-2 border-amber-400 relative" : "border-border"}`}>
+                      {companyPlanMap.get(product.user_id) === "premium" && (
+                        <div className="absolute right-3 top-3 z-10"><PremiumBadge /></div>
+                      )}
                       <ProductCarousel images={getProductImages(product)} title={product.title} />
                       <div className="p-5">
                         <div className="mb-2 flex items-start justify-between">
@@ -743,6 +775,7 @@ export default function MarketplacePage() {
         </Dialog>
       </div>
       {ConfirmDialog}
+      <PlanUpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} resourceType="produtos" currentLimit={planLimits.limits.products} />
     </div>
   );
 }

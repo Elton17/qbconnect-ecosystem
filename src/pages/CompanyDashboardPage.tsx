@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Loader2, ShoppingBag, GraduationCap, Handshake, Gift, CalendarDays, Users, TrendingUp, BarChart3 } from "lucide-react";
+import { Loader2, ShoppingBag, GraduationCap, Handshake, Gift, CalendarDays, Users, TrendingUp, BarChart3, Crown, ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import PremiumBadge from "@/components/PremiumBadge";
+import { getPlanLimits, getUpgradeWhatsAppUrl } from "@/lib/plans";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -31,6 +36,7 @@ export default function CompanyDashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [companyName, setCompanyName] = useState("");
+  const [plan, setPlan] = useState("basic");
   const [loading, setLoading] = useState(true);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
 
@@ -38,15 +44,17 @@ export default function CompanyDashboardPage() {
     if (!user) return;
     async function fetchData() {
       const [products, courses, opportunities, benefits, events, profile] = await Promise.all([
-        supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
+        supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("active", true),
         supabase.from("courses").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
-        supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
-        supabase.from("benefits").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
+        supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("active", true).eq("status", "open"),
+        supabase.from("benefits").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("active", true),
         supabase.from("events").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
-        supabase.from("profiles").select("company_name").eq("user_id", user!.id).single(),
+        supabase.from("profiles").select("company_name, plan").eq("user_id", user!.id).single(),
       ]);
 
-      // Get user's course & event IDs
+      setCompanyName(profile.data?.company_name || "Minha Empresa");
+      setPlan(profile.data?.plan || "basic");
+
       const [{ data: userCourses }, { data: userEvents }] = await Promise.all([
         supabase.from("courses").select("id").eq("user_id", user!.id),
         supabase.from("events").select("id").eq("user_id", user!.id),
@@ -78,31 +86,18 @@ export default function CompanyDashboardPage() {
         registrationRows = rowsRes.data || [];
       }
 
-      // Build monthly data for last 6 months
       const months: MonthlyData[] = [];
       for (let i = 5; i >= 0; i--) {
         const date = subMonths(new Date(), i);
         const monthStart = startOfMonth(date);
         const nextMonth = startOfMonth(subMonths(new Date(), i - 1));
         const label = format(date, "MMM yy", { locale: ptBR });
-
-        const alunos = enrollmentRows.filter(r => {
-          if (!r.enrolled_at) return false;
-          const d = new Date(r.enrolled_at);
-          return d >= monthStart && d < nextMonth;
-        }).length;
-
-        const eventos = registrationRows.filter(r => {
-          if (!r.created_at) return false;
-          const d = new Date(r.created_at);
-          return d >= monthStart && d < nextMonth;
-        }).length;
-
+        const alunos = enrollmentRows.filter(r => { if (!r.enrolled_at) return false; const d = new Date(r.enrolled_at); return d >= monthStart && d < nextMonth; }).length;
+        const eventos = registrationRows.filter(r => { if (!r.created_at) return false; const d = new Date(r.created_at); return d >= monthStart && d < nextMonth; }).length;
         months.push({ month: label, alunos, eventos });
       }
 
       setMonthlyData(months);
-      setCompanyName(profile.data?.company_name || "Minha Empresa");
       setStats({
         products: products.count || 0,
         courses: courses.count || 0,
@@ -118,6 +113,9 @@ export default function CompanyDashboardPage() {
   }, [user]);
 
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+
+  const limits = getPlanLimits(plan);
+  const isPremium = plan === "premium";
 
   const cards = [
     { label: "Produtos", value: stats?.products || 0, icon: ShoppingBag, color: "bg-primary/10 text-primary" },
@@ -145,9 +143,52 @@ export default function CompanyDashboardPage() {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">{companyName} · Visão geral</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">{companyName}</p>
+              {isPremium ? <PremiumBadge /> : <Badge variant="secondary" className="text-xs">Associado</Badge>}
+            </div>
           </div>
         </div>
+
+        {/* Plan usage section */}
+        <Card className={`mb-6 ${isPremium ? "border-2 border-amber-400" : ""}`}>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              {isPremium ? <Crown className="h-5 w-5 text-amber-500" /> : <Crown className="h-5 w-5 text-muted-foreground" />}
+              Uso do Plano — {isPremium ? "Premium" : "Associado"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Produtos ativos</span>
+                <span className="font-semibold text-foreground">{stats?.products || 0}/{limits.products === Infinity ? "∞" : limits.products}</span>
+              </div>
+              <Progress value={limits.products === Infinity ? 10 : ((stats?.products || 0) / limits.products) * 100} className="h-2" />
+            </div>
+            <div>
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Oportunidades ativas</span>
+                <span className="font-semibold text-foreground">{stats?.opportunities || 0}/{limits.opportunities === Infinity ? "∞" : limits.opportunities}</span>
+              </div>
+              <Progress value={limits.opportunities === Infinity ? 10 : ((stats?.opportunities || 0) / limits.opportunities) * 100} className="h-2" />
+            </div>
+            <div>
+              <div className="mb-1 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Benefícios ativos</span>
+                <span className="font-semibold text-foreground">{stats?.benefits || 0}/{limits.benefits === Infinity ? "∞" : limits.benefits}</span>
+              </div>
+              <Progress value={limits.benefits === Infinity ? 10 : ((stats?.benefits || 0) / limits.benefits) * 100} className="h-2" />
+            </div>
+            {!isPremium && (
+              <Button className="w-full gap-2 bg-amber-500 hover:bg-amber-600 text-white" asChild>
+                <a href={getUpgradeWhatsAppUrl()} target="_blank" rel="noopener noreferrer">
+                  <Crown className="h-4 w-4" /> Fazer Upgrade para Premium <ArrowUpRight className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((card, i) => (
@@ -178,9 +219,7 @@ export default function CompanyDashboardPage() {
 
             <TabsContent value="alunos">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Novos alunos por mês</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-base">Novos alunos por mês</CardTitle></CardHeader>
                 <CardContent>
                   <ChartContainer config={chartConfig} className="h-[300px] w-full">
                     <BarChart data={monthlyData}>
@@ -197,9 +236,7 @@ export default function CompanyDashboardPage() {
 
             <TabsContent value="eventos">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Inscrições em eventos por mês</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-base">Inscrições em eventos por mês</CardTitle></CardHeader>
                 <CardContent>
                   <ChartContainer config={chartConfig} className="h-[300px] w-full">
                     <BarChart data={monthlyData}>
@@ -216,9 +253,7 @@ export default function CompanyDashboardPage() {
 
             <TabsContent value="ambos">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Comparativo mensal</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-base">Comparativo mensal</CardTitle></CardHeader>
                 <CardContent>
                   <ChartContainer config={chartConfig} className="h-[300px] w-full">
                     <LineChart data={monthlyData}>

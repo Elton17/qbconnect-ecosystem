@@ -18,6 +18,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
+import PlanUpgradeModal from "@/components/PlanUpgradeModal";
+import PremiumBadge from "@/components/PremiumBadge";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 const benefitCategories = ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"];
 
@@ -43,6 +46,7 @@ interface Benefit {
   expires_at: string | null;
   company_name?: string;
   logo_url?: string;
+  plan?: string;
 }
 
 interface Redemption {
@@ -55,6 +59,7 @@ export default function BenefitsPage() {
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const planLimitsData = usePlanLimits();
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,14 +74,15 @@ export default function BenefitsPage() {
   const [userRedemptions, setUserRedemptions] = useState<Map<string, string>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
   const [searchTerm, setSearchTerm] = useState("");
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const fetchData = async () => {
     const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
     const userIds = [...new Set(items.map((b: any) => b.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, logo_url: p.logo_url }]));
-    setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id)?.company_name || "Empresa", logo_url: profileMap.get(b.user_id)?.logo_url || "" })));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url, plan").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, logo_url: p.logo_url, plan: p.plan }]));
+    setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id)?.company_name || "Empresa", logo_url: profileMap.get(b.user_id)?.logo_url || "", plan: profileMap.get(b.user_id)?.plan || "basic" })));
     if (user) {
       const { data: redemptions } = await supabase.from("redemptions").select("benefit_id, code").eq("user_id", user.id);
       if (redemptions) setUserRedemptions(new Map(redemptions.map((r: any) => [r.benefit_id, r.code])));
@@ -137,12 +143,14 @@ export default function BenefitsPage() {
 
   const exclusiveCount = benefits.filter(b => b.exclusive).length;
   const catFiltered = selectedCategory === "Todas" ? benefits : benefits.filter(b => b.category === selectedCategory);
-  const filteredBenefits = searchTerm.trim()
+  const searchFiltered = searchTerm.trim()
     ? catFiltered.filter(b => {
         const q = searchTerm.toLowerCase();
         return b.offer.toLowerCase().includes(q) || b.company_name?.toLowerCase().includes(q) || b.category?.toLowerCase().includes(q);
       })
     : catFiltered;
+  // Premium first
+  const filteredBenefits = [...searchFiltered].sort((a, b) => (a.plan === "premium" ? -1 : 0) - (b.plan === "premium" ? -1 : 0));
   const activeCategories = ["Todas", ...new Set(benefits.map(b => b.category).filter(Boolean))];
 
   // Non-authenticated users see a CTA to join
@@ -223,7 +231,10 @@ export default function BenefitsPage() {
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
-                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
+                  <Button variant="hero" size="xl" onClick={() => {
+                    if (!planLimitsData.canAddBenefit) { setUpgradeOpen(true); return; }
+                    setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null });
+                  }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle></DialogHeader>
@@ -320,7 +331,7 @@ export default function BenefitsPage() {
               const isExpired = benefit.expires_at && new Date(benefit.expires_at) < new Date();
               const expiresFormatted = benefit.expires_at ? format(new Date(benefit.expires_at), "dd/MM/yyyy", { locale: ptBR }) : null;
               return (
-                <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1">
+                <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className={`rounded-2xl border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1 ${benefit.plan === "premium" ? "border-2 border-amber-400" : "border-border"}`}>
                   <div className="mb-4 flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 overflow-hidden">
                       {benefit.logo_url ? (
@@ -330,6 +341,7 @@ export default function BenefitsPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      {benefit.plan === "premium" && <PremiumBadge />}
                       {benefit.exclusive && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Exclusivo Premium</span>}
                       {user?.id === benefit.user_id && (
                         <div className="flex gap-1">
@@ -421,6 +433,7 @@ export default function BenefitsPage() {
         </Dialog>
       </div>
       {ConfirmDialog}
+      <PlanUpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} resourceType="benefícios" currentLimit={planLimitsData.limits.benefits} />
     </div>
   );
 }
