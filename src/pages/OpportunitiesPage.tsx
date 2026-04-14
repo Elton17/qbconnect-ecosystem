@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Handshake, TrendingUp, Zap, MessageCircle } from "lucide-react";
+import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Pencil, Handshake, TrendingUp, Zap, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
