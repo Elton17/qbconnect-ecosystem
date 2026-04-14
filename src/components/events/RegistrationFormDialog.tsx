@@ -40,7 +40,9 @@ export default function RegistrationFormDialog({ open, onOpenChange, requiredFie
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const fields = REGISTRATION_FIELDS.filter(f => requiredFields.includes(f.key as RegistrationFieldKey));
+  // Always include email for confirmation
+  const allRequired = requiredFields.includes("email" as RegistrationFieldKey) ? requiredFields : [...requiredFields, "email" as RegistrationFieldKey];
+  const fields = REGISTRATION_FIELDS.filter(f => allRequired.includes(f.key as RegistrationFieldKey));
 
   const handleChange = (key: string, value: string) => {
     let masked = value;
