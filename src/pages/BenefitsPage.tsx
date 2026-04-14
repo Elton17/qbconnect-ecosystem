@@ -18,6 +18,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
+import PlanUpgradeModal from "@/components/PlanUpgradeModal";
+import PremiumBadge from "@/components/PremiumBadge";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 const benefitCategories = ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"];
 
@@ -43,6 +46,7 @@ interface Benefit {
   expires_at: string | null;
   company_name?: string;
   logo_url?: string;
+  plan?: string;
 }
 
 interface Redemption {
@@ -55,6 +59,7 @@ export default function BenefitsPage() {
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const planLimitsData = usePlanLimits();
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -69,14 +74,15 @@ export default function BenefitsPage() {
   const [userRedemptions, setUserRedemptions] = useState<Map<string, string>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
   const [searchTerm, setSearchTerm] = useState("");
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const fetchData = async () => {
     const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
     const userIds = [...new Set(items.map((b: any) => b.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, logo_url: p.logo_url }]));
-    setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id)?.company_name || "Empresa", logo_url: profileMap.get(b.user_id)?.logo_url || "" })));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url, plan").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, logo_url: p.logo_url, plan: p.plan }]));
+    setBenefits(items.map((b: any) => ({ ...b, company_name: profileMap.get(b.user_id)?.company_name || "Empresa", logo_url: profileMap.get(b.user_id)?.logo_url || "", plan: profileMap.get(b.user_id)?.plan || "basic" })));
     if (user) {
       const { data: redemptions } = await supabase.from("redemptions").select("benefit_id, code").eq("user_id", user.id);
       if (redemptions) setUserRedemptions(new Map(redemptions.map((r: any) => [r.benefit_id, r.code])));
