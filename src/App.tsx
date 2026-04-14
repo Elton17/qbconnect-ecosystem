@@ -31,6 +31,8 @@ import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
 import LearningPathPage from "@/pages/LearningPathPage";
 import InstallAppPage from "@/pages/InstallAppPage";
 import SACPage from "@/pages/SACPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 const queryClient = new QueryClient();
 const App = () => (
