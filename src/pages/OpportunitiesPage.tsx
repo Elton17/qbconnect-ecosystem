@@ -13,6 +13,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
+import PlanUpgradeModal from "@/components/PlanUpgradeModal";
+import PremiumBadge from "@/components/PremiumBadge";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 const types = [
   { label: "Todos", value: "all" },
@@ -45,6 +48,7 @@ interface Opportunity {
   created_at: string;
   company_name?: string;
   contact_phone?: string;
+  plan?: string;
 }
 
 export default function OpportunitiesPage() {
@@ -52,6 +56,7 @@ export default function OpportunitiesPage() {
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const planLimitsData = usePlanLimits();
   const [activeType, setActiveType] = useState("all");
   const [search, setSearch] = useState("");
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -60,19 +65,21 @@ export default function OpportunitiesPage() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const fetchData = async () => {
     const { data: opps } = await supabase.from("opportunities").select("*").eq("active", true).order("created_at", { ascending: false });
     if (!opps) { setLoading(false); return; }
 
     const userIds = [...new Set(opps.map((o: any) => o.user_id))];
-    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, contact_phone, phone").in("user_id", userIds);
-    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, contact_phone: p.contact_phone || p.phone }]));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, contact_phone, phone, plan").in("user_id", userIds);
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, { company_name: p.company_name, contact_phone: p.contact_phone || p.phone, plan: p.plan }]));
 
     setOpportunities(opps.map((o: any) => ({
       ...o,
       company_name: profileMap.get(o.user_id)?.company_name || "Empresa",
       contact_phone: profileMap.get(o.user_id)?.contact_phone || "",
+      plan: profileMap.get(o.user_id)?.plan || "basic",
     })));
     setLoading(false);
   };
