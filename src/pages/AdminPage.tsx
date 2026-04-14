@@ -16,7 +16,9 @@ import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
   ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList, Route, Plus,
+  MessageCircle, Download,
 } from "lucide-react";
+import { getWhatsAppContactUrl } from "@/lib/constants";
 
 interface Stat { label: string; value: number; icon: any; }
 
@@ -33,6 +35,7 @@ export default function AdminPage() {
   const [promotions, setPromotions] = useState<any[]>([]);
   const [learningPaths, setLearningPaths] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
+  const [waitlist, setWaitlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
@@ -56,7 +59,7 @@ export default function AdminPage() {
     const [
       profilesRes, productsRes, coursesRes, eventsRes,
       oppsRes, benefitsRes, promosRes, rolesRes,
-      enrollRes, eventRegRes, pathsRes,
+      enrollRes, eventRegRes, pathsRes, waitlistRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("products").select("*").order("created_at", { ascending: false }),
@@ -69,6 +72,7 @@ export default function AdminPage() {
       supabase.from("course_enrollments").select("id", { count: "exact", head: true }),
       supabase.from("event_registrations").select("id", { count: "exact", head: true }),
       supabase.from("learning_paths").select("*").order("sort_order"),
+      supabase.from("waitlist").select("*").order("created_at", { ascending: false }),
     ]);
 
     const p = profilesRes.data || [];
@@ -83,6 +87,7 @@ export default function AdminPage() {
     setOpportunities(op); setBenefits(b); setPromotions(pm);
     setLearningPaths(pathsRes.data || []);
     setUserRoles(rolesRes.data || []);
+    setWaitlist(waitlistRes.data || []);
 
     setStats([
       { label: "Empresas", value: p.length, icon: Building2 },
@@ -336,6 +341,7 @@ export default function AdminPage() {
             <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
             <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
+            <TabsTrigger value="waitlist">Lista de Espera ({waitlist.length})</TabsTrigger>
           </TabsList>
 
           {/* ── OVERVIEW ── */}
