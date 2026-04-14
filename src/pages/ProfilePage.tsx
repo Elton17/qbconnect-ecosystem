@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 
