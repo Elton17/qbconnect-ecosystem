@@ -31,6 +31,8 @@ import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
 import LearningPathPage from "@/pages/LearningPathPage";
 import InstallAppPage from "@/pages/InstallAppPage";
 import SACPage from "@/pages/SACPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -58,6 +60,8 @@ const App = () => (
               <Route path="/empresa/:id" element={<CompanyProfilePage />} />
               <Route path="/cadastro" element={<CompanyRegistrationPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/certificado" element={<CertificateVerifyPage />} />
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
               <Route path="/instalar" element={<InstallAppPage />} />

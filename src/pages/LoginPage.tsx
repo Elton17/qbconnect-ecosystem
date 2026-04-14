@@ -89,6 +89,9 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" size="lg" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
+                <Link to="/esqueci-senha" className="text-sm font-medium text-primary hover:underline">
+                  Esqueci minha senha
+                </Link>
                 <p className="text-center text-sm text-muted-foreground">
                   Não tem conta?{" "}
                   <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">Cadastre sua empresa</a>
