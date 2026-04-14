@@ -136,7 +136,13 @@ export default function BenefitsPage() {
   const handleCopy = () => { if (redeemCode) { navigator.clipboard.writeText(redeemCode); setCopied(true); setTimeout(() => setCopied(false), 2000); } };
 
   const exclusiveCount = benefits.filter(b => b.exclusive).length;
-  const filteredBenefits = selectedCategory === "Todas" ? benefits : benefits.filter(b => b.category === selectedCategory);
+  const catFiltered = selectedCategory === "Todas" ? benefits : benefits.filter(b => b.category === selectedCategory);
+  const filteredBenefits = searchTerm.trim()
+    ? catFiltered.filter(b => {
+        const q = searchTerm.toLowerCase();
+        return b.offer.toLowerCase().includes(q) || b.company_name?.toLowerCase().includes(q) || b.category?.toLowerCase().includes(q);
+      })
+    : catFiltered;
   const activeCategories = ["Todas", ...new Set(benefits.map(b => b.category).filter(Boolean))];
 
   // Non-authenticated users see a CTA to join
