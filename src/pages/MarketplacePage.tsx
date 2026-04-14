@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap } from "lucide-react";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -114,6 +115,7 @@ export default function MarketplacePage() {
   const { user } = useAuth();
   const location = useLocation();
   const { toast } = useToast();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [activeTab, setActiveTab] = useState("empresas");
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [search, setSearch] = useState("");
@@ -609,7 +611,7 @@ export default function MarketplacePage() {
                             <Button variant="ghost" size="sm" className="flex-1" onClick={() => openEditProduct(product)}>
                               <Pencil className="mr-1 h-3.5 w-3.5" /> Editar
                             </Button>
-                            <Button variant="ghost" size="sm" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDeleteProduct(product.id)}>
+                            <Button variant="ghost" size="sm" className="flex-1 text-destructive hover:text-destructive" onClick={() => confirmDelete(() => handleDeleteProduct(product.id))}>
                               <Trash2 className="mr-1 h-3.5 w-3.5" /> Remover
                             </Button>
                           </div>
@@ -728,6 +730,8 @@ export default function MarketplacePage() {
           </DialogContent>
         </Dialog>
       </div>
+    </div>
+      {ConfirmDialog}
     </div>
   );
 }

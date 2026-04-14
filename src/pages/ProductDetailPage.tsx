@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, Package, MessageCircle, Mail, ChevronLeft, ChevronRight,
