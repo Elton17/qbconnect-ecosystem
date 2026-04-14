@@ -252,11 +252,30 @@ export default function BenefitsPage() {
 
       {/* Content */}
       <div className="container py-10">
+        {/* Category Filter */}
+        {!loading && benefits.length > 0 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            {activeCategories.map((cat) => (
+              <Button
+                key={cat}
+                variant={selectedCategory === cat ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(cat)}
+                className="rounded-full"
+              >
+                {cat === "Todas" && <Tag className="mr-1.5 h-3.5 w-3.5" />}
+                {cat}
+                {cat === "Todas" ? ` (${benefits.length})` : ` (${benefits.filter(b => b.category === cat).length})`}
+              </Button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {benefits.map((benefit, i) => {
+            {filteredBenefits.map((benefit, i) => {
               const alreadyRedeemed = userRedemptions.has(benefit.id);
               return (
                 <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1">
@@ -290,6 +309,14 @@ export default function BenefitsPage() {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {!loading && benefits.length > 0 && filteredBenefits.length === 0 && (
+          <div className="py-16 text-center">
+            <Tag className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
+            <p className="text-muted-foreground">Nenhum benefício nesta categoria.</p>
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => setSelectedCategory("Todas")}>Ver todos</Button>
           </div>
         )}
 
