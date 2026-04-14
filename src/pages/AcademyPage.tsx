@@ -17,6 +17,12 @@ import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 
 const courseCategories = ["Marketing", "Finanças", "Gestão", "Vendas", "Jurídico", "Tecnologia", "RH", "Outro"];
+const courseLevels = ["iniciante", "intermediário", "avançado"];
+const levelColors: Record<string, string> = {
+  iniciante: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  intermediário: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  avançado: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+};
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
