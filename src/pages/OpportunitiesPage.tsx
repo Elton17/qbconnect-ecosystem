@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 
 const types = [
   { label: "Todos", value: "all" },
@@ -48,6 +49,7 @@ interface Opportunity {
 export default function OpportunitiesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { approved } = useApprovedCompany();
   const [activeType, setActiveType] = useState("all");
   const [search, setSearch] = useState("");
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
@@ -149,7 +151,7 @@ export default function OpportunitiesPage() {
               Conecte-se com fornecedores, parceiros e oportunidades de negócios da região.
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              {user && (
+              {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                   <DialogTrigger asChild>
                     <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false }); }}><Plus className="mr-1 h-5 w-5" /> Publicar Oportunidade</Button>
