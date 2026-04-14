@@ -168,6 +168,31 @@ export default function EventOrganizerPage() {
     toast({ title: "CSV exportado com sucesso!" });
   };
 
+  const exportExcel = () => {
+    const data = filtered.map((a) => ({
+      "Nome": a.contact_name || "",
+      "Empresa": a.company_name || "",
+      "Email": a.email || "",
+      "Telefone": a.contact_phone || "",
+      "CPF": a.registration_data?.cpf || "",
+      "CNPJ": a.registration_data?.cnpj || "",
+      "Cargo": a.registration_data?.cargo || "",
+      "Código Ingresso": a.ticket_code,
+      "Status": a.status === "confirmed" ? "Confirmado" : a.status || "Confirmado",
+      "Data Inscrição": a.created_at ? format(new Date(a.created_at), "dd/MM/yyyy HH:mm") : "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [
+      { wch: 25 }, { wch: 25 }, { wch: 30 }, { wch: 18 },
+      { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 18 },
+      { wch: 12 }, { wch: 18 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inscritos");
+    XLSX.writeFile(wb, `inscritos-${event?.title?.replace(/\s+/g, "-") || "evento"}.xlsx`);
+    toast({ title: "Excel exportado com sucesso!" });
+  };
+
   const handleSendMessage = () => {
     const targets = attendees.filter((a) => selectedAttendees.has(a.id));
     const emails = targets.map((a) => a.email).filter(Boolean);
