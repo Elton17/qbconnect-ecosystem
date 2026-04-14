@@ -128,6 +128,8 @@ export default function BenefitsPage() {
   const handleCopy = () => { if (redeemCode) { navigator.clipboard.writeText(redeemCode); setCopied(true); setTimeout(() => setCopied(false), 2000); } };
 
   const exclusiveCount = benefits.filter(b => b.exclusive).length;
+  const filteredBenefits = selectedCategory === "Todas" ? benefits : benefits.filter(b => b.category === selectedCategory);
+  const activeCategories = ["Todas", ...new Set(benefits.map(b => b.category).filter(Boolean))];
 
   // Non-authenticated users see a CTA to join
   if (!user) {
