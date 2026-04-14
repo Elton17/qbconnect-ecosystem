@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Loader2, Package, MessageCircle, Mail, ChevronLeft, ChevronRight,
+  ArrowLeft, Loader2, Package, ChevronLeft, ChevronRight,
   MapPin, Phone, Globe, Building2, ShoppingBag, Tag, Pencil, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,22 @@ interface Seller {
   website: string | null;
   description: string | null;
   id: string;
+  contact_phone: string;
+}
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+  );
+}
+
+function getWhatsAppUrl(phone: string, productTitle: string) {
+  const cleanPhone = phone.replace(/\D/g, "");
+  const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
+  const message = encodeURIComponent(`Olá! Vi seu produto *${productTitle}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`);
+  return `https://wa.me/${fullPhone}?text=${message}`;
 }
 
 export default function ProductDetailPage() {
@@ -73,17 +89,15 @@ export default function ProductDetailPage() {
       setProduct(prod as Product);
       setSelectedImage(0);
 
-      // Fetch seller profile
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, company_name, segment, city, logo_url, phone, email, website, description")
+        .select("id, company_name, segment, city, logo_url, phone, email, website, description, contact_phone")
         .eq("user_id", prod.user_id)
         .eq("approved", true)
         .limit(1);
 
       if (profiles && profiles.length > 0) setSeller(profiles[0] as Seller);
 
-      // Fetch other products from same seller
       const { data: others } = await supabase
         .from("products")
         .select("*")
@@ -114,6 +128,9 @@ export default function ProductDetailPage() {
 
   const images = (product.images && product.images.length > 0) ? product.images : product.image_url ? [product.image_url] : [];
 
+  // Determine WhatsApp number: product contact_phone → seller contact_phone → seller phone
+  const whatsappPhone = product.contact_phone || seller?.contact_phone || seller?.phone || "";
+
   return (
     <div className="container py-8">
       <Breadcrumbs items={[
@@ -124,7 +141,6 @@ export default function ProductDetailPage() {
       <div className="grid gap-8 lg:grid-cols-5">
         {/* Gallery — 3 cols */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-3">
-          {/* Main image */}
           <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-muted">
             {images.length > 0 ? (
               <img src={images[selectedImage]} alt={product.title} className="h-full w-full object-contain bg-card" />
@@ -149,7 +165,6 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* Thumbnails */}
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {images.map((img, idx) => (
@@ -180,8 +195,13 @@ export default function ProductDetailPage() {
 
             <div className="mb-4">
               <span className="text-3xl font-extrabold text-primary">
-                {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Sob consulta"}
+                {product.price > 0
+                  ? `R$ ${product.price.toFixed(2).replace(".", ",")}`
+                  : "Consulte condições"}
               </span>
+              {product.price > 0 && (
+                <span className="ml-2 text-sm text-muted-foreground">a partir de</span>
+              )}
             </div>
 
             <Separator className="my-4" />
@@ -193,26 +213,30 @@ export default function ProductDetailPage() {
               </p>
             </div>
 
-            {/* Contact buttons */}
-            <div className="flex flex-col gap-2">
-              {product.contact_phone && (
-                <a
-                  href={`https://api.whatsapp.com/send?phone=55${product.contact_phone.replace(/\D/g, "")}&text=Olá! Vi seu produto \"${product.title}\" no Marketplace QBCAMP e tenho interesse.`}
-                  target="_blank" rel="noopener noreferrer"
+            {/* WhatsApp CTA */}
+            {whatsappPhone ? (
+              <a
+                href={getWhatsAppUrl(whatsappPhone, product.title)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <button
+                  className="flex w-full items-center justify-center gap-3 rounded-xl px-6 py-4 text-white font-bold text-lg shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: "#25D366" }}
                 >
-                  <Button className="w-full" size="lg">
-                    <MessageCircle className="mr-2 h-5 w-5" /> Contato via WhatsApp
-                  </Button>
-                </a>
-              )}
-              {product.contact_email && (
-                <a href={`mailto:${product.contact_email}?subject=Interesse no produto: ${product.title}`}>
-                  <Button variant="outline" className="w-full" size="lg">
-                    <Mail className="mr-2 h-5 w-5" /> Enviar Email
-                  </Button>
-                </a>
-              )}
-            </div>
+                  <WhatsAppIcon className="h-6 w-6" />
+                  <div className="flex flex-col items-start">
+                    <span>Falar com o vendedor</span>
+                    <span className="text-xs font-normal opacity-90">Resposta rápida via WhatsApp</span>
+                  </div>
+                </button>
+              </a>
+            ) : (
+              <div className="rounded-xl border border-border bg-muted p-4 text-center text-sm text-muted-foreground">
+                Contato não disponível. Visite o perfil da empresa para mais informações.
+              </div>
+            )}
 
             {/* Owner actions */}
             {isOwner && (
@@ -255,7 +279,6 @@ export default function ProductDetailPage() {
               <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
                 {seller.city && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" />{seller.city}</span>}
                 {seller.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 shrink-0" />{seller.phone}</span>}
-                {seller.email && <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 shrink-0" />{seller.email}</span>}
                 {seller.website && (
                   <a href={seller.website.startsWith("http") ? seller.website : `https://${seller.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline">
                     <Globe className="h-3.5 w-3.5 shrink-0" />{seller.website}
@@ -295,7 +318,7 @@ export default function ProductDetailPage() {
                   <div className="p-4">
                     <h3 className="mb-1 text-sm font-bold text-card-foreground truncate">{p.title}</h3>
                     <span className="text-base font-extrabold text-primary">
-                      {p.price > 0 ? `R$ ${p.price.toFixed(2).replace(".", ",")}` : "Sob consulta"}
+                      {p.price > 0 ? `R$ ${p.price.toFixed(2).replace(".", ",")}` : "Consulte condições"}
                     </span>
                   </div>
                 </Link>
