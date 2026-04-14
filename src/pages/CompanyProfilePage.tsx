@@ -113,10 +113,15 @@ export default function CompanyProfilePage() {
       <div className="container py-8">
         <Tabs defaultValue="opportunities" className="w-full">
           <TabsList className="mb-6 w-full justify-start">
+            <TabsTrigger value="contacts" className="gap-1.5"><Users className="h-4 w-4" /> Contatos</TabsTrigger>
             <TabsTrigger value="opportunities" className="gap-1.5"><Briefcase className="h-4 w-4" /> Oportunidades ({opportunities.length})</TabsTrigger>
             <TabsTrigger value="courses" className="gap-1.5"><GraduationCap className="h-4 w-4" /> Cursos ({courses.length})</TabsTrigger>
             <TabsTrigger value="benefits" className="gap-1.5"><Gift className="h-4 w-4" /> Benefícios ({benefits.length})</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="contacts">
+            <CompanyContacts companyUserId={profile.user_id} editable={false} />
+          </TabsContent>
 
           <TabsContent value="opportunities">
             {opportunities.length === 0 ? (
