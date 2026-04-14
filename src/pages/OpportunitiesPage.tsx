@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Search, Users, Truck, Briefcase, Package, ArrowRight, Calendar, Plus, Loader2, Trash2, Pencil, Handshake, TrendingUp, Zap, MessageCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -117,11 +117,20 @@ export default function OpportunitiesPage() {
     fetchData();
   };
 
-  const filtered = opportunities.filter((o) => {
-    const matchType = activeType === "all" || o.type === activeType;
-    const matchSearch = o.title.toLowerCase().includes(search.toLowerCase()) || (o.company_name || "").toLowerCase().includes(search.toLowerCase());
-    return matchType && matchSearch;
-  });
+  const filtered = useMemo(() => {
+    const base = opportunities.filter((o) => {
+      const matchType = activeType === "all" || o.type === activeType;
+      const matchSearch = o.title.toLowerCase().includes(search.toLowerCase()) || (o.company_name || "").toLowerCase().includes(search.toLowerCase());
+      return matchType && matchSearch;
+    });
+    // Shuffle using Fisher-Yates then sort descending by created_at
+    const shuffled = [...base];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [opportunities, activeType, search]);
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -218,7 +227,7 @@ export default function OpportunitiesPage() {
         ) : (
           <div className="space-y-4">
             {filtered.map((opp, i) => (
-              <motion.div key={opp.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp} className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover md:flex-row md:items-center md:justify-between">
+              <motion.div key={opp.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeInUp} className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-0.5 md:flex-row md:items-center md:justify-between">
                 <div className="flex-1">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${typeColors[opp.type] || ""}`}>{types.find((t) => t.value === opp.type)?.label}</span>
