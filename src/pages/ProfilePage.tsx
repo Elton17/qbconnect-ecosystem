@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, User, Phone, Globe, MapPin, Save, Loader2, Shield, Camera } from "lucide-react";
+import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -30,6 +31,149 @@ function formatCNPJ(value: string) {
   return digits.replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2");
 }
 
+// --- Meus Anúncios sub-component ---
+function MeusAnuncios({ userId }: { userId: string }) {
+  const { toast } = useToast();
+  const { confirmDelete, ConfirmDialog } = useConfirmDelete();
+  const [products, setProducts] = useState<any[]>([]);
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [benefits, setBenefits] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAll = async () => {
+    setLoading(true);
+    const [prodRes, oppRes, benRes, evtRes, crsRes] = await Promise.all([
+      supabase.from("products").select("id, title, category, price, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+      supabase.from("opportunities").select("id, title, type, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+      supabase.from("benefits").select("id, offer, category, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+      supabase.from("events").select("id, title, category, start_date, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+      supabase.from("courses").select("id, title, category, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+    ]);
+    setProducts(prodRes.data || []);
+    setOpportunities(oppRes.data || []);
+    setBenefits(benRes.data || []);
+    setEvents(evtRes.data || []);
+    setCourses(crsRes.data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchAll(); }, [userId]);
+
+  const handleDelete = async (table: string, id: string, label: string) => {
+    const { error } = await (supabase.from(table as any) as any).delete().eq("id", id);
+    if (error) { toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" }); }
+    else { toast({ title: `${label} removido!` }); fetchAll(); }
+  };
+
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("pt-BR");
+
+  if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+
+  const totalItems = products.length + opportunities.length + benefits.length + events.length + courses.length;
+
+  const SectionHeader = ({ icon: Icon, title, count }: { icon: any; title: string; count: number }) => (
+    <div className="flex items-center gap-2 mb-3 mt-6 first:mt-0">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <h3 className="text-base font-bold text-foreground">{title}</h3>
+      <Badge variant="secondary" className="ml-1 text-xs">{count}</Badge>
+    </div>
+  );
+
+  const ItemRow = ({ id, title, subtitle, link, table, label, active }: { id: string; title: string; subtitle?: string; link: string; table: string; label: string; active?: boolean }) => (
+    <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3 mb-2 hover:bg-muted/50 transition-colors">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-foreground truncate">{title}</span>
+          {active === false && <Badge variant="outline" className="text-[10px] border-destructive/30 text-destructive">Inativo</Badge>}
+        </div>
+        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+      </div>
+      <div className="flex items-center gap-1 ml-2 shrink-0">
+        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+          <Link to={link}><ExternalLink className="h-3.5 w-3.5" /></Link>
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(table, id, label))}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      {totalItems === 0 ? (
+        <Card className="card-shadow">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <Megaphone className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <p className="text-lg font-semibold text-foreground">Nenhum anúncio publicado</p>
+            <p className="text-sm text-muted-foreground mt-1">Comece a divulgar seus produtos, serviços e oportunidades no marketplace.</p>
+            <Button className="mt-4" asChild><Link to="/marketplace">Ir para o Marketplace</Link></Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="card-shadow">
+          <CardHeader>
+            <CardTitle className="text-lg">Todos os seus anúncios</CardTitle>
+            <CardDescription>{totalItems} publicação{totalItems !== 1 ? "ões" : ""} no total</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {products.length > 0 && (
+              <>
+                <SectionHeader icon={Package} title="Produtos" count={products.length} />
+                {products.map((p) => (
+                  <ItemRow key={p.id} id={p.id} title={p.title} subtitle={`${p.category || "Sem categoria"} • R$ ${Number(p.price).toFixed(2)}`} link={`/produto/${p.id}`} table="products" label="Produto" active={p.active} />
+                ))}
+              </>
+            )}
+
+            {opportunities.length > 0 && (
+              <>
+                <SectionHeader icon={Handshake} title="Oportunidades" count={opportunities.length} />
+                {opportunities.map((o) => (
+                  <ItemRow key={o.id} id={o.id} title={o.title} subtitle={`${o.type} • ${formatDate(o.created_at)}`} link="/oportunidades" table="opportunities" label="Oportunidade" active={o.active} />
+                ))}
+              </>
+            )}
+
+            {benefits.length > 0 && (
+              <>
+                <SectionHeader icon={Gift} title="Benefícios" count={benefits.length} />
+                {benefits.map((b) => (
+                  <ItemRow key={b.id} id={b.id} title={b.offer} subtitle={`${b.category || "Sem categoria"} • ${formatDate(b.created_at)}`} link="/beneficios" table="benefits" label="Benefício" active={b.active} />
+                ))}
+              </>
+            )}
+
+            {events.length > 0 && (
+              <>
+                <SectionHeader icon={CalendarDays} title="Eventos" count={events.length} />
+                {events.map((e) => (
+                  <ItemRow key={e.id} id={e.id} title={e.title} subtitle={`${e.category} • ${formatDate(e.start_date)}`} link={`/evento/${e.id}`} table="events" label="Evento" active={e.active} />
+                ))}
+              </>
+            )}
+
+            {courses.length > 0 && (
+              <>
+                <SectionHeader icon={GraduationCap} title="Cursos" count={courses.length} />
+                {courses.map((c) => (
+                  <ItemRow key={c.id} id={c.id} title={c.title} subtitle={`${c.category} • ${formatDate(c.created_at)}`} link={`/curso/${c.id}`} table="courses" label="Curso" active={c.active} />
+                ))}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      {ConfirmDialog}
+    </div>
+  );
+}
+
+// --- Main ProfilePage ---
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -148,10 +292,11 @@ export default function ProfilePage() {
       {/* Content */}
       <div className="container max-w-4xl py-8">
         <Tabs defaultValue="company" className="space-y-6">
-          <TabsList className="w-full justify-start">
+          <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="company" className="gap-1.5"><Building2 className="h-4 w-4" /> Empresa</TabsTrigger>
             <TabsTrigger value="contact" className="gap-1.5"><User className="h-4 w-4" /> Contato</TabsTrigger>
             <TabsTrigger value="details" className="gap-1.5"><Globe className="h-4 w-4" /> Detalhes</TabsTrigger>
+            <TabsTrigger value="listings" className="gap-1.5"><Megaphone className="h-4 w-4" /> Meus Anúncios</TabsTrigger>
           </TabsList>
 
           <TabsContent value="company">
@@ -202,6 +347,10 @@ export default function ProfilePage() {
                 <div className="space-y-2"><Label htmlFor="description">Descrição da empresa</Label><Textarea id="description" rows={4} value={form.description || ""} onChange={(e) => handleChange("description", e.target.value)} placeholder="Conte um pouco sobre sua empresa..." /></div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="listings">
+            {user && <MeusAnuncios userId={user.id} />}
           </TabsContent>
         </Tabs>
       </div>
