@@ -397,6 +397,11 @@ export default function AdminPage() {
 
           {/* ── COMPANIES ── */}
           <TabsContent value="companies">
+            <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{profiles.filter(p => p.plan === "premium").length} empresas Premium</span>
+              <span>·</span>
+              <span>{profiles.filter(p => p.plan !== "premium").length} empresas Associado</span>
+            </div>
             <AdminTable
               items={filterBySearch(profiles, ["company_name", "cnpj", "city", "email", "segment"])}
               columns={[
@@ -404,7 +409,7 @@ export default function AdminPage() {
                 { key: "cnpj", label: "CNPJ" },
                 { key: "city", label: "Cidade" },
                 { key: "segment", label: "Segmento" },
-                { key: "plan", label: "Plano" },
+                { key: "plan", label: "Plano", render: (v: string) => v === "premium" ? "⭐ Premium" : "Associado" },
               ]}
               renderStatus={(item) => (
                 <Badge variant={item.approved ? "default" : "destructive"} className="text-[10px]">
@@ -418,6 +423,18 @@ export default function AdminPage() {
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit("profiles", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant={item.plan === "premium" ? "outline" : "default"}
+                    className={item.plan === "premium" ? "" : "bg-amber-500 hover:bg-amber-600 text-white"}
+                    onClick={async () => {
+                      const newPlan = item.plan === "premium" ? "basic" : "premium";
+                      const { error } = await supabase.from("profiles").update({ plan: newPlan }).eq("id", item.id);
+                      if (error) { toast.error("Erro ao alterar plano"); return; }
+                      toast.success(`Plano alterado para ${newPlan === "premium" ? "Premium" : "Associado"}`);
+                      setProfiles(prev => prev.map(p => p.id === item.id ? { ...p, plan: newPlan } : p));
+                    }}
+                  >
+                    {item.plan === "premium" ? "Rebaixar" : "⭐ Premium"}
                   </Button>
                   <Button size="sm" variant={item.approved ? "outline" : "default"} onClick={() => toggleApproval(item.id, item.approved)}>
                     {item.approved ? <XCircle className="mr-1 h-3 w-3" /> : <CheckCircle2 className="mr-1 h-3 w-3" />}
