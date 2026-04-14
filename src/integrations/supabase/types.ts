@@ -296,6 +296,8 @@ export type Database = {
           description: string | null
           duration: string | null
           id: string
+          instructor_name: string | null
+          level: string
           premium: boolean | null
           thumbnail_url: string | null
           title: string
@@ -309,6 +311,8 @@ export type Database = {
           description?: string | null
           duration?: string | null
           id?: string
+          instructor_name?: string | null
+          level?: string
           premium?: boolean | null
           thumbnail_url?: string | null
           title: string
@@ -322,6 +326,8 @@ export type Database = {
           description?: string | null
           duration?: string | null
           id?: string
+          instructor_name?: string | null
+          level?: string
           premium?: boolean | null
           thumbnail_url?: string | null
           title?: string
@@ -442,6 +448,78 @@ export type Database = {
           state?: string | null
           title?: string
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_path_courses: {
+        Row: {
+          course_id: string
+          id: string
+          learning_path_id: string
+          sort_order: number
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          learning_path_id: string
+          sort_order?: number
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          learning_path_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_path_courses_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_paths: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          description: string | null
+          id: string
+          sort_order: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
