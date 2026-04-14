@@ -507,7 +507,7 @@ export default function MarketplacePage() {
                         </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-foreground/60 to-transparent p-4 pt-10">
                           <span className="text-lg font-extrabold text-primary-foreground">
-                            {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Sob consulta"}
+                            {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Consulte condições"}
                           </span>
                         </div>
                       </div>
