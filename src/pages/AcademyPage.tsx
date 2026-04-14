@@ -290,7 +290,40 @@ export default function AcademyPage() {
         </div>
       </section>
 
-      {/* Search & Filters */}
+      {/* Learning Paths */}
+      {learningPaths.length > 0 && (
+        <div className="container pt-10 pb-2">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+              <Route className="h-6 w-6 text-primary" /> Trilhas de Aprendizado
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {learningPaths.map((path, i) => (
+              <motion.div
+                key={path.id}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                onClick={() => navigate(`/trilha/${path.id}`)}
+                className="group cursor-pointer rounded-2xl border border-border bg-card p-5 transition-all hover:shadow-md hover:-translate-y-1"
+              >
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                  <Route className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="mb-1 text-lg font-bold text-card-foreground group-hover:text-primary transition-colors">{path.title}</h3>
+                {path.description && <p className="mb-3 text-sm text-muted-foreground line-clamp-2">{path.description}</p>}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{path.course_count} cursos</span>
+                  <ChevronRight className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="container pt-8 pb-4 space-y-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
