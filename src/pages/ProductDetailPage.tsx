@@ -1,10 +1,12 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, Package, MessageCircle, Mail, ChevronLeft, ChevronRight,
-  MapPin, Phone, Globe, Building2, ShoppingBag, Tag
+  MapPin, Phone, Globe, Building2, ShoppingBag, Tag, Pencil, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
