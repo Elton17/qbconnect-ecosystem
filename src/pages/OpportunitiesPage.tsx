@@ -130,13 +130,14 @@ export default function OpportunitiesPage() {
       const matchSearch = o.title.toLowerCase().includes(search.toLowerCase()) || (o.company_name || "").toLowerCase().includes(search.toLowerCase());
       return matchType && matchSearch;
     });
-    // Shuffle using Fisher-Yates then sort descending by created_at
-    const shuffled = [...base];
-    for (let i = shuffled.length - 1; i > 0; i--) {
+    // Premium first, then shuffle within groups
+    const premium = base.filter(o => o.plan === "premium");
+    const normal = base.filter(o => o.plan !== "premium");
+    for (let i = normal.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      [normal[i], normal[j]] = [normal[j], normal[i]];
     }
-    return shuffled;
+    return [...premium, ...normal];
   }, [opportunities, activeType, search]);
 
   const timeAgo = (date: string) => {
