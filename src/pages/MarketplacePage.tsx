@@ -87,8 +87,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 function getWhatsAppUrl(phone: string, title: string) {
   const cleanPhone = phone.replace(/\D/g, "");
   const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
-  const message = encodeURIComponent(`Olá! Vi seu produto *${title}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`);
-  return `https://wa.me/${fullPhone}?text=${message}`;
+  return `https://wa.me/${fullPhone}?text=${encodeURIComponent(`Olá! Vi seu produto *${title}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`)}`;
 }
 
 // Mini carousel for product cards
@@ -646,7 +645,7 @@ export default function MarketplacePage() {
                         <div className="flex gap-2">
                           {product.contact_phone && (
                             <a href={getWhatsAppUrl(product.contact_phone, product.title)} target="_blank" rel="noopener noreferrer" className="flex-1" onClick={(e) => e.stopPropagation()}>
-                              <Button size="sm" className="w-full text-white" style={{ backgroundColor: "#25D366" }}>
+                              <Button size="sm" variant="whatsapp" className="w-full">
                                 <WhatsAppIcon className="mr-1 h-3.5 w-3.5" /> Consultar via WhatsApp
                               </Button>
                             </a>

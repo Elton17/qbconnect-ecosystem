@@ -53,7 +53,7 @@ export default function SACPage() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   Atendimento rápido de {QBCAMP_HOURS}
                 </p>
-                <Button asChild className="mt-5 w-full bg-[#25D366] text-white hover:bg-[#1da851]">
+                <Button asChild variant="whatsapp" className="mt-5 w-full">
                   <a href={getWhatsAppUrl("Olá! Preciso de ajuda com o QBCAMP Conecta+.")} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-1.5 h-4 w-4" /> Chamar no WhatsApp
                   </a>
