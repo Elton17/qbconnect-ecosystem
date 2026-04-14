@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ interface Benefit {
   offer: string;
   category: string;
   exclusive: boolean;
+  whatsapp: string;
   company_name?: string;
   logo_url?: string;
 }
@@ -52,7 +53,7 @@ export default function BenefitsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false });
+  const [form, setForm] = useState({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "" });
   const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
   const [redeemingBenefit, setRedeemingBenefit] = useState<Benefit | null>(null);
   const [redeemCode, setRedeemCode] = useState<string | null>(null);
@@ -80,12 +81,12 @@ export default function BenefitsPage() {
     if (!user) return;
     setSaving(true);
     if (editingId) {
-      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive }).eq("id", editingId);
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp }).eq("id", editingId);
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
       else { toast({ title: "Benefício atualizado!" }); resetForm(); fetchData(); }
     } else {
-      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive });
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp });
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
       else { toast({ title: "Benefício criado!" }); resetForm(); fetchData(); }
@@ -93,14 +94,14 @@ export default function BenefitsPage() {
   };
 
   const resetForm = () => {
-    setForm({ offer: "", category: "Tecnologia", exclusive: false });
+    setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "" });
     setEditingId(null);
     setDialogOpen(false);
   };
 
   const handleEdit = (benefit: Benefit) => {
     setEditingId(benefit.id);
-    setForm({ offer: benefit.offer, category: benefit.category, exclusive: benefit.exclusive });
+    setForm({ offer: benefit.offer, category: benefit.category, exclusive: benefit.exclusive, whatsapp: benefit.whatsapp || "" });
     setDialogOpen(true);
   };
 
@@ -205,7 +206,7 @@ export default function BenefitsPage() {
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
-                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
+                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "" }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle></DialogHeader>
@@ -218,7 +219,8 @@ export default function BenefitsPage() {
                       </Select>
                     </div>
                     <div className="flex items-center gap-2"><Switch checked={form.exclusive} onCheckedChange={(v) => setForm({ ...form, exclusive: v })} /><Label>Exclusivo Premium</Label></div>
-                    <Button onClick={handleSubmit} disabled={saving || !form.offer} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}Criar Benefício</Button>
+                    <div><Label>WhatsApp da empresa</Label><Input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} placeholder="Ex: 5541999999999" /></div>
+                    <Button onClick={handleSubmit} disabled={saving || !form.offer} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}{editingId ? "Salvar" : "Criar Benefício"}</Button>
                   </div>
                 </DialogContent>
               </Dialog>
@@ -316,10 +318,25 @@ export default function BenefitsPage() {
                     <p className="mt-0.5 text-xs">por {redeemingBenefit.company_name}</p>
                   </div>
                 )}
-                <Button onClick={handleCopy} variant="outline" className="w-full">
-                  {copied ? <Check className="mr-1.5 h-4 w-4" /> : <Copy className="mr-1.5 h-4 w-4" />}
-                  {copied ? "Copiado!" : "Copiar código"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleCopy} variant="outline" className="flex-1">
+                    {copied ? <Check className="mr-1.5 h-4 w-4" /> : <Copy className="mr-1.5 h-4 w-4" />}
+                    {copied ? "Copiado!" : "Copiar código"}
+                  </Button>
+                  {redeemingBenefit?.whatsapp && (
+                    <Button
+                      variant="default"
+                      className="flex-1 bg-[#25D366] hover:bg-[#1da851] text-white"
+                      onClick={() => {
+                        const phone = redeemingBenefit.whatsapp.replace(/\D/g, "");
+                        const text = encodeURIComponent(`Olá! Gostaria de utilizar meu cupom de benefício QBCAMP.\n\n🎟️ Código: ${redeemCode}\n📋 Oferta: ${redeemingBenefit.offer}`);
+                        window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+                      }}
+                    >
+                      <MessageCircle className="mr-1.5 h-4 w-4" /> Enviar via WhatsApp
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : null}
           </DialogContent>
