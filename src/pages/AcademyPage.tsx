@@ -230,7 +230,16 @@ export default function AcademyPage() {
                           <SelectContent>{courseCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>Nível *</Label>
+                          <Select value={form.level} onValueChange={(v) => setForm({ ...form, level: v })}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>{courseLevels.map(l => <SelectItem key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div><Label>Duração estimada</Label><Input value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="Ex: 4h" /></div>
+                      </div>
+                      <div><Label>Nome do Instrutor</Label><Input value={form.instructor_name} onChange={(e) => setForm({ ...form, instructor_name: e.target.value })} placeholder="Ex: João Silva" /></div>
                       <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
                       <div>
                         <Label>Imagem de Capa</Label>
