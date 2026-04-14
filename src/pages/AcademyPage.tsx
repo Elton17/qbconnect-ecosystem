@@ -45,6 +45,16 @@ interface Course {
   lesson_count?: number;
   avg_rating?: number;
   enrollment_count?: number;
+  level?: string;
+  instructor_name?: string;
+}
+
+interface LearningPath {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail_url: string;
+  course_count: number;
 }
 
 export default function AcademyPage() {
