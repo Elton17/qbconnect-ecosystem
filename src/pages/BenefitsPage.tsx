@@ -68,6 +68,7 @@ export default function BenefitsPage() {
   const [copied, setCopied] = useState(false);
   const [userRedemptions, setUserRedemptions] = useState<Map<string, string>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchData = async () => {
     const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
