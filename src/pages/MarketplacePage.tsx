@@ -344,9 +344,9 @@ export default function MarketplacePage() {
                 </Button>
               ) : !user ? (
                 <Button variant="hero" size="xl" asChild>
-                  <Link to="/cadastro">
+                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
                     Comece a Vender <ArrowRight className="ml-1 h-5 w-5" />
-                  </Link>
+                  </a>
                 </Button>
               ) : null}
               <Button

@@ -151,8 +151,10 @@ export default function BenefitsPage() {
                 Filie-se à QBCAMP e tenha acesso a benefícios exclusivos, descontos especiais e uma rede de parceiros que impulsiona o seu negócio.
               </p>
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Button variant="hero" size="xl" onClick={() => window.location.href = "/registro"}>
-                  <Building2 className="mr-1.5 h-5 w-5" /> Quero me associar
+                <Button variant="hero" size="xl" asChild>
+                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
+                    <Building2 className="mr-1.5 h-5 w-5" /> Quero me associar
+                  </a>
                 </Button>
                 <Button variant="outline" size="lg" onClick={() => window.location.href = "/login"}>
                   Já sou associado — Entrar

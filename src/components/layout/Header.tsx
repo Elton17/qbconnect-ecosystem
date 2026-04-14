@@ -105,7 +105,7 @@ export default function Header() {
           ) : (
             <>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/cadastro">Cadastrar</Link>
+                <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Cadastrar</a>
               </Button>
               <Button size="sm" asChild>
                 <Link to="/login">Entrar</Link>
@@ -172,7 +172,7 @@ export default function Header() {
                 ) : (
                   <>
                     <Button variant="outline" size="sm" asChild>
-                      <Link to="/cadastro" onClick={() => setMobileOpen(false)}>Cadastrar</Link>
+                      <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>Cadastrar</a>
                     </Button>
                     <Button size="sm" asChild>
                       <Link to="/login" onClick={() => setMobileOpen(false)}>Entrar</Link>

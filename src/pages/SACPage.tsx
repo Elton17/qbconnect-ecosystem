@@ -218,7 +218,7 @@ export default function SACPage() {
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Button size="lg" asChild>
-                <Link to="/cadastro">Cadastrar Empresa <ArrowRight className="ml-1 h-4 w-4" /></Link>
+                <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Cadastrar Empresa <ArrowRight className="ml-1 h-4 w-4" /></a>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link to="/marketplace">Explorar Marketplace</Link>

@@ -91,7 +91,7 @@ export default function LoginPage() {
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Não tem conta?{" "}
-                  <Link to="/cadastro" className="font-semibold text-primary hover:underline">Cadastre sua empresa</Link>
+                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">Cadastre sua empresa</a>
                 </p>
               </CardFooter>
             </form>
