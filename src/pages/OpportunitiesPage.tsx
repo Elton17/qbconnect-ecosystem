@@ -54,6 +54,7 @@ export default function OpportunitiesPage() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
 
   const fetchData = async () => {
@@ -77,22 +78,38 @@ export default function OpportunitiesPage() {
   const handleSubmit = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("opportunities").insert({
-      user_id: user.id, title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent,
-    });
-    setSaving(false);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    if (editingId) {
+      const { error } = await supabase.from("opportunities").update({
+        title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent,
+      }).eq("id", editingId);
+      setSaving(false);
+      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+      else { toast({ title: "Oportunidade atualizada!" }); resetForm(); fetchData(); }
     } else {
-      toast({ title: "Oportunidade publicada!" });
-      setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
-      setDialogOpen(false);
-      fetchData();
+      const { error } = await supabase.from("opportunities").insert({
+        user_id: user.id, title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent,
+      });
+      setSaving(false);
+      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
+      else { toast({ title: "Oportunidade publicada!" }); resetForm(); fetchData(); }
     }
+  };
+
+  const resetForm = () => {
+    setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false });
+    setEditingId(null);
+    setDialogOpen(false);
+  };
+
+  const handleEdit = (opp: Opportunity) => {
+    setEditingId(opp.id);
+    setForm({ title: opp.title, type: opp.type, value: opp.value, description: opp.description, urgent: opp.urgent });
+    setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
     await supabase.from("opportunities").delete().eq("id", id);
+    toast({ title: "Oportunidade removida!" });
     fetchData();
   };
 
@@ -133,12 +150,12 @@ export default function OpportunitiesPage() {
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
               {user && (
-                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                   <DialogTrigger asChild>
-                    <Button variant="hero" size="xl"><Plus className="mr-1 h-5 w-5" /> Publicar Oportunidade</Button>
+                    <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ title: "", type: "fornecedor", value: "", description: "", urgent: false }); }}><Plus className="mr-1 h-5 w-5" /> Publicar Oportunidade</Button>
                   </DialogTrigger>
                   <DialogContent>
-                    <DialogHeader><DialogTitle>Nova Oportunidade</DialogTitle></DialogHeader>
+                    <DialogHeader><DialogTitle>{editingId ? "Editar Oportunidade" : "Nova Oportunidade"}</DialogTitle></DialogHeader>
                     <div className="space-y-4">
                       <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Procuro fornecedor de aço" /></div>
                       <div><Label>Tipo *</Label>
@@ -229,7 +246,10 @@ export default function OpportunitiesPage() {
                     </Button>
                   )}
                   {user?.id === opp.user_id ? (
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(opp.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <div className="flex gap-1">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(opp)}><Pencil className="h-3.5 w-3.5" /></Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(opp.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    </div>
                   ) : (
                     <Button variant="default" size="sm">Candidatar-se <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
                   )}
