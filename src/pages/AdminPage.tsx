@@ -610,6 +610,86 @@ export default function AdminPage() {
             />
           </TabsContent>
 
+          {/* ── LEARNING PATHS ── */}
+          <TabsContent value="learning_paths">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-card-foreground flex items-center gap-2">
+                  <Route className="h-5 w-5 text-primary" /> Trilhas de Aprendizado
+                </h2>
+                <Button size="sm" onClick={() => setLpDialog(true)}><Plus className="mr-1 h-4 w-4" /> Nova Trilha</Button>
+              </div>
+
+              {learningPaths.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhuma trilha criada.</p>
+              ) : (
+                <div className="space-y-3">
+                  {filterBySearch(learningPaths, ["title", "description"]).map((lp: any) => (
+                    <div key={lp.id} className="flex items-center justify-between rounded-xl border border-border p-3">
+                      <div>
+                        <div className="text-sm font-semibold text-card-foreground">{lp.title}</div>
+                        <div className="text-xs text-muted-foreground">{lp.description || "Sem descrição"}</div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <ActiveBadge active={lp.active} />
+                        <ToggleActiveBtn active={lp.active} onClick={() => toggleActive("learning_paths", lp.id, lp.active, setLearningPaths)} />
+                        <Button size="sm" variant="outline" onClick={() => openLinkDialog(lp.id)} title="Gerenciar cursos">
+                          <ClipboardList className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => openEdit("learning_paths", lp)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => deleteRecord("learning_paths", lp.id, setLearningPaths)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Create learning path dialog */}
+            <Dialog open={lpDialog} onOpenChange={setLpDialog}>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Nova Trilha de Aprendizado</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <div><Label>Título *</Label><Input value={lpForm.title} onChange={(e) => setLpForm({ ...lpForm, title: e.target.value })} placeholder="Ex: Vendas e Comercial" /></div>
+                  <div><Label>Descrição</Label><Textarea value={lpForm.description} onChange={(e) => setLpForm({ ...lpForm, description: e.target.value })} rows={3} /></div>
+                  <Button onClick={createLearningPath} disabled={lpSaving || !lpForm.title} className="w-full">
+                    {lpSaving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null} Criar Trilha
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Link courses dialog */}
+            <Dialog open={linkDialog.open} onOpenChange={(o) => setLinkDialog({ ...linkDialog, open: o })}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader><DialogTitle>Cursos da Trilha</DialogTitle></DialogHeader>
+                <div className="space-y-3">
+                  {linkedCourses.map((lc: any) => (
+                    <div key={lc.id} className="flex items-center justify-between rounded-lg border border-border p-2">
+                      <span className="text-sm text-foreground">{(lc.courses as any)?.title || lc.course_id}</span>
+                      <Button size="sm" variant="destructive" onClick={() => removeCourseFromPath(lc.id)}><Trash2 className="h-3 w-3" /></Button>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Select value={linkCourseId} onValueChange={setLinkCourseId}>
+                      <SelectTrigger><SelectValue placeholder="Selecione um curso" /></SelectTrigger>
+                      <SelectContent>
+                        {courses.filter((c: any) => !linkedCourses.some((lc: any) => lc.course_id === c.id)).map((c: any) => (
+                          <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button onClick={addCourseToPath} disabled={!linkCourseId}>Vincular</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
+
           {/* ── ROLES ── */}
           <TabsContent value="roles">
             <div className="rounded-2xl border border-border bg-card p-6">
