@@ -78,6 +78,7 @@ const App = () => (
               {/* Admin routes */}
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
             </Route>
+            <Route path="/em-breve" element={<PreLaunchPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
