@@ -363,6 +363,10 @@ export default function ProfilePage() {
           <TabsContent value="listings">
             {user && <MeusAnuncios userId={user.id} />}
           </TabsContent>
+
+          <TabsContent value="contacts">
+            {user && <CompanyContacts companyUserId={user.id} editable={true} />}
+          </TabsContent>
         </Tabs>
       </div>
     </div>
