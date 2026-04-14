@@ -597,7 +597,10 @@ export default function MarketplacePage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {filteredCompanies.map((company, i) => (
                     <motion.div key={company.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp}
-                      className="group rounded-2xl border border-border bg-card p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
+                      className={`group rounded-2xl border bg-card p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 ${company.plan === "premium" ? "border-2 border-amber-400" : "border-border"}`}>
+                      {company.plan === "premium" && (
+                        <div className="mb-3"><PremiumBadge /></div>
+                      )}
                       <div className="mb-4 flex items-start justify-between">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary overflow-hidden">
                           {company.logo_url ? <img src={company.logo_url} alt={company.company_name} className="h-full w-full object-cover" /> : company.company_name.charAt(0)}
@@ -622,7 +625,10 @@ export default function MarketplacePage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {filteredProducts.map((product, i) => (
                     <motion.div key={product.id} custom={i} initial="hidden" animate="visible" variants={fadeInUp}
-                      className="group rounded-2xl border border-border bg-card overflow-hidden card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
+                      className={`group rounded-2xl border bg-card overflow-hidden card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 ${companyPlanMap.get(product.user_id) === "premium" ? "border-2 border-amber-400 relative" : "border-border"}`}>
+                      {companyPlanMap.get(product.user_id) === "premium" && (
+                        <div className="absolute right-3 top-3 z-10"><PremiumBadge /></div>
+                      )}
                       <ProductCarousel images={getProductImages(product)} title={product.title} />
                       <div className="p-5">
                         <div className="mb-2 flex items-start justify-between">
