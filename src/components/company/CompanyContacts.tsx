@@ -102,7 +102,8 @@ export default function CompanyContacts({ companyUserId, editable = false }: Pro
   return (
     <div>
       {canEdit && (
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <CsvContactImport userId={user!.id} onImported={fetchContacts} />
           <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
             <DialogTrigger asChild>
               <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
