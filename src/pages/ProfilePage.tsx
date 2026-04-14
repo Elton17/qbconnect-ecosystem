@@ -17,6 +17,8 @@ import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handsha
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import CompanyContacts from "@/components/company/CompanyContacts";
+
 
 type Profile = Tables<"profiles">;
 
