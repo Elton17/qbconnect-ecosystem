@@ -8,7 +8,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
