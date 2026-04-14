@@ -260,7 +260,10 @@ export default function BenefitsPage() {
                     <div className="flex items-center gap-2">
                       {benefit.exclusive && <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">Exclusivo Premium</span>}
                       {user?.id === benefit.user_id && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(benefit.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(benefit)}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDelete(benefit.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                        </div>
                       )}
                     </div>
                   </div>
