@@ -40,11 +40,27 @@ interface Seller {
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [seller, setSeller] = useState<Seller | null>(null);
   const [otherProducts, setOtherProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  const isOwner = user && product && user.id === product.user_id;
+
+  async function handleDelete() {
+    if (!product) return;
+    const { error } = await supabase.from("products").delete().eq("id", product.id);
+    if (error) {
+      toast({ title: "Erro ao remover produto", variant: "destructive" });
+      return;
+    }
+    toast({ title: "Produto removido com sucesso" });
+    navigate("/marketplace");
+  }
 
   useEffect(() => {
     if (!id) return;
