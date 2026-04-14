@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Loader2, Phone, Mail, MessageCircle, User, Building2, StickyNote, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Phone, Mail, MessageCircle, User, Building2, StickyNote, Star, FileDown } from "lucide-react";
 import CsvContactImport from "./CsvContactImport";
 
 interface Contact {
@@ -97,13 +97,37 @@ export default function CompanyContacts({ companyUserId, editable = false }: Pro
     fetchContacts();
   };
 
+  const exportCsv = () => {
+    if (!contacts.length) return;
+    const bom = "\uFEFF";
+    const header = "nome;cargo;departamento;email;telefone;whatsapp;observacoes;principal";
+    const rows = contacts.map(c =>
+      [c.name, c.role, c.department, c.email, c.phone, c.whatsapp, c.notes, c.is_primary ? "sim" : "não"]
+        .map(v => `"${(v || "").replace(/"/g, '""')}"`)
+        .join(";")
+    );
+    const csv = bom + header + "\n" + rows.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "contatos.csv"; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
 
   return (
     <div>
       {canEdit && (
         <div className="mb-4 flex items-center justify-between gap-2">
-          <CsvContactImport userId={user!.id} onImported={fetchContacts} />
+          <div className="flex gap-2">
+            <CsvContactImport userId={user!.id} onImported={fetchContacts} />
+            {contacts.length > 0 && (
+              <Button variant="outline" size="sm" onClick={exportCsv}>
+                <FileDown className="mr-1.5 h-4 w-4" /> Exportar CSV
+              </Button>
+            )}
+          </div>
           <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
             <DialogTrigger asChild>
               <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
