@@ -41,6 +41,13 @@ export default function AdminPage() {
   const [editDialog, setEditDialog] = useState<{ open: boolean; table: string; item: any }>({ open: false, table: "", item: null });
   const [editForm, setEditForm] = useState<Record<string, any>>({});
   const [editSaving, setEditSaving] = useState(false);
+  // Learning path state
+  const [lpDialog, setLpDialog] = useState(false);
+  const [lpForm, setLpForm] = useState({ title: "", description: "" });
+  const [lpSaving, setLpSaving] = useState(false);
+  const [linkDialog, setLinkDialog] = useState<{ open: boolean; pathId: string }>({ open: false, pathId: "" });
+  const [linkCourseId, setLinkCourseId] = useState("");
+  const [linkedCourses, setLinkedCourses] = useState<any[]>([]);
 
   useEffect(() => { if (user) fetchAll(); }, [user]);
 
@@ -246,14 +253,7 @@ export default function AdminPage() {
     ],
   };
 
-  // Learning path creation
-  const [lpDialog, setLpDialog] = useState(false);
-  const [lpForm, setLpForm] = useState({ title: "", description: "" });
-  const [lpSaving, setLpSaving] = useState(false);
-  // Course linking
-  const [linkDialog, setLinkDialog] = useState<{ open: boolean; pathId: string }>({ open: false, pathId: "" });
-  const [linkCourseId, setLinkCourseId] = useState("");
-  const [linkedCourses, setLinkedCourses] = useState<any[]>([]);
+  // Functions below use state declared above loading check
 
   async function createLearningPath() {
     if (!user || !lpForm.title) return;
