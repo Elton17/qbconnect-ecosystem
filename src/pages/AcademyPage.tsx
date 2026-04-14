@@ -63,11 +63,12 @@ export default function AcademyPage() {
   const { approved } = useApprovedCompany();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const navigate = useNavigate();
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: "", category: "Marketing", duration: "", premium: false, description: "" });
+  const [form, setForm] = useState({ title: "", category: "Marketing", duration: "", premium: false, description: "", level: "iniciante", instructor_name: "" });
   const [filter, setFilter] = useState("Todos");
   const [searchQuery, setSearchQuery] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
