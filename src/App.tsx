@@ -33,6 +33,7 @@ import SACPage from "@/pages/SACPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import PlanosPage from "@/pages/PlanosPage";
+import PreLaunchPage from "@/pages/PreLaunchPage";
 
 const queryClient = new QueryClient();
 const App = () => (
