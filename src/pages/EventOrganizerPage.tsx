@@ -3,8 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Users, Download, Mail, Loader2, CalendarDays,
-  Ticket, Search, Check, X, MessageSquare, Clock, Copy, Pencil
+  Ticket, Search, Check, X, MessageSquare, Clock, Copy, Pencil, FileSpreadsheet
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import { Button } from "@/components/ui/button";
