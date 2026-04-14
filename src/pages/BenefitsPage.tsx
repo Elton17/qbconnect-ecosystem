@@ -318,10 +318,25 @@ export default function BenefitsPage() {
                     <p className="mt-0.5 text-xs">por {redeemingBenefit.company_name}</p>
                   </div>
                 )}
-                <Button onClick={handleCopy} variant="outline" className="w-full">
-                  {copied ? <Check className="mr-1.5 h-4 w-4" /> : <Copy className="mr-1.5 h-4 w-4" />}
-                  {copied ? "Copiado!" : "Copiar código"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleCopy} variant="outline" className="flex-1">
+                    {copied ? <Check className="mr-1.5 h-4 w-4" /> : <Copy className="mr-1.5 h-4 w-4" />}
+                    {copied ? "Copiado!" : "Copiar código"}
+                  </Button>
+                  {redeemingBenefit?.whatsapp && (
+                    <Button
+                      variant="default"
+                      className="flex-1 bg-[#25D366] hover:bg-[#1da851] text-white"
+                      onClick={() => {
+                        const phone = redeemingBenefit.whatsapp.replace(/\D/g, "");
+                        const text = encodeURIComponent(`Olá! Gostaria de utilizar meu cupom de benefício QBCAMP.\n\n🎟️ Código: ${redeemCode}\n📋 Oferta: ${redeemingBenefit.offer}`);
+                        window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+                      }}
+                    >
+                      <MessageCircle className="mr-1.5 h-4 w-4" /> Enviar via WhatsApp
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : null}
           </DialogContent>
