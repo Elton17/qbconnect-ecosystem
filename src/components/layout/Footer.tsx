@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { Link2, Phone, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { QBCAMP_PHONE, QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, QBCAMP_WHATSAPP, getWhatsAppUrl } from "@/lib/constants";
 
 export default function Footer() {
   return (
     <footer className="bg-secondary text-secondary-foreground">
-      {/* Red accent line */}
       <div className="h-[3px] bg-primary" />
 
       <div className="container py-12">
@@ -47,12 +46,12 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-white/70">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
-                <a href="tel:+554136721041" className="hover:text-primary transition-colors">(41) 3672-1041</a>
+                <a href={`tel:${QBCAMP_PHONE}`} className="hover:text-primary transition-colors">{QBCAMP_PHONE_DISPLAY}</a>
               </li>
-              <li>Seg-Sex 08h às 17h</li>
+              <li>{QBCAMP_HOURS}</li>
             </ul>
             <a
-              href="https://wa.me/554136721041"
+              href={getWhatsAppUrl("Olá! Preciso de ajuda com o QBCAMP Conecta+.")}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-heading font-bold text-white transition-colors hover:bg-primary-dark"
