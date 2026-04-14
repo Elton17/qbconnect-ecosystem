@@ -151,6 +151,20 @@ export default function MarketplacePage() {
     fetchData();
   }, []);
 
+  // Handle edit from product detail page
+  useEffect(() => {
+    const state = location.state as { editProductId?: string } | null;
+    if (state?.editProductId && products.length > 0) {
+      const product = products.find(p => p.id === state.editProductId);
+      if (product && user && user.id === product.user_id) {
+        openEditProduct(product);
+        setActiveTab("produtos");
+        // Clear the state to avoid re-opening on re-render
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, products, user]);
+
   async function fetchData() {
     setLoading(true);
     const [companiesRes, productsRes] = await Promise.all([
