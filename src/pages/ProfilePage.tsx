@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone } from "lucide-react";
+import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
