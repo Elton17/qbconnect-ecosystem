@@ -231,7 +231,10 @@ export default function BenefitsPage() {
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
-                  <Button variant="hero" size="xl" onClick={() => { setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null }); }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
+                  <Button variant="hero" size="xl" onClick={() => {
+                    if (!planLimitsData.canAddBenefit) { setUpgradeOpen(true); return; }
+                    setEditingId(null); setForm({ offer: "", category: "Tecnologia", exclusive: false, whatsapp: "", expires_at: null });
+                  }}><Plus className="mr-1 h-5 w-5" /> Criar Benefício</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle>{editingId ? "Editar Benefício" : "Novo Benefício"}</DialogTitle></DialogHeader>
