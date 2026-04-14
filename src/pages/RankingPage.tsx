@@ -58,23 +58,31 @@ export default function RankingPage() {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
+  const medalColors = [
+    "border-[#B8860B] ring-2 ring-[#B8860B]/30", // gold
+    "border-[#9E9E9E] ring-2 ring-[#9E9E9E]/30", // silver
+    "border-[#A0522D] ring-2 ring-[#A0522D]/30", // bronze
+  ];
+
+  const trophyColors = ["text-[#B8860B]", "text-[#9E9E9E]", "text-[#A0522D]"];
+
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-secondary py-16 md:py-20">
+      <section className="relative overflow-hidden bg-secondary py-14 md:py-20">
+        <div className="h-[3px] bg-primary absolute top-0 left-0 right-0" />
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute right-1/4 -top-10 h-80 w-80 rounded-full bg-accent blur-3xl" />
-          <div className="absolute -bottom-20 left-20 h-60 w-60 rounded-full bg-primary blur-3xl" />
+          <div className="absolute right-1/4 -top-10 h-80 w-80 rounded-full bg-primary blur-3xl" />
         </div>
         <div className="container relative">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/80">
               <Trophy className="h-4 w-4" /> Gamificação & Reconhecimento
             </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
-              Ranking <span className="text-gradient">Empresarial</span>
+            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl font-heading">
+              Ranking <span className="text-primary">Empresarial</span>
             </h1>
-            <p className="mb-6 text-lg text-secondary-foreground/70">
+            <p className="mb-6 text-lg text-white/60">
               As empresas mais ativas e engajadas da associação QBCAMP.
             </p>
           </motion.div>
@@ -85,13 +93,13 @@ export default function RankingPage() {
               { label: "Pontuação Máxima", value: `${ranking[0]?.score || 0}`, icon: Star },
               { label: "Medalhas", value: `${Math.min(ranking.length, 3)}`, icon: Medal },
             ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+              <div key={stat.label} className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
                   <stat.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xl font-extrabold text-secondary-foreground">{stat.value}</div>
-                  <div className="text-xs text-secondary-foreground/60">{stat.label}</div>
+                  <div className="text-xl font-extrabold text-white font-heading">{stat.value}</div>
+                  <div className="text-xs text-white/60">{stat.label}</div>
                 </div>
               </div>
             ))}
@@ -110,14 +118,14 @@ export default function RankingPage() {
             {/* Top 3 */}
             <div className="mb-10 grid gap-6 md:grid-cols-3">
               {ranking.slice(0, 3).map((company, i) => (
-                <motion.div key={company.rank} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className={`relative overflow-hidden rounded-2xl border border-border bg-card p-6 text-center card-shadow transition-all hover:card-shadow-hover ${i === 0 ? "md:-mt-4 md:scale-105 ring-2 ring-accent" : ""}`}>
+                <motion.div key={company.rank} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className={`relative overflow-hidden rounded-lg border bg-card p-6 text-center shadow-md transition-all hover:shadow-xl ${medalColors[i] || "border-border"} ${i === 0 ? "md:-mt-4 md:scale-105" : ""}`}>
                   <div className="mb-3 text-5xl">{company.badge}</div>
                   <div className="mb-1 flex items-center justify-center gap-2">
-                    <Trophy className={`h-5 w-5 ${i === 0 ? "text-accent" : "text-muted-foreground"}`} />
+                    <Trophy className={`h-5 w-5 ${trophyColors[i] || "text-muted-foreground"}`} />
                     <span className="text-sm font-bold text-muted-foreground">#{company.rank}</span>
                   </div>
                   <h3 className="mb-2 text-xl font-bold text-card-foreground">{company.name}</h3>
-                  <div className="mb-4 text-3xl font-extrabold text-primary">{company.score}</div>
+                  <div className="mb-4 text-3xl font-extrabold text-primary font-heading">{company.score}</div>
                   <div className="text-xs text-muted-foreground">pontos</div>
                   <div className="mt-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground border-t border-border pt-4">
                     <div className="flex flex-col items-center gap-1"><ShoppingBag className="h-3.5 w-3.5" /><span>{company.opportunities} oport.</span></div>
@@ -129,10 +137,10 @@ export default function RankingPage() {
             </div>
 
             {/* Table */}
-            <div className="rounded-2xl border border-border bg-card card-shadow overflow-hidden">
+            <div className="rounded-lg border border-border bg-card shadow-md overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-border bg-muted/50">
+                  <tr className="border-b border-border bg-muted">
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">#</th>
                     <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Empresa</th>
                     <th className="px-6 py-4 text-center font-semibold text-muted-foreground">Pontuação</th>
@@ -143,7 +151,7 @@ export default function RankingPage() {
                 </thead>
                 <tbody>
                   {ranking.map((company, i) => (
-                    <motion.tr key={company.rank} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                    <motion.tr key={company.rank} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="border-b border-border last:border-0 hover:bg-red-50/30 dark:hover:bg-red-950/10 transition-colors">
                       <td className="px-6 py-4 font-bold text-foreground">{company.badge || company.rank}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
