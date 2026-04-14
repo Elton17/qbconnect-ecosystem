@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Loader2, Phone, Mail, MessageCircle, User, Building2, StickyNote, Star } from "lucide-react";
+import CsvContactImport from "./CsvContactImport";
 
 interface Contact {
   id: string;
@@ -101,7 +102,8 @@ export default function CompanyContacts({ companyUserId, editable = false }: Pro
   return (
     <div>
       {canEdit && (
-        <div className="mb-4 flex justify-end">
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <CsvContactImport userId={user!.id} onImported={fetchContacts} />
           <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
             <DialogTrigger asChild>
               <Button onClick={() => { resetForm(); setDialogOpen(true); }}>
