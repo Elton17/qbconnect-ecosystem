@@ -29,7 +29,6 @@ import InstructorDashboardPage from "@/pages/InstructorDashboardPage";
 import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
 import LearningPathPage from "@/pages/LearningPathPage";
-import InstallAppPage from "@/pages/InstallAppPage";
 import SACPage from "@/pages/SACPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
@@ -65,11 +64,10 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/certificado" element={<CertificateVerifyPage />} />
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
-              <Route path="/instalar" element={<InstallAppPage />} />
               <Route path="/sac" element={<SACPage />} />
               <Route path="/planos" element={<PlanosPage />} />
 
-              {/* Protected routes - require authentication */}
+              {/* Protected routes */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><CompanyDashboardPage /></ProtectedRoute>} />
               <Route path="/curso/:id/gerenciar" element={<ProtectedRoute><CourseManagePage /></ProtectedRoute>} />
