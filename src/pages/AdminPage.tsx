@@ -237,7 +237,57 @@ export default function AdminPage() {
       { key: "expires_at", label: "Expira em", type: "datetime" },
       { key: "active", label: "Ativo", type: "switch" },
     ],
+    learning_paths: [
+      { key: "title", label: "Título" },
+      { key: "description", label: "Descrição", type: "textarea" },
+      { key: "thumbnail_url", label: "URL da imagem" },
+      { key: "sort_order", label: "Ordem", type: "number" },
+      { key: "active", label: "Ativo", type: "switch" },
+    ],
   };
+
+  // Learning path creation
+  const [lpDialog, setLpDialog] = useState(false);
+  const [lpForm, setLpForm] = useState({ title: "", description: "" });
+  const [lpSaving, setLpSaving] = useState(false);
+  // Course linking
+  const [linkDialog, setLinkDialog] = useState<{ open: boolean; pathId: string }>({ open: false, pathId: "" });
+  const [linkCourseId, setLinkCourseId] = useState("");
+  const [linkedCourses, setLinkedCourses] = useState<any[]>([]);
+
+  async function createLearningPath() {
+    if (!user || !lpForm.title) return;
+    setLpSaving(true);
+    const { error } = await supabase.from("learning_paths").insert({ title: lpForm.title, description: lpForm.description, user_id: user.id } as any);
+    setLpSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Trilha criada!");
+    setLpForm({ title: "", description: "" });
+    setLpDialog(false);
+    fetchAll();
+  }
+
+  async function openLinkDialog(pathId: string) {
+    setLinkDialog({ open: true, pathId });
+    const { data } = await supabase.from("learning_path_courses").select("*, courses(title)").eq("learning_path_id", pathId).order("sort_order");
+    setLinkedCourses(data || []);
+  }
+
+  async function addCourseToPath() {
+    if (!linkCourseId || !linkDialog.pathId) return;
+    const order = linkedCourses.length;
+    const { error } = await supabase.from("learning_path_courses").insert({ learning_path_id: linkDialog.pathId, course_id: linkCourseId, sort_order: order } as any);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Curso vinculado!");
+    setLinkCourseId("");
+    openLinkDialog(linkDialog.pathId);
+  }
+
+  async function removeCourseFromPath(junctionId: string) {
+    await supabase.from("learning_path_courses").delete().eq("id", junctionId);
+    toast.success("Curso removido da trilha");
+    openLinkDialog(linkDialog.pathId);
+  }
 
   return (
     <div className="py-8">
