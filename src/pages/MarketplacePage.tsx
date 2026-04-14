@@ -602,7 +602,7 @@ export default function MarketplacePage() {
                         <div className="mb-2 flex items-start justify-between">
                           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{product.category || "Geral"}</span>
                           <span className="text-lg font-extrabold text-primary">
-                            {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Sob consulta"}
+                            {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Consulte condições"}
                           </span>
                         </div>
                         <Link to={`/produto/${product.id}`} className="hover:underline">
@@ -611,13 +611,10 @@ export default function MarketplacePage() {
                         <p className="mb-4 text-sm text-muted-foreground line-clamp-2">{product.description || "Sem descrição"}</p>
                         <div className="flex gap-2">
                           {product.contact_phone && (
-                            <a href={`https://api.whatsapp.com/send?phone=55${product.contact_phone.replace(/\D/g, "")}&text=Olá! Vi seu produto "${product.title}" no Marketplace QBCAMP.`} target="_blank" rel="noopener noreferrer" className="flex-1">
-                              <Button variant="default" size="sm" className="w-full"><MessageCircle className="mr-1 h-3.5 w-3.5" /> WhatsApp</Button>
-                            </a>
-                          )}
-                          {product.contact_email && (
-                            <a href={`mailto:${product.contact_email}?subject=Interesse no produto: ${product.title}`} className="flex-1">
-                              <Button variant="outline" size="sm" className="w-full"><Mail className="mr-1 h-3.5 w-3.5" /> Email</Button>
+                            <a href={getWhatsAppUrl(product.contact_phone, product.title)} target="_blank" rel="noopener noreferrer" className="flex-1" onClick={(e) => e.stopPropagation()}>
+                              <Button size="sm" className="w-full text-white" style={{ backgroundColor: "#25D366" }}>
+                                <WhatsAppIcon className="mr-1 h-3.5 w-3.5" /> Consultar via WhatsApp
+                              </Button>
                             </a>
                           )}
                         </div>
