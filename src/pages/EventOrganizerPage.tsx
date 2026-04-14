@@ -3,8 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Users, Download, Mail, Loader2, CalendarDays,
-  Ticket, Search, Check, X, MessageSquare, Clock, Copy, Pencil
+  Ticket, Search, Check, X, MessageSquare, Clock, Copy, Pencil, FileSpreadsheet
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import { Button } from "@/components/ui/button";
@@ -61,13 +62,17 @@ export default function EventOrganizerPage() {
   useEffect(() => {
     if (!id || !user) return;
     const fetch = async () => {
+      // Check if user is admin
+      const { data: isAdminData } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
+      const isUserAdmin = !!isAdminData;
+
       const { data: ev } = await supabase
         .from("events")
         .select("*")
         .eq("id", id)
         .single();
 
-      if (!ev || ev.user_id !== user.id) {
+      if (!ev || (!isUserAdmin && ev.user_id !== user.id)) {
         setLoading(false);
         return;
       }
@@ -161,6 +166,31 @@ export default function EventOrganizerPage() {
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: "CSV exportado com sucesso!" });
+  };
+
+  const exportExcel = () => {
+    const data = filtered.map((a) => ({
+      "Nome": a.contact_name || "",
+      "Empresa": a.company_name || "",
+      "Email": a.email || "",
+      "Telefone": a.contact_phone || "",
+      "CPF": a.registration_data?.cpf || "",
+      "CNPJ": a.registration_data?.cnpj || "",
+      "Cargo": a.registration_data?.cargo || "",
+      "Código Ingresso": a.ticket_code,
+      "Status": a.status === "confirmed" ? "Confirmado" : a.status || "Confirmado",
+      "Data Inscrição": a.created_at ? format(new Date(a.created_at), "dd/MM/yyyy HH:mm") : "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [
+      { wch: 25 }, { wch: 25 }, { wch: 30 }, { wch: 18 },
+      { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 18 },
+      { wch: 12 }, { wch: 18 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inscritos");
+    XLSX.writeFile(wb, `inscritos-${event?.title?.replace(/\s+/g, "-") || "evento"}.xlsx`);
+    toast({ title: "Excel exportado com sucesso!" });
   };
 
   const handleSendMessage = () => {
@@ -267,7 +297,10 @@ export default function EventOrganizerPage() {
               <Copy className="mr-1 h-4 w-4" /> Copiar Emails
             </Button>
             <Button variant="outline" size="sm" onClick={exportCSV}>
-              <Download className="mr-1 h-4 w-4" /> Exportar CSV
+              <Download className="mr-1 h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportExcel}>
+              <FileSpreadsheet className="mr-1 h-4 w-4" /> Excel
             </Button>
             <Button
               size="sm"

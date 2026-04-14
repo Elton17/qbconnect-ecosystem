@@ -338,7 +338,7 @@ export type Database = {
           registration_data: Json | null
           status: string | null
           ticket_code: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -347,7 +347,7 @@ export type Database = {
           registration_data?: Json | null
           status?: string | null
           ticket_code: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -356,7 +356,7 @@ export type Database = {
           registration_data?: Json | null
           status?: string | null
           ticket_code?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {

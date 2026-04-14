@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -89,7 +89,6 @@ export default function EventsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { approved } = useApprovedCompany();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +97,12 @@ export default function EventsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState<EventFormData | null>(null);
   const [userRegistrations, setUserRegistrations] = useState<Set<string>>(new Set());
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
+  }, [user]);
 
   const fetchAllEvents = async () => {
     const { data } = await supabase
@@ -140,14 +145,6 @@ export default function EventsPage() {
   useEffect(() => { fetchAllEvents(); }, [user]);
 
   const handleRegister = (event: EventItem) => {
-    if (!user) {
-      toast({ title: "Faça login", description: "Você precisa estar logado para se inscrever.", variant: "destructive" });
-      return;
-    }
-    if (userRegistrations.has(event.id)) {
-      toast({ title: "Você já está inscrito neste evento!" });
-      return;
-    }
     navigate(`/evento/${event.id}`);
   };
 
@@ -202,7 +199,7 @@ export default function EventsPage() {
               Feiras, workshops, networking e capacitações exclusivas para associados e comunidade empresarial.
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              {user && approved && (
+              {isAdmin && (
                 <Button variant="hero" size="xl" onClick={handleCreate}>
                   <Plus className="mr-1 h-5 w-5" /> Criar Evento
                 </Button>
@@ -361,7 +358,7 @@ export default function EventsPage() {
           <div className="py-16 text-center">
             <CalendarDays className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
             <p className="text-muted-foreground">Nenhum evento encontrado.</p>
-            {user && approved && (
+            {isAdmin && (
               <Button className="mt-4" onClick={handleCreate}>
                 <Plus className="mr-1 h-4 w-4" /> Criar primeiro evento
               </Button>
@@ -434,7 +431,7 @@ export default function EventsPage() {
                         {isRegistered ? "Inscrito ✓" : isFull ? "Esgotado" : "Inscrever"}
                       </Button>
                     </div>
-                    {user?.id === event.user_id && (
+                    {isAdmin && (
                       <div className="mt-2 flex gap-2 border-t border-border pt-2">
                         <Link to={`/evento/${event.id}/painel`} className="flex-1">
                           <Button variant="outline" size="sm" className="w-full text-xs">

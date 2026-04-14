@@ -60,6 +60,12 @@ export default function EventDetailPage() {
   const [copied, setCopied] = useState(false);
   const [regDialogOpen, setRegDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => setIsAdmin(!!data));
+  }, [user]);
 
   const fetchEvent = async () => {
     if (!id) return;
@@ -86,13 +92,16 @@ export default function EventDetailPage() {
   useEffect(() => { fetchEvent(); }, [id, user]);
 
   const handleRegister = async (registrationData: Record<string, string>) => {
-    if (!user || !event) return;
+    if (!event) return;
     setRegistering(true);
     const code = generateTicketCode();
-    const { error } = await supabase.from("event_registrations").insert({
-      event_id: event.id, user_id: user.id, ticket_code: code,
+    const insertData: any = {
+      event_id: event.id,
+      ticket_code: code,
       registration_data: registrationData,
-    } as any);
+    };
+    if (user) insertData.user_id = user.id;
+    const { error } = await supabase.from("event_registrations").insert(insertData);
     if (error) {
       if (error.code === "23505") {
         toast({ title: "Você já está inscrito!" });
@@ -103,7 +112,7 @@ export default function EventDetailPage() {
       setIsRegistered(true);
       setTicketCode(code);
       setEvent({ ...event, registration_count: (event.registration_count || 0) + 1 });
-      toast({ title: "Inscrição confirmada!" });
+      toast({ title: "Inscrição confirmada!", description: "Seu código de ingresso foi gerado." });
       setRegDialogOpen(false);
     }
     setRegistering(false);
@@ -298,7 +307,7 @@ export default function EventDetailPage() {
             </div>
 
             {/* Organizer Actions */}
-            {user?.id === event.user_id && (
+            {isAdmin && (
               <div className="space-y-2">
                 <Link to={`/evento/${event.id}/painel`}>
                   <Button variant="outline" className="w-full">
