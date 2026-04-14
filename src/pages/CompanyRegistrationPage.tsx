@@ -87,6 +87,7 @@ function formatCNPJ(value: string) {
 }
 
 export default function CompanyRegistrationPage() {
+  usePageTitle("Cadastro");
   const { toast } = useToast();
   const navigate = useNavigate();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
