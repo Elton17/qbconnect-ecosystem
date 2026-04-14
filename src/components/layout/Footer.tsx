@@ -1,58 +1,70 @@
 import { Link } from "react-router-dom";
+import { Link2, Phone, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-secondary text-secondary-foreground">
+    <footer className="bg-secondary text-secondary-foreground">
+      {/* Red accent line */}
+      <div className="h-[3px] bg-primary" />
+
       <div className="container py-12">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2">
+        <div className="grid gap-8 md:grid-cols-3">
+          {/* Column 1 - Brand */}
+          <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xs font-extrabold text-primary-foreground">QB</span>
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-sm font-bold">QBCAMP</span>
-                <span className="text-xs font-medium text-primary">Conecta+</span>
-              </div>
+              <Link2 className="h-5 w-5 text-primary" />
+              <span className="font-heading text-lg font-bold">
+                <span className="text-primary">QBCAMP</span>{" "}
+                <span className="text-white">Conecta+</span>
+              </span>
             </div>
-            <p className="text-sm text-secondary-foreground/70 max-w-xs">
+            <p className="text-sm text-white/70 max-w-xs">
               Ecossistema digital empresarial de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba.
             </p>
-            <p className="mt-3 text-xs text-secondary-foreground/50">
+            <p className="mt-3 text-xs text-white/40">
               Desde 1988 fortalecendo o comércio regional.
             </p>
           </div>
+
+          {/* Column 2 - Links */}
           <div>
-            <h4 className="mb-3 text-sm font-semibold">Plataforma</h4>
-            <ul className="space-y-2 text-sm text-secondary-foreground/70">
+            <h4 className="mb-3 text-sm font-heading font-bold text-white">Plataforma</h4>
+            <ul className="space-y-2 text-sm text-white/70">
               <li><Link to="/marketplace" className="hover:text-primary transition-colors">Marketplace</Link></li>
-              <li><Link to="/servicos" className="hover:text-primary transition-colors">Serviços</Link></li>
               <li><Link to="/oportunidades" className="hover:text-primary transition-colors">Oportunidades</Link></li>
               <li><Link to="/academia" className="hover:text-primary transition-colors">Academia</Link></li>
               <li><Link to="/eventos" className="hover:text-primary transition-colors">Eventos</Link></li>
-              <li><Link to="/ranking" className="hover:text-primary transition-colors">Ranking</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="mb-3 text-sm font-semibold">Associação</h4>
-            <ul className="space-y-2 text-sm text-secondary-foreground/70">
               <li><Link to="/beneficios" className="hover:text-primary transition-colors">Benefícios</Link></li>
-              <li><a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Associe-se</a></li>
-              <li><Link to="/login" className="hover:text-primary transition-colors">Área do Associado</Link></li>
-              <li><Link to="/certificado" className="hover:text-primary transition-colors">Verificar Certificado</Link></li>
+              <li><Link to="/planos" className="hover:text-primary transition-colors">Planos</Link></li>
+              <li><Link to="/sac" className="hover:text-primary transition-colors">SAC</Link></li>
             </ul>
           </div>
+
+          {/* Column 3 - Contact */}
           <div>
-            <h4 className="mb-3 text-sm font-semibold">Contato</h4>
-            <ul className="space-y-2 text-sm text-secondary-foreground/70">
-              <li><a href="mailto:contato@qbcamp.com.br" className="hover:text-primary transition-colors">contato@qbcamp.com.br</a></li>
-              <li><a href="tel:+554136763288" className="hover:text-primary transition-colors">(41) 3676-3288</a></li>
-              <li><span>Quatro Barras - PR</span></li>
+            <h4 className="mb-3 text-sm font-heading font-bold text-white">Contato</h4>
+            <ul className="space-y-2 text-sm text-white/70">
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" />
+                <a href="tel:+554136721041" className="hover:text-primary transition-colors">(41) 3672-1041</a>
+              </li>
+              <li>Seg-Sex 08h às 17h</li>
             </ul>
+            <a
+              href="https://wa.me/554136721041"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-heading font-bold text-white transition-colors hover:bg-primary-dark"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp QBCAMP
+            </a>
           </div>
         </div>
-        <div className="mt-8 border-t border-secondary-foreground/10 pt-6 text-center text-xs text-secondary-foreground/50">
-          © {new Date().getFullYear()} QBCAMP Conecta+. Todos os direitos reservados.
+
+        <div className="mt-8 border-t border-white/10 pt-6 text-center text-xs text-white/40">
+          © {new Date().getFullYear()} QBCAMP Conecta+ · Associação Industrial e Comercial de Quatro Barras e Campina Grande do Sul
         </div>
       </div>
     </footer>
