@@ -299,6 +299,8 @@ export default function BenefitsPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredBenefits.map((benefit, i) => {
               const alreadyRedeemed = userRedemptions.has(benefit.id);
+              const isExpired = benefit.expires_at && new Date(benefit.expires_at) < new Date();
+              const expiresFormatted = benefit.expires_at ? format(new Date(benefit.expires_at), "dd/MM/yyyy", { locale: ptBR }) : null;
               return (
                 <motion.div key={benefit.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="rounded-2xl border border-border bg-card p-6 card-shadow transition-all hover:card-shadow-hover hover:-translate-y-1">
                   <div className="mb-4 flex items-start justify-between">
