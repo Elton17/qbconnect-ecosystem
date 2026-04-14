@@ -1,10 +1,12 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, Loader2, Package, MessageCircle, Mail, ChevronLeft, ChevronRight,
-  MapPin, Phone, Globe, Building2, ShoppingBag, Tag
+  MapPin, Phone, Globe, Building2, ShoppingBag, Tag, Pencil, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,11 +40,27 @@ interface Seller {
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [seller, setSeller] = useState<Seller | null>(null);
   const [otherProducts, setOtherProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  const isOwner = user && product && user.id === product.user_id;
+
+  async function handleDelete() {
+    if (!product) return;
+    const { error } = await supabase.from("products").delete().eq("id", product.id);
+    if (error) {
+      toast({ title: "Erro ao remover produto", variant: "destructive" });
+      return;
+    }
+    toast({ title: "Produto removido com sucesso" });
+    navigate("/marketplace");
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -193,6 +211,25 @@ export default function ProductDetailPage() {
                 </a>
               )}
             </div>
+
+            {/* Owner actions */}
+            {isOwner && (
+              <div className="mt-4 flex gap-2 border-t border-border pt-4">
+                <Link to="/marketplace" state={{ editProductId: product.id }} className="flex-1">
+                  <Button variant="outline" size="lg" className="w-full">
+                    <Pencil className="mr-2 h-4 w-4" /> Editar
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={handleDelete}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Seller card */}

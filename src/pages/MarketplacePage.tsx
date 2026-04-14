@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, ArrowRight, Loader2, Package, Plus, MessageCircle, Mail, Pencil, Trash2, ImagePlus, X, ChevronLeft, ChevronRight, ShoppingBag, Building2, Tag, Star, Flame, Sparkles, Zap } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -112,6 +112,7 @@ function ProductCarousel({ images, title }: { images: string[]; title: string })
 
 export default function MarketplacePage() {
   const { user } = useAuth();
+  const location = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("empresas");
   const [activeCategory, setActiveCategory] = useState("Todos");
@@ -149,6 +150,20 @@ export default function MarketplacePage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Handle edit from product detail page
+  useEffect(() => {
+    const state = location.state as { editProductId?: string } | null;
+    if (state?.editProductId && products.length > 0) {
+      const product = products.find(p => p.id === state.editProductId);
+      if (product && user && user.id === product.user_id) {
+        openEditProduct(product);
+        setActiveTab("produtos");
+        // Clear the state to avoid re-opening on re-render
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, products, user]);
 
   async function fetchData() {
     setLoading(true);
