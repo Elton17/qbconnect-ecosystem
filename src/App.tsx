@@ -33,6 +33,7 @@ import InstallAppPage from "@/pages/InstallAppPage";
 import SACPage from "@/pages/SACPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import PlanosPage from "@/pages/PlanosPage";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
               <Route path="/instalar" element={<InstallAppPage />} />
               <Route path="/sac" element={<SACPage />} />
+              <Route path="/planos" element={<PlanosPage />} />
 
               {/* Protected routes - require authentication */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

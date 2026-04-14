@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Moon, Sun, Search, Phone } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Moon, Sun, Search, Phone, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ const navItems = [
   { label: "Benefícios", href: "/beneficios", icon: Gift },
   { label: "Ranking", href: "/ranking", icon: Trophy },
   { label: "SAC", href: "/sac", icon: Phone },
+  { label: "Planos", href: "/planos", icon: Crown },
 ];
 
 export default function Header() {
