@@ -74,6 +74,7 @@ export default function BenefitsPage() {
   const [redeemCode, setRedeemCode] = useState<string | null>(null);
   const [redeemLoading, setRedeemLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [codeSaved, setCodeSaved] = useState(false);
   const [userRedemptions, setUserRedemptions] = useState<Map<string, string>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
   const [searchTerm, setSearchTerm] = useState("");
