@@ -223,6 +223,11 @@ export default function Header() {
                           <User className="mr-1 h-4 w-4" /> Meu Perfil
                         </Link>
                       </Button>
+                      <Button variant="ghost" size="sm" asChild className="justify-start">
+                        <Link to="/meus-cursos" onClick={() => setMobileOpen(false)}>
+                          <BookOpen className="mr-1 h-4 w-4" /> Meus Cursos
+                        </Link>
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
                         <LogOut className="mr-1 h-4 w-4" /> Sair
                       </Button>
