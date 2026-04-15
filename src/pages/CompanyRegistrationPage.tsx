@@ -313,6 +313,7 @@ export default function CompanyRegistrationPage() {
                     <Input id="password" type="password" placeholder="Mínimo 6 caracteres" className="pl-9" {...register("password")} />
                   </div>
                   {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+                  <p className="mt-1 text-xs text-muted-foreground">{PASSWORD_HINT}</p>
                 </div>
                 <div>
                   <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
