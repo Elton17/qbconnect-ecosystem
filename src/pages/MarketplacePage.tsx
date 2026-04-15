@@ -16,6 +16,7 @@ import MarketplaceFilters, { FilterState, defaultFilters } from "@/components/ma
 import ProductCard, { type ProductWithSeller } from "@/components/marketplace/ProductCard";
 import ProductFormDialog from "@/components/marketplace/ProductFormDialog";
 import PromotionsSection from "@/components/marketplace/PromotionsSection";
+import PremiumHighlights from "@/components/marketplace/PremiumHighlights";
 import PlanUpgradeModal from "@/components/PlanUpgradeModal";
 
 export default function MarketplacePage() {
