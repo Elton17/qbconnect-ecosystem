@@ -58,7 +58,11 @@ const formSchema = z.object({
   website: z.string().max(200).optional().or(z.literal("")),
   phone: z.string().min(8, "Telefone inválido").max(20),
   email: z.string().email("E-mail inválido").max(255),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  password: z.string().min(6, "Mínimo 6 caracteres")
+    .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
+    .regex(/[a-z]/, "Deve conter pelo menos uma letra minúscula")
+    .regex(/[0-9]/, "Deve conter pelo menos um número")
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/, "Deve conter pelo menos um caractere especial (!@#$%&*)"),
   confirmPassword: z.string().min(6, "Confirme a senha"),
   description: z.string().trim().min(10, "Mínimo 10 caracteres").max(1000),
   address: z.string().trim().min(3, "Endereço é obrigatório").max(200),

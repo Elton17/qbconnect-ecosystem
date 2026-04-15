@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Lock, ShieldCheck } from "lucide-react";
+import { validatePassword, translateAuthError, PASSWORD_HINT } from "@/lib/auth-utils";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -40,14 +41,15 @@ export default function ResetPasswordPage() {
       toast({ title: "Erro", description: "As senhas não coincidem.", variant: "destructive" });
       return;
     }
-    if (password.length < 6) {
-      toast({ title: "Erro", description: "A senha deve ter pelo menos 6 caracteres.", variant: "destructive" });
+    const pwError = validatePassword(password);
+    if (pwError) {
+      toast({ title: "Erro", description: pwError, variant: "destructive" });
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      toast({ title: "Erro", description: translateAuthError(error.message), variant: "destructive" });
     } else {
       toast({ title: "Senha atualizada!", description: "Sua senha foi redefinida com sucesso." });
       navigate("/");
@@ -92,6 +94,7 @@ export default function ResetPasswordPage() {
               </div>
               <CardTitle className="text-2xl font-extrabold">Nova senha</CardTitle>
               <CardDescription>Digite sua nova senha abaixo.</CardDescription>
+              <p className="mt-2 text-xs text-muted-foreground">{PASSWORD_HINT}</p>
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
