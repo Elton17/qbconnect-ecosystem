@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Ticket } from "lucide-react";
 import { REGISTRATION_FIELDS, type RegistrationFieldKey } from "./RegistrationFieldsConfig";
+import { formatCPF as maskCPF, formatCNPJ as maskCNPJ, formatPhone as maskPhone } from "@/lib/masks";
 
 interface Props {
   open: boolean;
@@ -13,27 +14,6 @@ interface Props {
   eventTitle: string;
   onSubmit: (data: Record<string, string>) => Promise<void>;
   submitting: boolean;
-}
-
-function maskCPF(value: string) {
-  return value.replace(/\D/g, "").slice(0, 11)
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-}
-
-function maskCNPJ(value: string) {
-  return value.replace(/\D/g, "").slice(0, 14)
-    .replace(/(\d{2})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1/$2")
-    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
-}
-
-function maskPhone(value: string) {
-  return value.replace(/\D/g, "").slice(0, 11)
-    .replace(/(\d{2})(\d)/, "($1) $2")
-    .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
 }
 
 export default function RegistrationFormDialog({ open, onOpenChange, requiredFields, eventTitle, onSubmit, submitting }: Props) {

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { formatWhatsApp } from "@/lib/masks";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays, Search } from "lucide-react";
 
@@ -208,7 +209,7 @@ export default function BenefitsPage() {
                       </Popover>
                       {form.expires_at && <Button variant="ghost" size="sm" className="mt-1 h-auto p-0 text-xs text-muted-foreground" onClick={() => setForm({ ...form, expires_at: null })}>Remover validade</Button>}
                     </div>
-                    <div><Label>WhatsApp da empresa</Label><Input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} placeholder="Ex: 5541999999999" /></div>
+                    <div><Label>WhatsApp da empresa</Label><Input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: formatWhatsApp(e.target.value) })} placeholder="Ex: +55 (41) 99999-9999" /></div>
                     <Button onClick={handleSubmit} disabled={saving || !form.offer} className="w-full">{saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null}{editingId ? "Salvar" : "Criar Benefício"}</Button>
                   </div>
                 </DialogContent>

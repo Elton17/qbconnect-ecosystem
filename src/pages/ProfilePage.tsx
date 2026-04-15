@@ -17,6 +17,7 @@ import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handsha
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
+import { formatPhone, formatCNPJ as formatCNPJMask } from "@/lib/masks";
 
 
 
@@ -29,10 +30,7 @@ const plans = [
   { value: "enterprise", label: "Enterprise", color: "destructive" as const },
 ];
 
-function formatCNPJ(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 14);
-  return digits.replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2");
-}
+const formatCNPJ = formatCNPJMask;
 
 // --- Meus Anúncios sub-component ---
 function MeusAnuncios({ userId }: { userId: string }) {
@@ -222,6 +220,7 @@ export default function ProfilePage() {
 
   const handleChange = (field: string, value: string) => {
     if (field === "cnpj") value = formatCNPJ(value);
+    if (field === "phone" || field === "contact_phone") value = formatPhone(value);
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
