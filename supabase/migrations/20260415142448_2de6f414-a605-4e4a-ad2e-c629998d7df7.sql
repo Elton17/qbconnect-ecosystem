@@ -1,0 +1,1 @@
+UPDATE events SET city = 'Campina Grande do Sul' WHERE city = 'Campo Largo';
