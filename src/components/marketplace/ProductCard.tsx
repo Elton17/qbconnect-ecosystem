@@ -27,7 +27,6 @@ export interface ProductWithSeller {
   product_type: string;
   city: string | null;
   created_at: string | null;
-  // joined seller info
   seller_name?: string;
   seller_city?: string;
   seller_plan?: string;
@@ -60,7 +59,7 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
   return (
     <div className={`group flex flex-col overflow-hidden rounded-lg bg-card shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${isPremium ? "border-l-[3px] border-l-primary border border-border" : "border border-border"}`}>
       {/* Image */}
-      <Link to={`/produto/${product.id}`} className="relative block overflow-hidden" style={{ height: 220 }}>
+      <Link to={`/produto/${product.id}`} className="relative block overflow-hidden h-[140px] sm:h-[220px]">
         {imgs.length > 0 ? (
           <img
             src={imgs[0]}
@@ -69,63 +68,64 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-muted">
-            <Package className="h-12 w-12 text-muted-foreground/30" />
+            <Package className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/30" />
           </div>
         )}
 
         {isPremium && (
-          <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-amber-400 px-2 py-0.5 text-xs font-bold text-amber-900 shadow">
-            <Star className="h-3 w-3 fill-amber-900" /> Premium
+          <span className="absolute left-1.5 top-1.5 sm:left-2 sm:top-2 flex items-center gap-1 rounded-md bg-amber-400 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold text-amber-900 shadow">
+            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-900" /> Premium
           </span>
         )}
 
         {isNew(product.created_at) && (
-          <span className="absolute right-2 top-2 animate-pulse rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground shadow">
+          <span className="absolute right-1.5 top-1.5 sm:right-2 sm:top-2 animate-pulse rounded-md bg-primary px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold text-primary-foreground shadow">
             NOVO
           </span>
         )}
       </Link>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-4">
         {/* Category */}
         {(product.category || product.seller_segment) && (
-          <span className="mb-1 text-xs font-medium uppercase text-muted-foreground tracking-wide">
+          <span className="mb-0.5 sm:mb-1 text-[10px] sm:text-xs font-medium uppercase text-muted-foreground tracking-wide line-clamp-1">
             {[product.category, product.seller_segment].filter(Boolean).join(" · ")}
           </span>
         )}
 
         {/* Title */}
         <Link to={`/produto/${product.id}`}>
-          <h3 className="mb-1 text-base font-semibold text-card-foreground line-clamp-2 hover:text-primary transition-colors">
+          <h3 className="mb-0.5 sm:mb-1 text-sm sm:text-base font-semibold text-card-foreground line-clamp-2 hover:text-primary transition-colors leading-tight">
             {product.title}
           </h3>
         </Link>
 
         {/* Price */}
-        <span className="mb-2 text-xl font-extrabold text-primary">
+        <span className="mb-1 sm:mb-2 text-base sm:text-xl font-extrabold text-primary">
           {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Consultar preço"}
         </span>
 
         {/* Seller info */}
-        <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground overflow-hidden">
+        <div className="mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+          <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[9px] sm:text-[10px] font-bold text-primary-foreground overflow-hidden">
             {product.seller_logo ? (
               <img src={product.seller_logo} alt="" className="h-full w-full object-cover" />
             ) : (
               (product.seller_name || "?").charAt(0)
             )}
           </div>
-          <span className="text-sm text-muted-foreground truncate">{product.seller_name || "Vendedor"}</span>
+          {/* Hide seller name on mobile, show on sm+ */}
+          <span className="hidden sm:inline text-sm text-muted-foreground truncate">{product.seller_name || "Vendedor"}</span>
           {(product.city || product.seller_city) && (
-            <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3" /> {product.city || product.seller_city}
+            <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-muted-foreground truncate">
+              <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" /> {product.city || product.seller_city}
             </span>
           )}
         </div>
 
-        {/* Engagement */}
-        <div className="mb-3 flex items-center gap-3 text-xs text-muted-foreground">
+        {/* Engagement — hidden on mobile */}
+        <div className="mb-3 hidden sm:flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{product.view_count || 0}</span>
           <span className="flex items-center gap-1"><MessageCircle className="h-3 w-3" />{product.contact_count || 0}</span>
         </div>
@@ -142,13 +142,15 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
                 incrementContact(product.id);
               }}
             >
-              <Button size="sm" variant="whatsapp" className="w-full">
-                <WhatsAppIcon className="mr-1.5 h-4 w-4" /> Falar com vendedor
+              <Button size="sm" variant="whatsapp" className="w-full h-9 sm:h-10 text-xs sm:text-sm">
+                <WhatsAppIcon className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="sm:hidden">Consultar</span>
+                <span className="hidden sm:inline">Falar com vendedor</span>
               </Button>
             </a>
           ) : (
             <Link to={`/produto/${product.id}`}>
-              <Button size="sm" variant="outline" className="w-full">Ver detalhes</Button>
+              <Button size="sm" variant="outline" className="w-full h-9 sm:h-10 text-xs sm:text-sm">Ver detalhes</Button>
             </Link>
           )}
         </div>
