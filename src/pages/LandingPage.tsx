@@ -338,9 +338,9 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
+                <Link to="/cadastro">
                   Cadastrar minha empresa <ArrowRight className="ml-1 h-5 w-5" />
-                </a>
+                </Link>
               </Button>
               <Button size="xl" asChild className="border-2 border-white/50 text-white bg-transparent hover:border-white hover:bg-white/10 font-heading font-bold">
                 <Link to="/marketplace">Ver marketplace</Link>
