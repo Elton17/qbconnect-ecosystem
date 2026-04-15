@@ -44,6 +44,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route element={<MainLayout />}>
               {/* Public routes */}
