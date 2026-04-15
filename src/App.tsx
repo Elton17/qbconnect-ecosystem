@@ -32,7 +32,7 @@ import LearningPathPage from "@/pages/LearningPathPage";
 import SACPage from "@/pages/SACPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
-import PlanosPage from "@/pages/PlanosPage";
+
 import PreLaunchPage from "@/pages/PreLaunchPage";
 
 const queryClient = new QueryClient();
@@ -66,7 +66,7 @@ const App = () => (
               <Route path="/certificado" element={<CertificateVerifyPage />} />
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
               <Route path="/sac" element={<SACPage />} />
-              <Route path="/planos" element={<PlanosPage />} />
+              
 
               {/* Protected routes */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />

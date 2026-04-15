@@ -23,7 +23,6 @@ const navItems = [
   { label: "Eventos", href: "/eventos" },
   { label: "Benefícios", href: "/beneficios" },
   { label: "Ranking", href: "/ranking" },
-  { label: "Planos", href: "/planos" },
 ];
 
 const mobileNavItems = [
@@ -33,7 +32,6 @@ const mobileNavItems = [
   { label: "Eventos", href: "/eventos", icon: CalendarDays },
   { label: "Benefícios", href: "/beneficios", icon: Gift },
   { label: "Ranking", href: "/ranking", icon: Trophy },
-  { label: "Planos", href: "/planos", icon: Crown },
 ];
 
 export default function Header() {
