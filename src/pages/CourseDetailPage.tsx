@@ -333,6 +333,30 @@ export default function CourseDetailPage() {
                         ))}
                       </div>
                     )}
+                    {/* Next / Previous navigation */}
+                    {enrollment && (
+                      <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!prevLesson}
+                          onClick={() => prevLesson && goToLesson(prevLesson)}
+                        >
+                          <SkipBack className="mr-1 h-4 w-4" /> Anterior
+                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          {activeLessonIndex + 1} / {allLessons.length}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={!nextLesson}
+                          onClick={() => nextLesson && goToLesson(nextLesson)}
+                        >
+                          Próxima <SkipForward className="ml-1 h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : activeLesson ? (
