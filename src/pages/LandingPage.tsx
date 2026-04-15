@@ -88,7 +88,7 @@ export default function LandingPage() {
 
               {/* H1 */}
               <h1 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl font-heading">
-                <span className="text-white">Sua parceira no</span><br />
+                <span className="text-white">Sua parceria no</span><br />
                 <span className="text-primary">desenvolvimento</span><br />
                 <span className="text-white">empresarial.</span>
               </h1>
