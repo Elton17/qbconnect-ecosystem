@@ -125,7 +125,7 @@ export default function BenefitsPage() {
   const handleDelete = async (id: string) => { await supabase.from("benefits").delete().eq("id", id); toast({ title: "Benefício removido!" }); fetchData(); };
 
   const handleRedeem = async (benefit: Benefit) => {
-    if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios.", variant: "destructive" }); return; }
+    if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios. Acesse /login para entrar.", variant: "destructive" }); return; }
     setRedeemingBenefit(benefit); setRedeemDialogOpen(true); setCopied(false);
     const existingCode = userRedemptions.get(benefit.id);
     if (existingCode) { setRedeemCode(existingCode); return; }
@@ -154,62 +154,6 @@ export default function BenefitsPage() {
   // Premium first
   const filteredBenefits = [...searchFiltered].sort((a, b) => (a.plan === "premium" ? -1 : 0) - (b.plan === "premium" ? -1 : 0));
   const activeCategories = ["Todas", ...new Set(benefits.map(b => b.category).filter(Boolean))];
-
-  // Non-authenticated users see a CTA to join
-  if (!user) {
-    return (
-      <div>
-        <section className="relative overflow-hidden bg-secondary py-20 md:py-28">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute -left-10 top-1/4 h-72 w-72 rounded-full bg-accent blur-3xl" />
-            <div className="absolute -bottom-10 right-1/4 h-64 w-64 rounded-full bg-primary blur-3xl" />
-          </div>
-          <div className="container relative">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
-                <Gift className="h-4 w-4" /> Exclusivo para Associados
-              </div>
-              <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
-                Clube de <span className="text-gradient">Benefícios</span>
-              </h1>
-              <p className="mb-4 text-lg text-secondary-foreground/70">
-                Descontos e condições exclusivas entre empresas associadas da QBCAMP.
-              </p>
-              <p className="mb-8 text-base text-secondary-foreground/60">
-                Filie-se à QBCAMP e tenha acesso a benefícios exclusivos, descontos especiais e uma rede de parceiros que impulsiona o seu negócio.
-              </p>
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Button variant="hero" size="xl" asChild>
-                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
-                    <Building2 className="mr-1.5 h-5 w-5" /> Quero me associar
-                  </a>
-                </Button>
-                <Button variant="outline" size="lg" onClick={() => window.location.href = "/login"}>
-                  Já sou associado — Entrar
-                </Button>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }} className="mx-auto mt-12 grid max-w-2xl gap-4 sm:grid-cols-3">
-              {[
-                { icon: Percent, title: "Descontos Exclusivos", desc: "Condições especiais entre associados" },
-                { icon: Ticket, title: "Cupons Únicos", desc: "Resgate e use quando quiser" },
-                { icon: Sparkles, title: "Benefícios Premium", desc: "Ofertas especiais para planos Premium" },
-              ].map((item) => (
-                <div key={item.title} className="rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 p-5 text-center backdrop-blur-sm">
-                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
-                    <item.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="text-sm font-bold text-secondary-foreground">{item.title}</h3>
-                  <p className="mt-1 text-xs text-secondary-foreground/60">{item.desc}</p>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-      </div>
-    );
-  }
 
   return (
     <div>
