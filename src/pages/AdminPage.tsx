@@ -141,8 +141,37 @@ export default function AdminPage() {
       }
       
       toast.success("Empresa aprovada! Notificação enviada via WhatsApp.");
-    } else {
-      toast.success("Aprovação removida");
+    } else if (current && profile) {
+      // Removendo aprovação — notificar via WhatsApp
+      const phone = profile.contact_phone || profile.phone;
+      const companyName = profile.company_name || "sua empresa";
+      if (phone) {
+        const message = `Olá ${profile.contact_name || ""}.\n\nInformamos que a aprovação da empresa *${companyName}* na plataforma QBCAMP Conecta Mais foi *suspensa temporariamente*.\n\nIsso pode ocorrer por pendências cadastrais ou revisão de dados. Entre em contato conosco para mais informações e regularização.\n\n📞 (41) 3672-1041\n📱 (41) 99122-8567\n\nEquipe QBCAMP`;
+        const whatsappUrl = getWhatsAppContactUrl(phone, message);
+        window.open(whatsappUrl, "_blank");
+      }
+
+      // Notificar via e-mail (se disponível)
+      const email = profile.contact_email || profile.email;
+      if (email) {
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "registration-rejected",
+              recipientEmail: email,
+              idempotencyKey: `rejection-${profileId}-${Date.now()}`,
+              templateData: {
+                companyName,
+                contactName: profile.contact_name || "",
+              },
+            },
+          });
+        } catch {
+          // E-mail não configurado
+        }
+      }
+
+      toast.success("Aprovação removida. Notificação enviada via WhatsApp.");
     }
     
     setProfiles((prev) => prev.map((p) => p.id === profileId ? { ...p, approved: !current } : p));
