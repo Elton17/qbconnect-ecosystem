@@ -9,6 +9,7 @@ import { Building2, Upload, User, ArrowRight, Lock, Loader2, Shield, MessageCirc
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
 import { formatPhone, formatCEP, formatCNPJ as formatCNPJMask } from "@/lib/masks";
+import { translateAuthError, PASSWORD_HINT } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -153,7 +154,7 @@ export default function CompanyRegistrationPage() {
     });
 
     if (authError) {
-      toast({ title: "Erro no cadastro", description: authError.message, variant: "destructive" });
+      toast({ title: "Erro no cadastro", description: translateAuthError(authError.message), variant: "destructive" });
       return;
     }
 
