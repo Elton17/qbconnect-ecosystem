@@ -383,15 +383,13 @@ export default function AcademyPage() {
                 className="group flex cursor-pointer flex-col rounded-2xl border border-border bg-card card-shadow overflow-hidden transition-all hover:card-shadow-hover hover:-translate-y-1"
               >
                 {/* Thumbnail */}
-                <div className="relative flex h-44 items-center justify-center bg-gradient-to-br from-secondary to-muted overflow-hidden">
-                  {course.thumbnail_url ? (
-                    <img src={course.thumbnail_url} alt={course.title} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <GraduationCap className="h-12 w-12 text-muted-foreground/20" />
-                      <span className="text-xs text-muted-foreground/30">{course.category}</span>
-                    </div>
-                  )}
+                <div className="relative flex h-44 items-center justify-center overflow-hidden">
+                  <img
+                    src={course.thumbnail_url || categoryCovers[course.category] || coverOutro}
+                    alt={course.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                   {/* Play overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/20">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:scale-100 scale-75 shadow-lg">
