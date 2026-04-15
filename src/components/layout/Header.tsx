@@ -105,6 +105,11 @@ export default function Header() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
+            <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 rounded-md font-heading font-bold shadow-sm animate-pulse-subtle">
+              <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
+                <Crown className="mr-1 h-4 w-4" /> Cadastre-se
+              </a>
+            </Button>
             {user ? (
               <>
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground relative">
@@ -142,14 +147,9 @@ export default function Header() {
                 </DropdownMenu>
               </>
             ) : (
-              <>
-                <Button variant="outline" size="sm" asChild className="text-foreground">
-                  <Link to="/login">Entrar</Link>
-                </Button>
-                <Button size="sm" asChild className="bg-primary text-white hover:bg-primary-dark rounded-md font-heading font-bold">
-                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Associe-se</a>
-                </Button>
-              </>
+              <Button variant="outline" size="sm" asChild className="text-foreground">
+                <Link to="/login">Entrar</Link>
+              </Button>
             )}
           </div>
 
