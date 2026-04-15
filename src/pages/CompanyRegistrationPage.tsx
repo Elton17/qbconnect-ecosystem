@@ -55,7 +55,7 @@ const formSchema = z.object({
   cnpj: z.string().regex(cnpjRegex, "CNPJ inválido (XX.XXX.XXX/XXXX-XX)"),
   segment: z.string().min(1, "Selecione um segmento"),
   city: z.string().trim().min(1, "Cidade é obrigatória").max(100),
-  website: z.string().url("URL inválida").optional().or(z.literal("")),
+  website: z.string().max(200).optional().or(z.literal("")),
   phone: z.string().min(8, "Telefone inválido").max(20),
   email: z.string().email("E-mail inválido").max(255),
   password: z.string().min(6, "Mínimo 6 caracteres"),
