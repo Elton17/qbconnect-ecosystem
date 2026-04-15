@@ -424,7 +424,7 @@ export default function CompanyRegistrationPage() {
                           <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Tudo do básico</li>
                           <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Produtos ilimitados</li>
                           <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Destaque no ranking</li>
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Acesso à Academia</li>
+                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Acesso à Escola de Negócios</li>
                         </ul>
                       </div>
                     </div>

@@ -110,7 +110,7 @@ export default function CertificateGenerator({
     // Platform
     doc.setFontSize(9);
     doc.setTextColor(180, 40, 40);
-    doc.text("QBCAMP Conecta+ | Academia", w / 2, 182, { align: "center" });
+    doc.text("QBCAMP Conecta+ | Escola de Negócios", w / 2, 182, { align: "center" });
 
     return doc;
   };

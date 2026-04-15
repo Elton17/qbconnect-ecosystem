@@ -14,7 +14,7 @@ const faqs = [
   { q: "O que são as Oportunidades?", a: "É onde empresas publicam demandas reais: procuro fornecedor, busco parceiro, estou contratando. Qualquer associado pode demonstrar interesse e negociar diretamente." },
   { q: "Como funciona o Ranking?", a: "O ranking pontua empresas por engajamento real: negócios fechados, cursos publicados e benefícios cadastrados. As melhores recebem selos e destaque na plataforma." },
   { q: "O que é o plano Premium?", a: "O plano Premium oferece mais slots de produtos, destaque nas listagens e badge especial. Entre em contato com a QBCAMP para fazer upgrade." },
-  { q: "Como verifico um certificado da Academia?", a: "Acesse /certificado e insira o código do certificado para validar a autenticidade." },
+  { q: "Como verifico um certificado da Escola de Negócios?", a: "Acesse /certificado e insira o código do certificado para validar a autenticidade." },
 ];
 
 export default function SACPage() {
