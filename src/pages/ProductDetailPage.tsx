@@ -6,38 +6,33 @@ import { useToast } from "@/hooks/use-toast";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, Loader2, Package, ChevronLeft, ChevronRight,
-  MapPin, Phone, Globe, Building2, ShoppingBag, Tag, Pencil, Trash2
+  Loader2, Package, ChevronLeft, ChevronRight, MapPin, Building2,
+  Eye, MessageCircle, Star, Pencil, Trash2, Share2, ShoppingBag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import ProductCard, { type ProductWithSeller } from "@/components/marketplace/ProductCard";
 
 interface Product {
-  id: string;
-  user_id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  image_url: string;
-  images: string[];
-  contact_phone: string;
-  contact_email: string;
+  id: string; user_id: string; title: string; description: string | null; price: number;
+  category: string | null; image_url: string | null; images: string[] | null;
+  contact_phone: string | null; contact_email: string | null;
+  view_count: number; contact_count: number; price_type: string; product_type: string; city: string | null;
+  created_at: string | null;
 }
 
 interface Seller {
-  company_name: string;
-  segment: string;
-  city: string;
-  logo_url: string | null;
-  phone: string;
-  email: string;
-  website: string | null;
-  description: string | null;
-  id: string;
-  contact_phone: string;
+  id: string; company_name: string; segment: string; city: string; logo_url: string | null;
+  phone: string; website: string | null; plan: string; contact_phone: string;
+}
+
+interface Review {
+  id: string; product_id: string; reviewer_user_id: string; rating: number;
+  comment: string | null; created_at: string;
+  reviewer_name?: string;
 }
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -48,11 +43,46 @@ function WhatsAppIcon({ className }: { className?: string }) {
   );
 }
 
-function getWhatsAppUrl(phone: string, productTitle: string) {
+function getWhatsAppUrl(phone: string, title: string) {
   const cleanPhone = phone.replace(/\D/g, "");
   const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
-  return `https://wa.me/${fullPhone}?text=${encodeURIComponent(`Olá! Vi seu produto *${productTitle}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`)}`;
+  return `https://wa.me/${fullPhone}?text=${encodeURIComponent(`Olá! Vi seu produto *${title}* no QBCAMP Conecta+ e tenho interesse. Podemos conversar?`)}`;
 }
+
+function StarRating({ rating, onChange, interactive = false }: { rating: number; onChange?: (r: number) => void; interactive?: boolean }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <button
+          key={i}
+          type="button"
+          disabled={!interactive}
+          onClick={() => onChange?.(i)}
+          className={interactive ? "cursor-pointer" : "cursor-default"}
+        >
+          <Star className={`h-5 w-5 ${i <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days < 1) return "hoje";
+  if (days === 1) return "há 1 dia";
+  if (days < 30) return `há ${days} dias`;
+  const months = Math.floor(days / 30);
+  return months === 1 ? "há 1 mês" : `há ${months} meses`;
+}
+
+function isNew(createdAt: string | null) {
+  if (!createdAt) return false;
+  return Date.now() - new Date(createdAt).getTime() < 7 * 86400000;
+}
+
+const typeLabels: Record<string, string> = { product: "Produto", service: "Serviço", plan: "Plano" };
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,23 +90,59 @@ export default function ProductDetailPage() {
   const { toast } = useToast();
   const { confirmDelete, ConfirmDialog } = useConfirmDelete();
   const navigate = useNavigate();
+
   const [product, setProduct] = useState<Product | null>(null);
   const [seller, setSeller] = useState<Seller | null>(null);
-  const [otherProducts, setOtherProducts] = useState<Product[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [otherProducts, setOtherProducts] = useState<ProductWithSeller[]>([]);
+  const [relatedProducts, setRelatedProducts] = useState<ProductWithSeller[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
 
   const isOwner = user && product && user.id === product.user_id;
 
   async function handleDelete() {
     if (!product) return;
     const { error } = await supabase.from("products").delete().eq("id", product.id);
-    if (error) {
-      toast({ title: "Erro ao remover produto", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Produto removido com sucesso" });
+    if (error) { toast({ title: "Erro ao remover", variant: "destructive" }); return; }
+    toast({ title: "Produto removido" });
     navigate("/marketplace");
+  }
+
+  async function handleShare() {
+    await navigator.clipboard.writeText(window.location.href);
+    toast({ title: "Link copiado!" });
+  }
+
+  async function handleWhatsAppClick() {
+    if (product) {
+      try { await supabase.rpc("increment_product_contact", { p_id: product.id }); } catch {}
+    }
+  }
+
+  async function submitReview() {
+    if (!user || !product || newRating === 0) { toast({ title: "Selecione uma nota", variant: "destructive" }); return; }
+    setSubmittingReview(true);
+    const { error } = await supabase.from("product_reviews").upsert({
+      product_id: product.id, reviewer_user_id: user.id, rating: newRating, comment: newComment,
+    }, { onConflict: "product_id,reviewer_user_id" });
+    if (error) { toast({ title: "Erro ao enviar avaliação", variant: "destructive" }); }
+    else { toast({ title: "Avaliação enviada!" }); setNewRating(0); setNewComment(""); loadReviews(product.id); }
+    setSubmittingReview(false);
+  }
+
+  async function loadReviews(productId: string) {
+    const { data } = await supabase.from("product_reviews").select("*").eq("product_id", productId).order("created_at", { ascending: false }).limit(10);
+    if (!data) return;
+    // Get reviewer names
+    const userIds = [...new Set(data.map(r => r.reviewer_user_id))];
+    const { data: profiles } = await supabase.from("profiles").select("user_id, company_name").in("user_id", userIds);
+    const nameMap = new Map((profiles || []).map(p => [p.user_id, p.company_name]));
+    setReviews(data.map(r => ({ ...r, reviewer_name: nameMap.get(r.reviewer_user_id) || "Usuário" })));
   }
 
   useEffect(() => {
@@ -88,27 +154,46 @@ export default function ProductDetailPage() {
       setProduct(prod as Product);
       setSelectedImage(0);
 
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, company_name, segment, city, logo_url, phone, email, website, description, contact_phone")
-        .eq("user_id", prod.user_id)
-        .eq("approved", true)
-        .limit(1);
+      // Increment view
+      try { await supabase.rpc("increment_product_view", { p_id: id }); } catch {}
 
-      if (profiles && profiles.length > 0) setSeller(profiles[0] as Seller);
+      // Seller
+      const { data: profiles } = await supabase.from("profiles").select("id, company_name, segment, city, logo_url, phone, plan, contact_phone, website").eq("user_id", prod.user_id).eq("approved", true).limit(1);
+      const sellerData = profiles && profiles.length > 0 ? profiles[0] as Seller : null;
+      setSeller(sellerData);
 
-      const { data: others } = await supabase
-        .from("products")
-        .select("*")
-        .eq("user_id", prod.user_id)
-        .eq("active", true)
-        .neq("id", id)
-        .limit(4);
-      setOtherProducts((others as Product[]) || []);
+      // Reviews
+      await loadReviews(id);
+
+      // Other products from seller
+      const { data: others } = await supabase.from("products").select("*").eq("user_id", prod.user_id).eq("active", true).neq("id", id).limit(4);
+      setOtherProducts((others || []).map((p: any) => ({
+        ...p, view_count: p.view_count || 0, contact_count: p.contact_count || 0,
+        price_type: p.price_type || "fixed", product_type: p.product_type || "product",
+        seller_name: sellerData?.company_name, seller_city: sellerData?.city, seller_plan: sellerData?.plan,
+        seller_logo: sellerData?.logo_url, seller_segment: sellerData?.segment,
+      })));
+
+      // Related products (same category, different seller)
+      if (prod.category) {
+        const { data: related } = await supabase.from("products").select("*").eq("active", true).eq("category", prod.category).neq("user_id", prod.user_id).limit(6);
+        // Enrich related with seller data (simplified)
+        setRelatedProducts((related || []).map((p: any) => ({
+          ...p, view_count: p.view_count || 0, contact_count: p.contact_count || 0,
+          price_type: p.price_type || "fixed", product_type: p.product_type || "product",
+        })));
+      }
+
       setLoading(false);
     }
     load();
   }, [id]);
+
+  // Check if user is approved
+  useEffect(() => {
+    if (!user) { setIsApproved(false); return; }
+    supabase.from("profiles").select("id").eq("user_id", user.id).eq("approved", true).maybeSingle().then(({ data }) => setIsApproved(!!data));
+  }, [user]);
 
   if (loading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -119,61 +204,48 @@ export default function ProductDetailPage() {
       <div className="container py-16 text-center">
         <Package className="mx-auto mb-4 h-16 w-16 text-muted-foreground/40" />
         <h2 className="mb-2 text-2xl font-bold text-foreground">Produto não encontrado</h2>
-        <p className="mb-6 text-muted-foreground">Este produto não existe ou foi removido.</p>
-        <Link to="/marketplace"><Button variant="outline"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao Marketplace</Button></Link>
+        <Link to="/marketplace"><Button variant="outline">Voltar ao Marketplace</Button></Link>
       </div>
     );
   }
 
   const images = (product.images && product.images.length > 0) ? product.images : product.image_url ? [product.image_url] : [];
-
-  // Determine WhatsApp number: product contact_phone → seller contact_phone → seller phone
   const whatsappPhone = product.contact_phone || seller?.contact_phone || seller?.phone || "";
+  const avgRating = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
+  const isPremium = seller?.plan === "premium";
 
   return (
     <div className="container py-8">
       <Breadcrumbs items={[
         { label: "Marketplace", href: "/marketplace" },
+        ...(product.category ? [{ label: product.category }] : []),
         { label: product.title },
       ]} />
 
-      <div className="grid gap-8 lg:grid-cols-5">
-        {/* Gallery — 3 cols */}
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-3">
-          <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-muted">
+      <div className="grid gap-8 lg:grid-cols-[55%_45%]">
+        {/* Gallery */}
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+          <div className="relative mb-3 overflow-hidden rounded-xl border border-border bg-muted" style={{ height: 420 }}>
             {images.length > 0 ? (
-              <img src={images[selectedImage]} alt={product.title} className="h-full w-full object-contain bg-card" />
+              <img src={images[selectedImage]} alt={product.title} className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center"><Package className="h-20 w-20 text-muted-foreground/30" /></div>
             )}
             {images.length > 1 && (
               <>
-                <button
-                  onClick={() => setSelectedImage((s) => (s - 1 + images.length) % images.length)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-card/90 p-2 shadow transition-colors hover:bg-card"
-                >
+                <button onClick={() => setSelectedImage(s => (s - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-card/90 p-2 shadow hover:bg-card">
                   <ChevronLeft className="h-5 w-5 text-foreground" />
                 </button>
-                <button
-                  onClick={() => setSelectedImage((s) => (s + 1) % images.length)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-card/90 p-2 shadow transition-colors hover:bg-card"
-                >
+                <button onClick={() => setSelectedImage(s => (s + 1) % images.length)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-card/90 p-2 shadow hover:bg-card">
                   <ChevronRight className="h-5 w-5 text-foreground" />
                 </button>
               </>
             )}
           </div>
-
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
               {images.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
-                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
-                    idx === selectedImage ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-muted-foreground/40"
-                  }`}
-                >
+                <button key={idx} onClick={() => setSelectedImage(idx)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${idx === selectedImage ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-muted-foreground/40"}`}>
                   <img src={img} alt="" className="h-full w-full object-cover" />
                 </button>
               ))}
@@ -181,150 +253,171 @@ export default function ProductDetailPage() {
           )}
         </motion.div>
 
-        {/* Product info — 2 cols */}
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-2">
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <div className="mb-3 flex flex-wrap gap-2">
-              {product.category && (
-                <Badge variant="outline" className="gap-1"><Tag className="h-3 w-3" />{product.category}</Badge>
-              )}
-            </div>
+        {/* Details */}
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">{typeLabels[product.product_type] || "Produto"}</Badge>
+            {isNew(product.created_at) && <Badge className="animate-pulse">NOVO</Badge>}
+            {isPremium && <Badge className="bg-amber-400 text-amber-900 hover:bg-amber-400"><Star className="mr-1 h-3 w-3 fill-amber-900" />Premium</Badge>}
+          </div>
 
-            <h1 className="mb-3 text-2xl font-extrabold text-foreground">{product.title}</h1>
+          {/* Title */}
+          <h1 className="text-2xl font-bold text-foreground">{product.title}</h1>
 
-            <div className="mb-4">
-              <span className="text-3xl font-extrabold text-primary">
-                {product.price > 0
-                  ? `R$ ${product.price.toFixed(2).replace(".", ",")}`
-                  : "Consulte condições"}
-              </span>
-              {product.price > 0 && (
-                <span className="ml-2 text-sm text-muted-foreground">a partir de</span>
-              )}
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="mb-6">
-              <h3 className="mb-2 text-sm font-semibold text-foreground">Descrição</h3>
-              <p className="whitespace-pre-line text-sm text-muted-foreground">
-                {product.description || "Sem descrição disponível."}
-              </p>
-            </div>
-
-            {/* WhatsApp CTA */}
-            {whatsappPhone ? (
-              <a
-                href={getWhatsAppUrl(whatsappPhone, product.title)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <button
-                  className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#25D366] px-6 py-4 text-white font-bold text-lg shadow-lg transition-all duration-200 hover:bg-[#1ea952] hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <WhatsAppIcon className="h-6 w-6" />
-                  <div className="flex flex-col items-start">
-                    <span>Falar com o vendedor</span>
-                    <span className="text-xs font-normal opacity-90">Resposta rápida via WhatsApp</span>
-                  </div>
-                </button>
-              </a>
+          {/* Price */}
+          <div>
+            {product.price_type === "consult" ? (
+              <span className="text-xl text-muted-foreground">Consulte o vendedor</span>
             ) : (
-              <div className="rounded-xl border border-border bg-muted p-4 text-center text-sm text-muted-foreground">
-                Contato não disponível. Visite o perfil da empresa para mais informações.
-              </div>
+              <>
+                <span className="text-3xl font-black text-primary">
+                  {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Consultar preço"}
+                </span>
+                {product.price_type === "negotiable" && <span className="ml-2 text-sm text-muted-foreground">Preço negociável</span>}
+              </>
             )}
+          </div>
 
-            {/* Owner actions */}
-            {isOwner && (
-              <div className="mt-4 flex gap-2 border-t border-border pt-4">
-                <Link to="/marketplace" state={{ editProductId: product.id }} className="flex-1">
-                  <Button variant="outline" size="lg" className="w-full">
-                    <Pencil className="mr-2 h-4 w-4" /> Editar
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => confirmDelete(handleDelete)}
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                </Button>
-              </div>
-            )}
+          {/* Quick stats */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1"><Eye className="h-4 w-4" />{product.view_count} visualizações</span>
+            <span className="flex items-center gap-1"><MessageCircle className="h-4 w-4" />{product.contact_count} consultas</span>
+            {(product.city || seller?.city) && <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{product.city || seller?.city}</span>}
           </div>
 
           {/* Seller card */}
           {seller && (
-            <div className="mt-4 rounded-2xl border border-border bg-card p-5">
-              <h3 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Vendedor</h3>
+            <div className="rounded-xl bg-muted p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary overflow-hidden">
-                  {seller.logo_url ? (
-                    <img src={seller.logo_url} alt={seller.company_name} className="h-full w-full object-cover" />
-                  ) : (
-                    seller.company_name.charAt(0)
-                  )}
+                  {seller.logo_url ? <img src={seller.logo_url} alt="" className="h-full w-full object-cover" /> : seller.company_name.charAt(0)}
                 </div>
                 <div className="min-w-0">
                   <p className="font-bold text-card-foreground truncate">{seller.company_name}</p>
-                  <p className="text-xs text-muted-foreground">{seller.segment}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant="secondary" className="text-[10px]">{isPremium ? "Premium" : "Associado"}</Badge>
+                    {seller.city && <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3" />{seller.city}</span>}
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                {seller.city && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" />{seller.city}</span>}
-                {seller.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 shrink-0" />{seller.phone}</span>}
-                {seller.website && (
-                  <a href={seller.website.startsWith("http") ? seller.website : `https://${seller.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline">
-                    <Globe className="h-3.5 w-3.5 shrink-0" />{seller.website}
-                  </a>
-                )}
-              </div>
-
               <Link to={`/empresa/${seller.id}`} className="mt-3 block">
-                <Button variant="ghost" size="sm" className="w-full">
-                  <Building2 className="mr-1 h-4 w-4" /> Ver perfil da empresa
-                </Button>
+                <Button variant="ghost" size="sm" className="w-full"><Building2 className="mr-1 h-4 w-4" />Ver perfil completo</Button>
               </Link>
             </div>
           )}
+
+          {/* WhatsApp CTA */}
+          {whatsappPhone ? (
+            <a href={getWhatsAppUrl(whatsappPhone, product.title)} target="_blank" rel="noopener noreferrer" onClick={handleWhatsAppClick}>
+              <button className="flex w-full items-center justify-center gap-3 rounded-xl bg-[#25D366] px-6 py-4 text-white font-bold text-lg shadow-lg transition-all hover:bg-[#1ea952] hover:shadow-xl hover:scale-[1.01] active:scale-[0.99]">
+                <WhatsAppIcon className="h-6 w-6" />
+                <div className="flex flex-col items-start">
+                  <span>Falar com o vendedor</span>
+                  <span className="text-xs font-normal opacity-90">Resposta rápida via WhatsApp</span>
+                </div>
+              </button>
+            </a>
+          ) : (
+            <div className="rounded-xl border border-border bg-muted p-4 text-center text-sm text-muted-foreground">
+              Contato não disponível.
+            </div>
+          )}
+
+          {/* Share */}
+          <Button variant="outline" className="w-full" onClick={handleShare}>
+            <Share2 className="mr-2 h-4 w-4" /> Compartilhar produto
+          </Button>
+
+          {/* Owner actions */}
+          {isOwner && (
+            <div className="flex gap-2 border-t border-border pt-4">
+              <Link to="/marketplace" state={{ editProductId: product.id }} className="flex-1">
+                <Button variant="outline" size="lg" className="w-full"><Pencil className="mr-2 h-4 w-4" />Editar</Button>
+              </Link>
+              <Button variant="outline" size="lg" className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => confirmDelete(handleDelete)}>
+                <Trash2 className="mr-2 h-4 w-4" />Excluir
+              </Button>
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Description */}
+          <div>
+            <h3 className="mb-2 font-semibold text-foreground">Sobre este {typeLabels[product.product_type]?.toLowerCase() || "produto"}</h3>
+            <p className="whitespace-pre-line text-sm text-muted-foreground">{product.description || "Sem descrição."}</p>
+          </div>
         </motion.div>
       </div>
 
+      {/* Reviews */}
+      <section className="mt-12">
+        <h2 className="mb-4 text-xl font-bold text-foreground flex items-center gap-2">
+          <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
+          Avaliações
+          {reviews.length > 0 && <span className="text-base font-normal text-muted-foreground">({avgRating.toFixed(1)} · {reviews.length} avaliação{reviews.length !== 1 ? "es" : ""})</span>}
+        </h2>
+
+        {reviews.length > 0 && (
+          <div className="mb-6 space-y-4">
+            {reviews.slice(0, 5).map(r => (
+              <div key={r.id} className="rounded-lg border border-border bg-card p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{(r.reviewer_name || "U").charAt(0)}</div>
+                    <span className="text-sm font-medium text-foreground">{r.reviewer_name}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{timeAgo(r.created_at)}</span>
+                </div>
+                <StarRating rating={r.rating} />
+                {r.comment && <p className="mt-2 text-sm text-muted-foreground">{r.comment}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {user && isApproved && !isOwner && (
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h4 className="mb-3 text-sm font-semibold">Deixe sua avaliação</h4>
+            <StarRating rating={newRating} onChange={setNewRating} interactive />
+            <Textarea className="mt-3" placeholder="Comentário (opcional)" value={newComment} onChange={e => setNewComment(e.target.value)} rows={2} />
+            <Button className="mt-3" disabled={submittingReview || newRating === 0} onClick={submitReview}>
+              {submittingReview ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Enviar avaliação
+            </Button>
+          </div>
+        )}
+
+        {!user && (
+          <p className="text-sm text-muted-foreground">
+            <Link to="/login" className="text-primary hover:underline">Faça login</Link> para avaliar este produto.
+          </p>
+        )}
+      </section>
+
       {/* Other products from seller */}
       {otherProducts.length > 0 && (
-        <div className="mt-12">
-          <h2 className="mb-6 text-xl font-extrabold text-foreground">
-            <ShoppingBag className="mr-2 inline h-5 w-5" />
-            Outros produtos {seller ? `de ${seller.company_name}` : "do vendedor"}
+        <section className="mt-12">
+          <h2 className="mb-6 text-xl font-bold text-foreground flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5" />
+            Outros produtos de {seller?.company_name || "este vendedor"}
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {otherProducts.map((p) => {
-              const imgs = (p.images && p.images.length > 0) ? p.images : p.image_url ? [p.image_url] : [];
-              return (
-                <Link key={p.id} to={`/produto/${p.id}`} className="group rounded-2xl border border-border bg-card overflow-hidden card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
-                  <div className="aspect-video bg-muted overflow-hidden">
-                    {imgs.length > 0 ? (
-                      <img src={imgs[0]} alt={p.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center"><Package className="h-10 w-10 text-muted-foreground/40" /></div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="mb-1 text-sm font-bold text-card-foreground truncate">{p.title}</h3>
-                    <span className="text-base font-extrabold text-primary">
-                      {p.price > 0 ? `R$ ${p.price.toFixed(2).replace(".", ",")}` : "Consulte condições"}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {otherProducts.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
-        </div>
+        </section>
       )}
+
+      {/* Related products */}
+      {relatedProducts.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-6 text-xl font-bold text-foreground">Você também pode gostar</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {relatedProducts.slice(0, 6).map(p => <ProductCard key={p.id} product={p} />)}
+          </div>
+        </section>
+      )}
+
       {ConfirmDialog}
     </div>
   );

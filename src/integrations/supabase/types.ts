@@ -619,10 +619,47 @@ export type Database = {
         }
         Relationships: []
       }
+      product_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          product_id: string
+          rating: number
+          reviewer_user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          product_id: string
+          rating: number
+          reviewer_user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string
+          rating?: number
+          reviewer_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean | null
           category: string | null
+          city: string | null
+          contact_count: number
           contact_email: string | null
           contact_phone: string | null
           created_at: string | null
@@ -631,13 +668,18 @@ export type Database = {
           image_url: string | null
           images: string[] | null
           price: number
+          price_type: string
+          product_type: string
           title: string
           updated_at: string | null
           user_id: string
+          view_count: number
         }
         Insert: {
           active?: boolean | null
           category?: string | null
+          city?: string | null
+          contact_count?: number
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
@@ -646,13 +688,18 @@ export type Database = {
           image_url?: string | null
           images?: string[] | null
           price?: number
+          price_type?: string
+          product_type?: string
           title: string
           updated_at?: string | null
           user_id: string
+          view_count?: number
         }
         Update: {
           active?: boolean | null
           category?: string | null
+          city?: string | null
+          contact_count?: number
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
@@ -661,9 +708,12 @@ export type Database = {
           image_url?: string | null
           images?: string[] | null
           price?: number
+          price_type?: string
+          product_type?: string
           title?: string
           updated_at?: string | null
           user_id?: string
+          view_count?: number
         }
         Relationships: []
       }
@@ -888,6 +938,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_product_contact: { Args: { p_id: string }; Returns: undefined }
+      increment_product_view: { Args: { p_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
