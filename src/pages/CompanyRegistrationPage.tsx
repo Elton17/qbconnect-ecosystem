@@ -293,6 +293,7 @@ export default function CompanyRegistrationPage() {
                 <div>
                   <Label htmlFor="email">E-mail *</Label>
                   <Input id="email" type="email" placeholder="contato@empresa.com" {...register("email")} />
+                  <p className="mt-1 text-xs text-muted-foreground">Este será seu login de acesso ao sistema.</p>
                   {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
                 </div>
                 <div>
