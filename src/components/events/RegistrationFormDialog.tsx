@@ -7,6 +7,15 @@ import { Loader2, Ticket } from "lucide-react";
 import { REGISTRATION_FIELDS, type RegistrationFieldKey } from "./RegistrationFieldsConfig";
 import { formatCPF as maskCPF, formatCNPJ as maskCNPJ, formatPhone as maskPhone } from "@/lib/masks";
 
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  requiredFields: RegistrationFieldKey[];
+  eventTitle: string;
+  onSubmit: (data: Record<string, string>) => Promise<void>;
+  submitting: boolean;
+}
+
 export default function RegistrationFormDialog({ open, onOpenChange, requiredFields, eventTitle, onSubmit, submitting }: Props) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
