@@ -17,7 +17,7 @@ const modules = [
   { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace" },
   { title: "Serviços", description: "Serviços institucionais de apoio ao empresário.", icon: Briefcase, href: "/servicos" },
   { title: "Oportunidades", description: "Encontre fornecedores, parceiros e feche negócios.", icon: Handshake, href: "/oportunidades" },
-  { title: "Academia", description: "Cursos e capacitações para sua empresa crescer.", icon: GraduationCap, href: "/academia" },
+  { title: "Escola de Negócios", description: "Cursos e capacitações para sua empresa crescer.", icon: GraduationCap, href: "/academia" },
   { title: "Eventos", description: "Networking, feiras e encontros empresariais.", icon: CalendarDays, href: "/eventos" },
   { title: "Benefícios", description: "Descontos e vantagens exclusivas para associados.", icon: Gift, href: "/beneficios" },
   { title: "Ranking", description: "Gamificação e reconhecimento das melhores empresas.", icon: Trophy, href: "/ranking" },

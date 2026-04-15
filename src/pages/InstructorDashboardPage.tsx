@@ -171,7 +171,7 @@ export default function InstructorDashboardPage() {
       <div className="border-b border-border bg-card/95 backdrop-blur-md">
         <div className="container flex items-center gap-4 py-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/academia")}>
-            <ArrowLeft className="mr-1 h-4 w-4" /> Academia
+            <ArrowLeft className="mr-1 h-4 w-4" /> Escola de Negócios
           </Button>
           <div className="flex-1">
             <h1 className="text-lg font-extrabold text-foreground">Dashboard do Instrutor</h1>
@@ -219,8 +219,8 @@ export default function InstructorDashboardPage() {
             <div className="rounded-xl border-2 border-dashed border-border p-12 text-center">
               <GraduationCap className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
               <p className="mb-1 font-semibold text-foreground">Nenhum curso criado</p>
-              <p className="mb-4 text-sm text-muted-foreground">Crie seu primeiro curso na Academia.</p>
-              <Button onClick={() => navigate("/academia")}>Ir para Academia</Button>
+              <p className="mb-4 text-sm text-muted-foreground">Crie seu primeiro curso na Escola de Negócios.</p>
+              <Button onClick={() => navigate("/academia")}>Ir para Escola de Negócios</Button>
             </div>
           ) : (
             <div className="space-y-3">

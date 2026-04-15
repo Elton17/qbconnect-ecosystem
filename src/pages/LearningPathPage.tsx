@@ -174,7 +174,7 @@ export default function LearningPathPage() {
         </div>
         <div className="container relative">
           <Button variant="ghost" size="sm" onClick={() => navigate("/academia")} className="mb-4">
-            <ArrowLeft className="mr-1 h-4 w-4" /> Voltar para Academia
+            <ArrowLeft className="mr-1 h-4 w-4" /> Voltar para Escola de Negócios
           </Button>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">

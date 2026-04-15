@@ -59,7 +59,7 @@ interface LearningPath {
 }
 
 export default function AcademyPage() {
-  usePageTitle("Academia");
+  usePageTitle("Escola de Negócios");
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
@@ -136,7 +136,7 @@ export default function AcademyPage() {
 
     setCourses(items.map((c: any) => ({
       ...c,
-      company_name: profileMap.get(c.user_id) || "QBCAMP Academy",
+      company_name: profileMap.get(c.user_id) || "Escola de Negócios QBCAMP",
       module_count: moduleCounts[c.id] || 0,
       lesson_count: lessonCounts[c.id] || 0,
       avg_rating: ratingMap[c.id] ? ratingMap[c.id].sum / ratingMap[c.id].count : 0,
@@ -208,10 +208,10 @@ export default function AcademyPage() {
         <div className="container relative">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
-              <GraduationCap className="h-4 w-4" /> Plataforma de Cursos
+              <GraduationCap className="h-4 w-4" /> Escola de Negócios
             </div>
             <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
-              Academia <span className="text-gradient">QBCAMP</span>
+              Escola de Negócios <span className="text-gradient">QBCAMP</span>
             </h1>
             <p className="mb-8 text-lg text-secondary-foreground/70">
               Cursos completos com vídeos, módulos e certificados. Aprenda com as melhores empresas da região.
