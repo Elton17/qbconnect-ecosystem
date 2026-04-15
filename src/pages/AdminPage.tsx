@@ -107,7 +107,44 @@ export default function AdminPage() {
   async function toggleApproval(profileId: string, current: boolean) {
     const { error } = await supabase.from("profiles").update({ approved: !current }).eq("id", profileId);
     if (error) { toast.error("Erro ao atualizar"); return; }
-    toast.success(!current ? "Empresa aprovada!" : "Aprovação removida");
+    
+    const profile = profiles.find((p) => p.id === profileId);
+    
+    if (!current && profile) {
+      // Aprovando — notificar via WhatsApp
+      const phone = profile.contact_phone || profile.phone;
+      const companyName = profile.company_name || "sua empresa";
+      if (phone) {
+        const message = `🎉 Olá ${profile.contact_name || ""}! Temos uma ótima notícia!\n\nSeu cadastro da empresa *${companyName}* foi *aprovado* na plataforma QBCAMP Conecta Mais!\n\nAgora você pode:\n✅ Publicar produtos e serviços\n✅ Criar oportunidades de negócio\n✅ Oferecer benefícios exclusivos\n✅ Participar de eventos\n✅ Acessar a Escola de Negócios\n\nAcesse agora: ${window.location.origin}/login\n\nBem-vindo(a) à nossa rede! 🚀`;
+        const whatsappUrl = getWhatsAppContactUrl(phone, message);
+        window.open(whatsappUrl, "_blank");
+      }
+      
+      // Notificar via e-mail (se disponível)
+      const email = profile.contact_email || profile.email;
+      if (email) {
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName: "registration-approved",
+              recipientEmail: email,
+              idempotencyKey: `approval-${profileId}`,
+              templateData: {
+                companyName,
+                contactName: profile.contact_name || "",
+              },
+            },
+          });
+        } catch {
+          // E-mail não configurado — segue apenas com WhatsApp
+        }
+      }
+      
+      toast.success("Empresa aprovada! Notificação enviada via WhatsApp.");
+    } else {
+      toast.success("Aprovação removida");
+    }
+    
     setProfiles((prev) => prev.map((p) => p.id === profileId ? { ...p, approved: !current } : p));
   }
 
