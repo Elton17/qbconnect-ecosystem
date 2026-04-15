@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import ActivityFeed from "@/components/landing/ActivityFeed";
 import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
+import PromotionsSection from "@/components/marketplace/PromotionsSection";
 
 const modules = [
   { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace" },
