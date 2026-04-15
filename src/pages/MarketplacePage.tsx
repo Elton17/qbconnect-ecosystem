@@ -220,6 +220,7 @@ export default function MarketplacePage() {
         </div>
       </section>
 
+      <PremiumHighlights products={products} />
       <PromotionsSection />
 
       {/* Search bar */}
