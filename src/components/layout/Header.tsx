@@ -66,30 +66,6 @@ export default function Header() {
 
   return (
     <>
-      {/* Top Bar */}
-      <div className="bg-primary-dark text-white text-sm hidden md:block">
-        <div className="container flex items-center justify-between h-9">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <Phone className="h-3.5 w-3.5" />
-              {QBCAMP_PHONE_DISPLAY}
-            </span>
-            <span className="text-white/40">·</span>
-            <span>{QBCAMP_HOURS}</span>
-            <span className="text-white/40">·</span>
-            <span>{QBCAMP_REGION}</span>
-          </div>
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20 hover:text-white transition-colors"
-          >
-            <Search className="h-3 w-3" />
-            Buscar na plataforma...
-            <kbd className="ml-1 rounded border border-white/20 bg-white/10 px-1 py-0.5 font-mono text-[9px]">⌘K</kbd>
-          </button>
-        </div>
-      </div>
-
       <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-border">
         <div className="container flex h-16 items-center justify-between">
           {/* Logo */}
@@ -181,6 +157,20 @@ export default function Header() {
             </Button>
             <button className="p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Search bar below main nav */}
+        <div className="border-t border-border bg-muted/30 hidden md:block">
+          <div className="container py-3">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="mx-auto flex w-full max-w-xl items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground hover:border-primary/40 hover:shadow-sm transition-all"
+            >
+              <Search className="h-4 w-4 text-muted-foreground/60" />
+              <span className="flex-1 text-left">Buscar produtos, cursos, eventos, oportunidades...</span>
+              <kbd className="hidden sm:inline-flex rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">⌘K</kbd>
             </button>
           </div>
         </div>
