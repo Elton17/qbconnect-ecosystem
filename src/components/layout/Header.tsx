@@ -68,15 +68,25 @@ export default function Header() {
     <>
       {/* Top Bar */}
       <div className="bg-primary-dark text-white text-sm hidden md:block">
-        <div className="container flex items-center justify-center gap-4 h-9">
-          <span className="flex items-center gap-1.5">
-            <Phone className="h-3.5 w-3.5" />
-            {QBCAMP_PHONE_DISPLAY}
-          </span>
-          <span className="text-white/40">·</span>
-          <span>{QBCAMP_HOURS}</span>
-          <span className="text-white/40">·</span>
-          <span>{QBCAMP_REGION}</span>
+        <div className="container flex items-center justify-between h-9">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <Phone className="h-3.5 w-3.5" />
+              {QBCAMP_PHONE_DISPLAY}
+            </span>
+            <span className="text-white/40">·</span>
+            <span>{QBCAMP_HOURS}</span>
+            <span className="text-white/40">·</span>
+            <span>{QBCAMP_REGION}</span>
+          </div>
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/70 hover:bg-white/20 hover:text-white transition-colors"
+          >
+            <Search className="h-3 w-3" />
+            Buscar na plataforma...
+            <kbd className="ml-1 rounded border border-white/20 bg-white/10 px-1 py-0.5 font-mono text-[9px]">⌘K</kbd>
+          </button>
         </div>
       </div>
 
@@ -118,12 +128,7 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Desktop right */}
           <div className="hidden items-center gap-2 lg:flex">
-            <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="gap-2 text-muted-foreground">
-              <Search className="h-4 w-4" /> Buscar...
-              <kbd className="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
-            </Button>
             {user ? (
               <>
                 <Button variant="ghost" size="icon" className="h-9 w-9 text-foreground relative">
