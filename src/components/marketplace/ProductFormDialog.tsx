@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { formatPhone } from "@/lib/masks";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -243,7 +244,7 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="mb-1 block text-sm font-medium">WhatsApp</Label>
-              <Input value={form.contact_phone} onChange={(e) => { const { formatPhone } = require("@/lib/masks"); setForm({ ...form, contact_phone: formatPhone(e.target.value) }); }} placeholder="(41) 99999-0000" />
+              <Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: formatPhone(e.target.value) })} placeholder="(41) 99999-0000" />
             </div>
             <div>
               <Label className="mb-1 block text-sm font-medium">Email de contato</Label>
