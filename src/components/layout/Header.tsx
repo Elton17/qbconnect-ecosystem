@@ -233,15 +233,15 @@ export default function Header() {
                       </Button>
                     </>
                   ) : (
-                    <>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to="/login" onClick={() => setMobileOpen(false)}>Entrar</Link>
-                      </Button>
-                      <Button size="sm" asChild className="bg-primary text-white hover:bg-primary-dark">
-                        <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>Associe-se</a>
-                      </Button>
-                    </>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/login" onClick={() => setMobileOpen(false)}>Entrar</Link>
+                    </Button>
                   )}
+                  <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold w-full">
+                    <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
+                      <Crown className="mr-1 h-4 w-4" /> Cadastre-se
+                    </a>
+                  </Button>
                 </div>
               </nav>
             </motion.div>
