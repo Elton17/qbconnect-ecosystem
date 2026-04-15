@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Search, Phone, Crown, Link2, Bell, User, ChevronDown } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Search, Phone, Crown, Link2, Bell, User, ChevronDown, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -128,6 +128,9 @@ export default function Header() {
                     <DropdownMenuItem onClick={() => navigate("/perfil")}>
                       <User className="mr-2 h-4 w-4" /> Meu Perfil
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/meus-cursos")}>
+                      <BookOpen className="mr-2 h-4 w-4" /> Meus Cursos
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/instrutor/dashboard")}>
                       <GraduationCap className="mr-2 h-4 w-4" /> Painel Instrutor
                     </DropdownMenuItem>
@@ -218,6 +221,11 @@ export default function Header() {
                       <Button variant="ghost" size="sm" asChild className="justify-start">
                         <Link to="/perfil" onClick={() => setMobileOpen(false)}>
                           <User className="mr-1 h-4 w-4" /> Meu Perfil
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" asChild className="justify-start">
+                        <Link to="/meus-cursos" onClick={() => setMobileOpen(false)}>
+                          <BookOpen className="mr-1 h-4 w-4" /> Meus Cursos
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>

@@ -31,6 +31,7 @@ import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 import CompanyDashboardPage from "@/pages/CompanyDashboardPage";
 import LearningPathPage from "@/pages/LearningPathPage";
 import SACPage from "@/pages/SACPage";
+import MeusCursosPage from "@/pages/MeusCoursosPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
@@ -72,6 +73,7 @@ const App = () => (
 
               {/* Protected routes */}
               <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/meus-cursos" element={<ProtectedRoute><MeusCursosPage /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><CompanyDashboardPage /></ProtectedRoute>} />
               <Route path="/curso/:id/gerenciar" element={<ProtectedRoute><CourseManagePage /></ProtectedRoute>} />
               <Route path="/instrutor/dashboard" element={<ProtectedRoute><InstructorDashboardPage /></ProtectedRoute>} />
