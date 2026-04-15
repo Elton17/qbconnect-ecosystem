@@ -35,7 +35,7 @@ export default function Footer() {
               <li><Link to="/academia" className="hover:text-primary transition-colors">Escola de Negócios</Link></li>
               <li><Link to="/eventos" className="hover:text-primary transition-colors">Eventos</Link></li>
               <li><Link to="/beneficios" className="hover:text-primary transition-colors">Benefícios</Link></li>
-              
+              <li><Link to="/cadastro" className="hover:text-primary transition-colors font-semibold text-primary">Cadastre sua Empresa</Link></li>
               <li><Link to="/sac" className="hover:text-primary transition-colors">SAC</Link></li>
             </ul>
           </div>

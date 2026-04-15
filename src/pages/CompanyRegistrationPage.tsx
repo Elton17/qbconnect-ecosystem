@@ -5,14 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
+import { Building2, Upload, User, ArrowRight, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import {
   Select,
   SelectContent,
@@ -66,7 +66,7 @@ const formSchema = z.object({
   referencePoint: z.string().trim().max(200).optional().or(z.literal("")),
   zipCode: z.string().trim().min(8, "CEP inválido").max(10),
   state: z.string().trim().min(2, "Estado é obrigatório").max(2),
-  plan: z.enum(["basic", "premium"], { required_error: "Selecione um plano" }),
+  plan: z.string().optional().default("basic"),
   contactName: z.string().trim().min(2, "Nome do responsável é obrigatório").max(100),
   contactRole: z.string().trim().min(2, "Cargo é obrigatório").max(100),
   contactEmail: z.string().email("E-mail inválido").max(255),
@@ -104,8 +104,6 @@ export default function CompanyRegistrationPage() {
     resolver: zodResolver(formSchema),
     defaultValues: { plan: "basic" },
   });
-
-  const selectedPlan = watch("plan");
 
   const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -385,55 +383,6 @@ export default function CompanyRegistrationPage() {
             </Card>
           </motion.div>
 
-          {/* Plan */}
-          <motion.div custom={2} initial="hidden" animate="visible" variants={fadeIn}>
-            <Card className="card-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <CreditCard className="h-5 w-5 text-primary" /> Plano
-                </CardTitle>
-                <CardDescription>Escolha o plano ideal para sua empresa.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup
-                  defaultValue="basic"
-                  onValueChange={(v) => setValue("plan", v as "basic" | "premium", { shouldValidate: true })}
-                  className="grid gap-4 sm:grid-cols-2"
-                >
-                  <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${selectedPlan === "basic" ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}>
-                    <div className="flex items-start gap-3">
-                      <RadioGroupItem value="basic" id="basic" className="mt-1" />
-                      <div>
-                        <p className="font-bold text-foreground">Básico</p>
-                        <p className="text-sm text-muted-foreground">Gratuito</p>
-                        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Perfil empresarial</li>
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Marketplace básico</li>
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Até 5 produtos</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </label>
-                  <label className={`cursor-pointer rounded-xl border-2 p-5 transition-all ${selectedPlan === "premium" ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}>
-                    <div className="flex items-start gap-3">
-                      <RadioGroupItem value="premium" id="premium" className="mt-1" />
-                      <div>
-                        <p className="font-bold text-foreground">Premium</p>
-                        <p className="text-sm text-primary font-semibold">R$ 99/mês</p>
-                        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Tudo do básico</li>
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Produtos ilimitados</li>
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Destaque no ranking</li>
-                          <li className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3 text-primary" /> Acesso à Escola de Negócios</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </label>
-                </RadioGroup>
-                {errors.plan && <p className="mt-2 text-xs text-destructive">{errors.plan.message}</p>}
-              </CardContent>
-            </Card>
-          </motion.div>
 
           {/* Responsible Person */}
           <motion.div custom={3} initial="hidden" animate="visible" variants={fadeIn}>
