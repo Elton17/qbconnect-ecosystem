@@ -128,7 +128,7 @@ export default function BenefitsPage() {
 
   const handleRedeem = async (benefit: Benefit) => {
     if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios. Acesse /login para entrar.", variant: "destructive" }); return; }
-    setRedeemingBenefit(benefit); setRedeemDialogOpen(true); setCopied(false);
+    setRedeemingBenefit(benefit); setRedeemDialogOpen(true); setCopied(false); setCodeSaved(false);
     const existingCode = userRedemptions.get(benefit.id);
     if (existingCode) { setRedeemCode(existingCode); return; }
     setRedeemLoading(true);
