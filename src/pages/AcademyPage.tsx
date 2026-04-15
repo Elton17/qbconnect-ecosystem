@@ -10,6 +10,26 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload, Search, Route, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+
+import coverMarketing from "@/assets/course-covers/marketing.jpg";
+import coverFinancas from "@/assets/course-covers/financas.jpg";
+import coverGestao from "@/assets/course-covers/gestao.jpg";
+import coverVendas from "@/assets/course-covers/vendas.jpg";
+import coverJuridico from "@/assets/course-covers/juridico.jpg";
+import coverTecnologia from "@/assets/course-covers/tecnologia.jpg";
+import coverRH from "@/assets/course-covers/rh.jpg";
+import coverOutro from "@/assets/course-covers/outro.jpg";
+
+const categoryCovers: Record<string, string> = {
+  Marketing: coverMarketing,
+  "Finanças": coverFinancas,
+  "Gestão": coverGestao,
+  Vendas: coverVendas,
+  "Jurídico": coverJuridico,
+  Tecnologia: coverTecnologia,
+  RH: coverRH,
+  Outro: coverOutro,
+};
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -363,15 +383,13 @@ export default function AcademyPage() {
                 className="group flex cursor-pointer flex-col rounded-2xl border border-border bg-card card-shadow overflow-hidden transition-all hover:card-shadow-hover hover:-translate-y-1"
               >
                 {/* Thumbnail */}
-                <div className="relative flex h-44 items-center justify-center bg-gradient-to-br from-secondary to-muted overflow-hidden">
-                  {course.thumbnail_url ? (
-                    <img src={course.thumbnail_url} alt={course.title} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <GraduationCap className="h-12 w-12 text-muted-foreground/20" />
-                      <span className="text-xs text-muted-foreground/30">{course.category}</span>
-                    </div>
-                  )}
+                <div className="relative flex h-44 items-center justify-center overflow-hidden">
+                  <img
+                    src={course.thumbnail_url || categoryCovers[course.category] || coverOutro}
+                    alt={course.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                   {/* Play overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/20">
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:scale-100 scale-75 shadow-lg">
