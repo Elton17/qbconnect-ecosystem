@@ -176,8 +176,13 @@ export default function CourseDetailPage() {
       }
       if (progRes.data) {
         const map: Record<string, boolean> = {};
-        progRes.data.forEach((p: any) => { map[p.lesson_id] = p.completed; });
+        const secMap: Record<string, number> = {};
+        progRes.data.forEach((p: any) => {
+          map[p.lesson_id] = p.completed;
+          if (p.progress_seconds) secMap[p.lesson_id] = p.progress_seconds;
+        });
         setProgress(map);
+        setSavedSeconds(secMap);
       }
     }
     setLoading(false);
