@@ -170,6 +170,10 @@ export default function LandingPage() {
         </div>
       </section>
 
+
+      {/* ===== PROMOÇÕES BANNER ===== */}
+      <PromotionsSection compact />
+
       {/* ===== WHY JOIN ===== */}
       <section className="py-20 bg-background">
         <div className="container">
