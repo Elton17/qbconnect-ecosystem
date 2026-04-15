@@ -167,7 +167,7 @@ export default function CourseDetailPage() {
     if (user) {
       const [enrRes, progRes, profileRes] = await Promise.all([
         supabase.from("course_enrollments").select("*").eq("course_id", id).eq("user_id", user.id).maybeSingle(),
-        supabase.from("lesson_progress").select("lesson_id, completed").eq("user_id", user.id),
+        supabase.from("lesson_progress").select("lesson_id, completed, progress_seconds").eq("user_id", user.id),
         supabase.from("profiles").select("company_name, contact_name").eq("user_id", user.id).maybeSingle(),
       ]);
       setEnrollment(enrRes.data);
