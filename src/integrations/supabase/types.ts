@@ -938,6 +938,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_product_contact: { Args: { p_id: string }; Returns: undefined }
+      increment_product_view: { Args: { p_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
