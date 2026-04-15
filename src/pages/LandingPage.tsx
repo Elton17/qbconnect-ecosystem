@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import ActivityFeed from "@/components/landing/ActivityFeed";
 import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
+import PromotionsSection from "@/components/marketplace/PromotionsSection";
 
 const modules = [
   { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace" },
@@ -168,6 +169,10 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+
+      {/* ===== PROMOÇÕES BANNER ===== */}
+      <PromotionsSection compact />
 
       {/* ===== WHY JOIN ===== */}
       <section className="py-20 bg-background">

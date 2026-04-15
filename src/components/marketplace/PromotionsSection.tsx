@@ -1,6 +1,5 @@
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { Flame, Plus, Loader2, Trash2, Clock, Percent, Calendar, Tag } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Flame, Plus, Loader2, Trash2, Clock, Percent, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,28 +25,32 @@ interface Promotion {
   company_name?: string;
 }
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.4 } }),
-};
-
 function timeLeft(expiresAt: string): string {
   const diff = new Date(expiresAt).getTime() - Date.now();
   if (diff <= 0) return "Expirada";
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
-  if (days > 0) return `${days}d ${hours}h restantes`;
+  if (days > 0) return `${days}d ${hours}h`;
   const mins = Math.floor((diff % 3600000) / 60000);
-  return `${hours}h ${mins}m restantes`;
+  return `${hours}h ${mins}m`;
 }
 
-export default function PromotionsSection() {
+interface Props {
+  /** Compact mode for landing page (smaller height) */
+  compact?: boolean;
+}
+
+export default function PromotionsSection({ compact = false }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [form, setForm] = useState({
     title: "", description: "", discount_percent: "10",
     original_price: "", promo_price: "", category: "Produtos",
@@ -70,6 +73,21 @@ export default function PromotionsSection() {
   };
 
   useEffect(() => { fetchPromotions(); }, []);
+
+  // Auto-play
+  const next = useCallback(() => {
+    setCurrent(c => (c + 1) % Math.max(promotions.length, 1));
+  }, [promotions.length]);
+
+  const prev = useCallback(() => {
+    setCurrent(c => (c - 1 + promotions.length) % Math.max(promotions.length, 1));
+  }, [promotions.length]);
+
+  useEffect(() => {
+    if (paused || promotions.length <= 1) return;
+    intervalRef.current = setInterval(next, 4000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [paused, promotions.length, next]);
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -107,7 +125,7 @@ export default function PromotionsSection() {
 
   if (loading) {
     return (
-      <section className="border-b border-border py-10">
+      <section className="border-b border-border py-6">
         <div className="container flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
@@ -115,170 +133,245 @@ export default function PromotionsSection() {
     );
   }
 
-  return (
-    <section className="border-b border-border py-10">
-      <div className="container">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-destructive/10">
+  if (promotions.length === 0) {
+    return (
+      <section className="border-b border-border py-6">
+        <div className="container">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <Flame className="h-5 w-5 text-destructive" />
+              <h2 className="text-lg font-bold text-foreground">Promoções & Ofertas</h2>
             </div>
-            <div>
-              <h2 className="text-xl font-extrabold text-foreground md:text-2xl">
-                Promoções & Ofertas
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Ofertas com tempo limitado dos associados
-              </p>
-            </div>
-          </div>
-          {user && (
-            <Button variant="default" size="sm" onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" /> Nova Promoção
-            </Button>
-          )}
-        </div>
-
-        {promotions.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-muted/30 py-12 text-center">
-            <Flame className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
-            <p className="text-muted-foreground">Nenhuma promoção ativa no momento.</p>
             {user && (
-              <Button variant="outline" size="sm" className="mt-3" onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-1 h-4 w-4" /> Criar primeira promoção
+              <Button variant="default" size="sm" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-1 h-4 w-4" /> Nova Promoção
               </Button>
             )}
           </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {promotions.map((promo, i) => (
-              <motion.div
-                key={promo.id}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeInUp}
-                className="group relative overflow-hidden rounded-2xl border border-destructive/20 bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1"
-              >
-                {/* Discount badge */}
-                <div className="absolute right-3 top-3 z-10 flex h-14 w-14 items-center justify-center rounded-full bg-destructive shadow-lg">
-                  <span className="text-lg font-extrabold text-destructive-foreground">
-                    -{promo.discount_percent}%
-                  </span>
-                </div>
+          <div className="rounded-2xl border border-dashed border-border bg-muted/30 py-10 text-center">
+            <Flame className="mx-auto mb-2 h-8 w-8 text-muted-foreground/30" />
+            <p className="text-sm text-muted-foreground">Nenhuma promoção ativa no momento.</p>
+          </div>
+          {renderDialog()}
+        </div>
+      </section>
+    );
+  }
 
-                {/* Image or gradient placeholder */}
-                {promo.image_url ? (
-                  <div className="aspect-[16/9] overflow-hidden bg-muted">
-                    <img src={promo.image_url} alt={promo.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  </div>
+  const promo = promotions[current];
+  const bannerH = compact ? "h-[200px] sm:h-[260px]" : "h-[220px] sm:h-[300px] lg:h-[340px]";
+
+  function renderDialog() {
+    return (
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flame className="h-5 w-5 text-destructive" /> Nova Promoção
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Título da oferta *</label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: 30% de desconto em manutenção" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">Descrição</label>
+              <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Detalhes da promoção" rows={2} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Desconto (%) *</label>
+                <Input type="number" min="1" max="99" value={form.discount_percent} onChange={(e) => setForm({ ...form, discount_percent: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Categoria</label>
+                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{promoCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Preço original (R$)</label>
+                <Input type="number" step="0.01" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: e.target.value })} placeholder="0,00" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-foreground">Preço promocional (R$)</label>
+                <Input type="number" step="0.01" value={form.promo_price} onChange={(e) => setForm({ ...form, promo_price: e.target.value })} placeholder="0,00" />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
+                <Calendar className="h-3.5 w-3.5" /> Válido até *
+              </label>
+              <Input type="datetime-local" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} />
+            </div>
+            <Button onClick={handleSubmit} disabled={saving || !form.title || !form.expires_at} className="w-full">
+              {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Flame className="mr-1 h-4 w-4" />}
+              Publicar Promoção
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <section className="border-b border-border py-6 sm:py-8">
+      <div className="container">
+        {/* Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-destructive/10">
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-foreground">Promoções & Ofertas</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            {user && !compact && (
+              <Button variant="default" size="sm" onClick={() => setDialogOpen(true)}>
+                <Plus className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Nova Promoção</span><span className="sm:hidden">Nova</span>
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Carousel Banner */}
+        <div
+          className={`relative overflow-hidden rounded-xl sm:rounded-2xl ${bannerH}`}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={() => setPaused(true)}
+          onTouchEnd={() => setTimeout(() => setPaused(false), 3000)}
+        >
+          {/* Slides container */}
+          <div
+            className="flex h-full transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${current * 100}%)` }}
+          >
+            {promotions.map((p) => (
+              <div key={p.id} className="relative h-full w-full flex-shrink-0">
+                {/* Background image */}
+                {p.image_url ? (
+                  <img
+                    src={p.image_url}
+                    alt={p.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
                 ) : (
-                  <div className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-destructive/10 to-primary/10">
-                    <Percent className="h-12 w-12 text-destructive/30" />
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-destructive/80 to-primary/60" />
                 )}
+                {/* Dark overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/20" />
 
-                <div className="p-4">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-medium text-destructive">
-                      {promo.category || "Geral"}
-                    </span>
-                    <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" /> {timeLeft(promo.expires_at)}
-                    </span>
-                  </div>
-
-                  <h3 className="mb-1 text-base font-bold text-card-foreground line-clamp-2">{promo.title}</h3>
-                  {promo.description && (
-                    <p className="mb-3 text-sm text-muted-foreground line-clamp-2">{promo.description}</p>
-                  )}
-
-                  {/* Price display */}
-                  {(promo.original_price || promo.promo_price) && (
-                    <div className="mb-3 flex items-center gap-2">
-                      {promo.original_price && (
-                        <span className="text-sm text-muted-foreground line-through">
-                          R$ {promo.original_price.toFixed(2).replace(".", ",")}
-                        </span>
-                      )}
-                      {promo.promo_price && (
-                        <span className="text-lg font-extrabold text-destructive">
-                          R$ {promo.promo_price.toFixed(2).replace(".", ",")}
-                        </span>
-                      )}
+                {/* Content */}
+                <div className="relative z-10 flex h-full items-center px-5 sm:px-10 lg:px-14">
+                  <div className="max-w-lg">
+                    {/* Discount badge */}
+                    <div className="mb-2 sm:mb-3 inline-flex items-center gap-1.5 rounded-full bg-destructive px-3 py-1 sm:px-4 sm:py-1.5 text-destructive-foreground shadow-lg">
+                      <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      <span className="text-sm sm:text-base font-extrabold">-{p.discount_percent}% OFF</span>
                     </div>
-                  )}
 
-                  <p className="text-xs text-muted-foreground">por {promo.company_name}</p>
+                    {/* Title */}
+                    <h3 className="mb-1 sm:mb-2 text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-tight line-clamp-2">
+                      {p.title}
+                    </h3>
 
-                  {user?.id === promo.user_id && (
-                    <div className="mt-3 border-t border-border pt-3">
-                      <Button variant="ghost" size="sm" className="w-full text-destructive hover:text-destructive" onClick={() => handleDelete(promo.id)}>
+                    {/* Description */}
+                    {p.description && (
+                      <p className="mb-2 sm:mb-3 text-sm sm:text-base text-white/80 line-clamp-2">
+                        {p.description}
+                      </p>
+                    )}
+
+                    {/* Price */}
+                    {(p.original_price || p.promo_price) && (
+                      <div className="mb-2 sm:mb-3 flex items-center gap-3">
+                        {p.original_price && (
+                          <span className="text-base sm:text-lg text-white/50 line-through">
+                            R$ {p.original_price.toFixed(2).replace(".", ",")}
+                          </span>
+                        )}
+                        {p.promo_price != null && p.promo_price > 0 && (
+                          <span className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white">
+                            R$ {p.promo_price.toFixed(2).replace(".", ",")}
+                          </span>
+                        )}
+                        {p.promo_price === 0 && (
+                          <span className="text-xl sm:text-2xl font-extrabold text-emerald-400">GRÁTIS</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Meta row */}
+                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-white/60">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> {timeLeft(p.expires_at)}
+                      </span>
+                      <span>por {p.company_name}</span>
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] sm:text-xs font-medium text-white/70">
+                        {p.category}
+                      </span>
+                    </div>
+
+                    {/* Owner delete */}
+                    {user?.id === p.user_id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 text-white/60 hover:text-destructive hover:bg-white/10"
+                        onClick={() => handleDelete(p.id)}
+                      >
                         <Trash2 className="mr-1 h-3.5 w-3.5" /> Remover
                       </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        )}
 
-        {/* Create Promotion Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Flame className="h-5 w-5 text-destructive" /> Nova Promoção
-              </DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Título da oferta *</label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: 30% de desconto em manutenção" />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">Descrição</label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Detalhes da promoção" rows={2} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Desconto (%) *</label>
-                  <Input type="number" min="1" max="99" value={form.discount_percent} onChange={(e) => setForm({ ...form, discount_percent: e.target.value })} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Categoria</label>
-                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{promoCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Preço original (R$)</label>
-                  <Input type="number" step="0.01" value={form.original_price} onChange={(e) => setForm({ ...form, original_price: e.target.value })} placeholder="0,00" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">Preço promocional (R$)</label>
-                  <Input type="number" step="0.01" value={form.promo_price} onChange={(e) => setForm({ ...form, promo_price: e.target.value })} placeholder="0,00" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
-                  <Calendar className="h-3.5 w-3.5" /> Válido até *
-                </label>
-                <Input type="datetime-local" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} />
-              </div>
-              <Button onClick={handleSubmit} disabled={saving || !form.title || !form.expires_at} className="w-full">
-                {saving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Flame className="mr-1 h-4 w-4" />}
-                Publicar Promoção
-              </Button>
+          {/* Nav arrows */}
+          {promotions.length > 1 && (
+            <>
+              <button
+                onClick={prev}
+                className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
+              >
+                <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
+              >
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
+            </>
+          )}
+
+          {/* Dots */}
+          {promotions.length > 1 && (
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 sm:gap-2">
+              {promotions.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+                    i === current
+                      ? "w-6 sm:w-8 bg-white"
+                      : "w-1.5 sm:w-2 bg-white/40 hover:bg-white/60"
+                  }`}
+                />
+              ))}
             </div>
-          </DialogContent>
-        </Dialog>
+          )}
+        </div>
       </div>
+
+      {renderDialog()}
     </section>
   );
 }
