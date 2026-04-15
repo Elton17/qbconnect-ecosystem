@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Building2, Upload, User, ArrowRight, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
+import { formatPhone, formatCEP, formatCNPJ as formatCNPJMask } from "@/lib/masks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -78,14 +79,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-function formatCNPJ(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 14);
-  return digits
-    .replace(/^(\d{2})(\d)/, "$1.$2")
-    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1/$2")
-    .replace(/(\d{4})(\d)/, "$1-$2");
-}
+const formatCNPJ = formatCNPJMask;
 
 export default function CompanyRegistrationPage() {
   usePageTitle("Cadastro");
@@ -288,7 +282,12 @@ export default function CompanyRegistrationPage() {
                 </div>
                 <div>
                   <Label htmlFor="phone">Telefone *</Label>
-                  <Input id="phone" placeholder="(41) 99999-0000" {...register("phone")} />
+                  <Input
+                    id="phone"
+                    placeholder="(41) 99999-0000"
+                    {...register("phone")}
+                    onChange={(e) => setValue("phone", formatPhone(e.target.value), { shouldValidate: true })}
+                  />
                   {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone.message}</p>}
                 </div>
                 <div>
@@ -362,7 +361,12 @@ export default function CompanyRegistrationPage() {
                   </div>
                   <div>
                     <Label htmlFor="zipCode">CEP *</Label>
-                    <Input id="zipCode" placeholder="00000-000" {...register("zipCode")} />
+                    <Input
+                      id="zipCode"
+                      placeholder="00000-000"
+                      {...register("zipCode")}
+                      onChange={(e) => setValue("zipCode", formatCEP(e.target.value), { shouldValidate: true })}
+                    />
                     {errors.zipCode && <p className="mt-1 text-xs text-destructive">{errors.zipCode.message}</p>}
                   </div>
                   <div>
@@ -411,7 +415,12 @@ export default function CompanyRegistrationPage() {
                 </div>
                 <div>
                   <Label htmlFor="contactPhone">Telefone *</Label>
-                  <Input id="contactPhone" placeholder="(41) 99999-0000" {...register("contactPhone")} />
+                  <Input
+                    id="contactPhone"
+                    placeholder="(41) 99999-0000"
+                    {...register("contactPhone")}
+                    onChange={(e) => setValue("contactPhone", formatPhone(e.target.value), { shouldValidate: true })}
+                  />
                   {errors.contactPhone && <p className="mt-1 text-xs text-destructive">{errors.contactPhone.message}</p>}
                 </div>
               </CardContent>
