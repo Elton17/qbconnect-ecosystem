@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Play, Lock, CheckCircle2, ChevronDown, ChevronRight, Clock, Users, Star,
-  BookOpen, Award, ArrowLeft, Loader2, Download, FileText, MessageSquare
+  BookOpen, Award, ArrowLeft, Loader2, Download, FileText, MessageSquare,
+  SkipBack, SkipForward
 } from "lucide-react";
 import CertificateGenerator from "@/components/courses/CertificateGenerator";
 
@@ -62,10 +63,69 @@ export default function CourseDetailPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
   const [userName, setUserName] = useState("");
+  const [savedSeconds, setSavedSeconds] = useState<Record<string, number>>({});
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const saveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const allLessons = useMemo(() => modules.flatMap(m => m.lessons), [modules]);
   const completedCount = useMemo(() => Object.values(progress).filter(Boolean).length, [progress]);
   const progressPercent = allLessons.length > 0 ? Math.round((completedCount / allLessons.length) * 100) : 0;
+
+  const activeLessonIndex = useMemo(() => {
+    if (!activeLesson) return -1;
+    return allLessons.findIndex(l => l.id === activeLesson.id);
+  }, [activeLesson, allLessons]);
+
+  const prevLesson = activeLessonIndex > 0 ? allLessons[activeLessonIndex - 1] : null;
+  const nextLesson = activeLessonIndex >= 0 && activeLessonIndex < allLessons.length - 1 ? allLessons[activeLessonIndex + 1] : null;
+
+  const goToLesson = useCallback((lesson: Lesson) => {
+    if (canWatch(lesson)) {
+      setActiveLesson(lesson);
+      // Expand the module containing this lesson
+      const mod = modules.find(m => m.lessons.some(l => l.id === lesson.id));
+      if (mod) setExpandedModules(prev => new Set(prev).add(mod.id));
+    }
+  }, [modules, enrollment, course, user]);
+
+  // Save video progress periodically
+  const saveVideoProgress = useCallback(async (lessonId: string, seconds: number) => {
+    if (!user || !enrollment) return;
+    await supabase.from("lesson_progress").upsert({
+      lesson_id: lessonId,
+      user_id: user.id,
+      progress_seconds: Math.floor(seconds),
+    }, { onConflict: "lesson_id,user_id" });
+  }, [user, enrollment]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearInterval(saveTimerRef.current);
+    };
+  }, []);
+
+  // When active lesson changes, set up video progress saving
+  useEffect(() => {
+    if (saveTimerRef.current) clearInterval(saveTimerRef.current);
+    if (!activeLesson || !videoRef.current || !user || !enrollment) return;
+
+    // Restore position
+    const saved = savedSeconds[activeLesson.id];
+    if (saved && videoRef.current) {
+      videoRef.current.currentTime = saved;
+    }
+
+    // Save every 10 seconds
+    saveTimerRef.current = setInterval(() => {
+      if (videoRef.current && activeLesson) {
+        saveVideoProgress(activeLesson.id, videoRef.current.currentTime);
+      }
+    }, 10000);
+
+    return () => {
+      if (saveTimerRef.current) clearInterval(saveTimerRef.current);
+    };
+  }, [activeLesson?.id]);
 
   useEffect(() => {
     if (id) fetchAll();
