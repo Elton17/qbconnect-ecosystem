@@ -9,6 +9,7 @@ import { Building2, Upload, User, ArrowRight, Lock, Loader2, Shield, MessageCirc
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
 import { formatPhone, formatCEP, formatCNPJ as formatCNPJMask } from "@/lib/masks";
+import { translateAuthError, PASSWORD_HINT } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,7 +59,11 @@ const formSchema = z.object({
   website: z.string().max(200).optional().or(z.literal("")),
   phone: z.string().min(8, "Telefone inválido").max(20),
   email: z.string().email("E-mail inválido").max(255),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  password: z.string().min(6, "Mínimo 6 caracteres")
+    .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
+    .regex(/[a-z]/, "Deve conter pelo menos uma letra minúscula")
+    .regex(/[0-9]/, "Deve conter pelo menos um número")
+    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/, "Deve conter pelo menos um caractere especial (!@#$%&*)"),
   confirmPassword: z.string().min(6, "Confirme a senha"),
   description: z.string().trim().min(10, "Mínimo 10 caracteres").max(1000),
   address: z.string().trim().min(3, "Endereço é obrigatório").max(200),
@@ -149,7 +154,7 @@ export default function CompanyRegistrationPage() {
     });
 
     if (authError) {
-      toast({ title: "Erro no cadastro", description: authError.message, variant: "destructive" });
+      toast({ title: "Erro no cadastro", description: translateAuthError(authError.message), variant: "destructive" });
       return;
     }
 
@@ -308,6 +313,7 @@ export default function CompanyRegistrationPage() {
                     <Input id="password" type="password" placeholder="Mínimo 6 caracteres" className="pl-9" {...register("password")} />
                   </div>
                   {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+                  <p className="mt-1 text-xs text-muted-foreground">{PASSWORD_HINT}</p>
                 </div>
                 <div>
                   <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
