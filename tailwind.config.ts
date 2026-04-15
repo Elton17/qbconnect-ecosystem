@@ -91,6 +91,10 @@ export default {
           from: { opacity: "0", transform: "scale(0.8)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
+        "pulse-subtle": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--accent) / 0.4)" },
+          "50%": { boxShadow: "0 0 0 6px hsl(var(--accent) / 0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -98,6 +102,7 @@ export default {
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
         "fade-in": "fade-in 0.5s ease-out forwards",
         "count-up": "count-up 0.5s ease-out forwards",
+        "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
       },
     },
   },
