@@ -257,40 +257,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== PLANS COMPARISON ===== */}
-      <section className="py-20 bg-background">
-        <div className="container">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14 text-center">
-            <span className="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-primary font-heading">Planos</span>
-            <h2 className="mb-4 text-3xl font-extrabold text-foreground md:text-4xl">Escolha o plano para sua empresa</h2>
-            <p className="mx-auto max-w-xl text-muted-foreground">Todos os associados têm acesso completo. O Premium desbloqueia mais capacidade e visibilidade.</p>
-          </motion.div>
-          <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-lg border border-border bg-card p-6">
-              <h3 className="mb-2 text-xl font-bold text-card-foreground">Associado</h3>
-              <p className="mb-4 text-sm text-muted-foreground">Incluído na associação</p>
-              <ul className="space-y-2 text-sm">
-                {["Até 3 produtos", "Até 2 oportunidades", "Até 2 benefícios", "Acesso completo"].map(f => (
-                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />{f}</li>
-                ))}
-              </ul>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="rounded-lg border-2 border-premium bg-card p-6 relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-premium px-3 py-0.5 text-xs font-bold text-white font-heading"><Crown className="h-3 w-3" /> PREMIUM</span>
-              <h3 className="mb-2 text-xl font-bold text-card-foreground">Premium</h3>
-              <p className="mb-4 text-sm text-muted-foreground">Máxima visibilidade</p>
-              <ul className="space-y-2 text-sm">
-                {["Até 10 produtos", "Até 10 oportunidades", "Benefícios ilimitados", "Destaque nas listagens", "Badge e borda dourada"].map(f => (
-                  <li key={f} className="flex items-center gap-2"><Check className="h-4 w-4 text-premium" />{f}</li>
-                ))}
-              </ul>
-              <Button className="mt-4 w-full gap-2 bg-premium hover:bg-premium/90 text-white font-heading font-bold" size="sm" asChild>
-                <Link to="/planos">Ver detalhes <ArrowRight className="ml-1 h-4 w-4" /></Link>
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* ===== COMPANY LOGOS ===== */}
       <CompanyLogosCarousel />
