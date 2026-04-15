@@ -128,6 +128,9 @@ export default function Header() {
                     <DropdownMenuItem onClick={() => navigate("/perfil")}>
                       <User className="mr-2 h-4 w-4" /> Meu Perfil
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/meus-cursos")}>
+                      <BookOpen className="mr-2 h-4 w-4" /> Meus Cursos
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/instrutor/dashboard")}>
                       <GraduationCap className="mr-2 h-4 w-4" /> Painel Instrutor
                     </DropdownMenuItem>
