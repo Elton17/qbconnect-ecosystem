@@ -208,6 +208,14 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-12 text-center">
+            <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+              <Link to="/cadastro">
+                <Building2 className="mr-2 h-5 w-5" /> Cadastre sua Empresa <ArrowRight className="ml-1 h-5 w-5" />
+              </Link>
+            </Button>
+          </motion.div>
         </div>
       </section>
 
@@ -253,6 +261,17 @@ export default function LandingPage() {
                 </Link>
               </motion.div>
             ))}
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-12 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+              <Link to="/cadastro">
+                Cadastre sua Empresa <ArrowRight className="ml-1 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button size="xl" variant="outline" asChild className="font-heading font-bold">
+              <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Quero me associar</a>
+            </Button>
           </motion.div>
         </div>
       </section>
