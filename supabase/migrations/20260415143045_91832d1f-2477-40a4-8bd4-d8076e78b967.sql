@@ -1,0 +1,1 @@
+ALTER TABLE public.redemptions ADD CONSTRAINT redemptions_user_benefit_unique UNIQUE (user_id, benefit_id);

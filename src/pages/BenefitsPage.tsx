@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { formatWhatsApp } from "@/lib/masks";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays, Search } from "lucide-react";
+import { Percent, Building2, Tag, Plus, Loader2, Trash2, Pencil, Copy, Check, Ticket, Gift, Sparkles, MessageCircle, CalendarDays, Search, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +74,7 @@ export default function BenefitsPage() {
   const [redeemCode, setRedeemCode] = useState<string | null>(null);
   const [redeemLoading, setRedeemLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [codeSaved, setCodeSaved] = useState(false);
   const [userRedemptions, setUserRedemptions] = useState<Map<string, string>>(new Map());
   const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
   const [searchTerm, setSearchTerm] = useState("");
@@ -127,7 +128,7 @@ export default function BenefitsPage() {
 
   const handleRedeem = async (benefit: Benefit) => {
     if (!user) { toast({ title: "Faça login", description: "Você precisa estar logado para resgatar benefícios. Acesse /login para entrar.", variant: "destructive" }); return; }
-    setRedeemingBenefit(benefit); setRedeemDialogOpen(true); setCopied(false);
+    setRedeemingBenefit(benefit); setRedeemDialogOpen(true); setCopied(false); setCodeSaved(false);
     const existingCode = userRedemptions.get(benefit.id);
     if (existingCode) { setRedeemCode(existingCode); return; }
     setRedeemLoading(true);
@@ -355,6 +356,19 @@ export default function BenefitsPage() {
                     <p className="mt-0.5 text-xs">por {redeemingBenefit.company_name}</p>
                   </div>
                 )}
+                <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/50 p-3">
+                  <input
+                    type="checkbox"
+                    id="codeSaved"
+                    checked={codeSaved}
+                    onChange={(e) => setCodeSaved(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                  <label htmlFor="codeSaved" className="text-xs text-muted-foreground cursor-pointer select-none">
+                    <ShieldCheck className="inline mr-1 h-3.5 w-3.5 text-primary" />
+                    Copiei o código para um local seguro
+                  </label>
+                </div>
                 <div className="flex gap-2">
                   <Button onClick={handleCopy} variant="outline" className="flex-1">
                     {copied ? <Check className="mr-1.5 h-4 w-4" /> : <Copy className="mr-1.5 h-4 w-4" />}
@@ -364,10 +378,12 @@ export default function BenefitsPage() {
                     <Button
                       variant="default"
                       className="flex-1 bg-[#25D366] hover:bg-[#1da851] text-white"
+                      disabled={!codeSaved}
                       onClick={() => {
                         const phone = redeemingBenefit.whatsapp.replace(/\D/g, "");
                         const text = encodeURIComponent(`Olá! Gostaria de utilizar meu cupom de benefício QBCAMP.\n\n🎟️ Código: ${redeemCode}\n📋 Oferta: ${redeemingBenefit.offer}`);
                         window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+                        setRedeemDialogOpen(false);
                       }}
                     >
                       <MessageCircle className="mr-1.5 h-4 w-4" /> Enviar via WhatsApp
