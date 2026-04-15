@@ -106,9 +106,9 @@ export default function Header() {
 
           <div className="hidden items-center gap-2 lg:flex">
             <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 rounded-md font-heading font-bold shadow-sm animate-pulse-subtle">
-              <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">
+              <Link to="/cadastro">
                 <Crown className="mr-1 h-4 w-4" /> Cadastre-se
-              </a>
+              </Link>
             </Button>
             {user ? (
               <>
@@ -238,9 +238,9 @@ export default function Header() {
                     </Button>
                   )}
                   <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold w-full">
-                    <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
+                    <Link to="/cadastro" onClick={() => setMobileOpen(false)}>
                       <Crown className="mr-1 h-4 w-4" /> Cadastre-se
-                    </a>
+                    </Link>
                   </Button>
                 </div>
               </nav>
