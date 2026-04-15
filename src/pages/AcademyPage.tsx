@@ -10,6 +10,26 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { GraduationCap, Play, Clock, Plus, Loader2, Trash2, BookOpen, Users, Award, Star, ArrowRight, BarChart3, Upload, Search, Route, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+
+import coverMarketing from "@/assets/course-covers/marketing.jpg";
+import coverFinancas from "@/assets/course-covers/financas.jpg";
+import coverGestao from "@/assets/course-covers/gestao.jpg";
+import coverVendas from "@/assets/course-covers/vendas.jpg";
+import coverJuridico from "@/assets/course-covers/juridico.jpg";
+import coverTecnologia from "@/assets/course-covers/tecnologia.jpg";
+import coverRH from "@/assets/course-covers/rh.jpg";
+import coverOutro from "@/assets/course-covers/outro.jpg";
+
+const categoryCovers: Record<string, string> = {
+  Marketing: coverMarketing,
+  "Finanças": coverFinancas,
+  "Gestão": coverGestao,
+  Vendas: coverVendas,
+  "Jurídico": coverJuridico,
+  Tecnologia: coverTecnologia,
+  RH: coverRH,
+  Outro: coverOutro,
+};
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
