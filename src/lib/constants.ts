@@ -1,6 +1,6 @@
 // QBCAMP Global Constants — change here to update across the platform
 
-export const QBCAMP_WHATSAPP = "5541999999999"; // Substituir pelo número real
+export const QBCAMP_WHATSAPP = "5541991228567";
 export const QBCAMP_PHONE = "+554136721041";
 export const QBCAMP_PHONE_DISPLAY = "(41) 3672-1041";
 export const QBCAMP_NAME = "QBCAMP Conecta+";
