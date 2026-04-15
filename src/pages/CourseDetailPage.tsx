@@ -257,7 +257,7 @@ export default function CourseDetailPage() {
       const vid = lesson.video_url.match(/vimeo\.com\/(\d+)/)?.[1];
       return <iframe className="aspect-video w-full rounded-xl" src={`https://player.vimeo.com/video/${vid}`} allowFullScreen />;
     }
-    return <video className="aspect-video w-full rounded-xl bg-secondary" src={lesson.video_url} controls />;
+    return <video ref={videoRef} className="aspect-video w-full rounded-xl bg-secondary" src={lesson.video_url} controls />
   };
 
   if (loading) return (
