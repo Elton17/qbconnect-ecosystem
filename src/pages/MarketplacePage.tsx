@@ -16,6 +16,7 @@ import MarketplaceFilters, { FilterState, defaultFilters } from "@/components/ma
 import ProductCard, { type ProductWithSeller } from "@/components/marketplace/ProductCard";
 import ProductFormDialog from "@/components/marketplace/ProductFormDialog";
 import PromotionsSection from "@/components/marketplace/PromotionsSection";
+import PremiumHighlights from "@/components/marketplace/PremiumHighlights";
 import PlanUpgradeModal from "@/components/PlanUpgradeModal";
 
 export default function MarketplacePage() {
@@ -219,6 +220,7 @@ export default function MarketplacePage() {
         </div>
       </section>
 
+      <PremiumHighlights products={products} />
       <PromotionsSection />
 
       {/* Search bar */}
@@ -287,7 +289,7 @@ export default function MarketplacePage() {
                 {isAssociate && <Button className="mt-4" onClick={openNewProduct}><Plus className="mr-1 h-4 w-4" /> Anunciar produto</Button>}
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3.5 lg:grid-cols-3 xl:grid-cols-4 xl:gap-4">
                 {filtered.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
