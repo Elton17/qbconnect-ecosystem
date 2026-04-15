@@ -5,14 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Building2, Upload, User, CreditCard, ArrowRight, CheckCircle2, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
+import { Building2, Upload, User, ArrowRight, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import {
   Select,
   SelectContent,
