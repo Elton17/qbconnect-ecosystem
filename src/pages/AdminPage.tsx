@@ -408,6 +408,8 @@ export default function AdminPage() {
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
             <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
             <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
+            <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
+            <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
             <TabsTrigger value="waitlist">Lista de Espera ({waitlist.length})</TabsTrigger>
           </TabsList>
