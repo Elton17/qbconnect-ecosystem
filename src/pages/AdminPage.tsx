@@ -19,6 +19,8 @@ import {
   MessageCircle, Download,
 } from "lucide-react";
 import { getWhatsAppContactUrl } from "@/lib/constants";
+import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
+import AdminCourseReports from "@/components/admin/AdminCourseReports";
 
 interface Stat { label: string; value: number; icon: any; }
 
