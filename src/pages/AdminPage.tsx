@@ -19,6 +19,8 @@ import {
   MessageCircle, Download,
 } from "lucide-react";
 import { getWhatsAppContactUrl } from "@/lib/constants";
+import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
+import AdminCourseReports from "@/components/admin/AdminCourseReports";
 
 interface Stat { label: string; value: number; icon: any; }
 
@@ -406,6 +408,8 @@ export default function AdminPage() {
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
             <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
             <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
+            <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
+            <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
             <TabsTrigger value="waitlist">Lista de Espera ({waitlist.length})</TabsTrigger>
           </TabsList>
@@ -779,6 +783,16 @@ export default function AdminPage() {
                 </div>
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          {/* ── STUDENTS ── */}
+          <TabsContent value="students">
+            <AdminStudentManagement />
+          </TabsContent>
+
+          {/* ── COURSE REPORTS ── */}
+          <TabsContent value="course_reports">
+            <AdminCourseReports />
           </TabsContent>
 
           {/* ── ROLES ── */}
