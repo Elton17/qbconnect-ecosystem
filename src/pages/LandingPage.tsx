@@ -108,6 +108,15 @@ export default function LandingPage() {
                 </Button>
               </div>
 
+              {/* Mobile-only CTA */}
+              <div className="mt-4 sm:hidden">
+                <Button size="xl" asChild className="w-full bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold shadow-lg animate-pulse-subtle">
+                  <Link to="/cadastro">
+                    <Crown className="mr-2 h-5 w-5" /> Cadastre sua Empresa
+                  </Link>
+                </Button>
+              </div>
+
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/50">
                 {["Acesso gratuito", "Empresas verificadas", "Suporte dedicado"].map((t) => (
                   <span key={t} className="flex items-center gap-1.5">
