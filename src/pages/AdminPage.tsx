@@ -785,6 +785,16 @@ export default function AdminPage() {
             </Dialog>
           </TabsContent>
 
+          {/* ── STUDENTS ── */}
+          <TabsContent value="students">
+            <AdminStudentManagement />
+          </TabsContent>
+
+          {/* ── COURSE REPORTS ── */}
+          <TabsContent value="course_reports">
+            <AdminCourseReports />
+          </TabsContent>
+
           {/* ── ROLES ── */}
           <TabsContent value="roles">
             <div className="rounded-2xl border border-border bg-card p-6">
