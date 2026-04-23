@@ -1,49 +1,48 @@
 
 
-# Endereço Completo no Cadastro
+## Configurar remetente com domínio QBCAMP
 
-## Objetivo
-Expandir o formulário de cadastro para capturar o endereço completo da empresa em campos separados (Endereço/Logradouro, Bairro, Cidade, Complemento, Ponto de Referência, CEP e Estado), preenchendo automaticamente via CNPJ quando possível. O mapa com Google Maps será adicionado futuramente.
+Configurar um remetente profissional usando o domínio `qbcamp.com.br` para que os e-mails da plataforma (confirmação de cadastro, recuperação de senha, etc.) sejam enviados de algo como `nao-responda@qbcamp.com.br` em vez do remetente padrão do Lovable.
 
-## O que muda para o usuário
-- Ao digitar o CNPJ, os campos de endereço (rua, bairro, cidade, CEP, estado) serão preenchidos automaticamente com os dados da Receita Federal.
-- Campos de Complemento e Ponto de Referência ficam disponíveis para preenchimento manual.
-- O campo "Cidade" deixa de ser um dropdown fixo e passa a aceitar a cidade retornada pelo CNPJ, mantendo as cidades da região como sugestões.
+### Benefícios
+- E-mails com cara profissional, com o domínio da QBCAMP
+- Menor chance de cair em spam (autenticação SPF/DKIM/DMARC do próprio domínio)
+- Maior confiança dos associados ao receber comunicações
 
----
+### Etapas
 
-## Detalhes Técnicos
+**1. Configurar o domínio de e-mail**
 
-### 1. Migração do Banco de Dados
-Adicionar novas colunas na tabela `profiles`:
+Vou abrir o assistente de configuração de e-mail dentro do Lovable. Você vai escolher um subdomínio para envio (recomendado: `mail.qbcamp.com.br` ou `email.qbcamp.com.br` — não usar o domínio raiz para preservar e-mails existentes).
 
-| Coluna | Tipo | Default |
-|--------|------|---------|
-| `neighborhood` | text | '' |
-| `complement` | text | '' |
-| `reference_point` | text | '' |
-| `zip_code` | text | '' |
-| `state` | text | '' |
+O assistente gera automaticamente os registros DNS necessários (SPF, DKIM, DMARC e MX para bounces).
 
-### 2. Atualizar Edge Function `cnpj-lookup`
-Retornar campos separados em vez de concatenar tudo em `address`:
+**2. Adicionar os registros DNS no provedor do domínio**
 
-```text
-Antes: address = "Rua X, 123, Sala 1, Centro"
-Depois: street, number, complement, neighborhood, city, state, zip_code (campos individuais)
-```
+Você (ou quem administra o DNS de `qbcamp.com.br`) precisa colar os registros gerados no painel do provedor (Registro.br, Cloudflare, GoDaddy, etc.). A propagação leva de minutos a algumas horas.
 
-Dados disponíveis na BrasilAPI: `logradouro`, `numero`, `complemento`, `bairro`, `municipio`, `uf`, `cep`.
+**3. Personalizar os templates dos e-mails de autenticação**
 
-### 3. Atualizar Formulário de Cadastro (`CompanyRegistrationPage.tsx`)
-- Substituir o campo único "Endereço" por campos separados: Endereço (logradouro + numero), Bairro, Complemento, Ponto de Referência, CEP e Estado.
-- Mudar o campo "Cidade" para `Input` em vez de `Select` fixo, permitindo receber a cidade vinda do CNPJ.
-- Atualizar o schema Zod com os novos campos (CEP, bairro e estado obrigatórios; complemento e ponto de referência opcionais).
-- Atualizar `lookupCNPJ` para preencher cada campo individualmente.
-- Atualizar `onSubmit` para salvar os novos campos no banco.
+Após o domínio estar configurado, vou:
+- Criar templates customizados para os 6 tipos de e-mails de autenticação (cadastro, recuperação de senha, magic link, convite, troca de e-mail, reautenticação)
+- Aplicar a identidade visual do Conecta Mais: vermelho `#C81E1E`, preto `#1A1A1A`, fontes Montserrat e Inter
+- Incluir o logo da QBCAMP no topo de cada e-mail
+- Traduzir todo o conteúdo para português brasileiro
+- Usar o tom da marca ("QBCAMP Conecta Mais", "Olá!", etc.)
 
-### 4. Sequencia de Implementacao
-1. Migrar banco (adicionar colunas)
-2. Atualizar edge function
-3. Atualizar formulario e logica de submit
+**4. Ativar o envio**
+
+Os e-mails de autenticação passarão a sair automaticamente do remetente do domínio QBCAMP assim que o DNS for verificado. Até lá, a plataforma continua usando o remetente padrão sem interrupção.
+
+### Detalhes técnicos
+
+- Edge Function `auth-email-hook` será criada em `supabase/functions/auth-email-hook/` para processar eventos de autenticação
+- Templates React Email em `supabase/functions/_shared/email-templates/*.tsx`
+- O logo será carregado de `public/` (ou subido para um bucket `email-assets` se necessário)
+- Nenhuma configuração de Resend, SendGrid ou chave de API externa é necessária — tudo é gerenciado pelo Lovable Cloud
+
+### Importante
+- Você precisa ter permissão de **admin/owner do workspace Lovable** para configurar o domínio
+- Você precisa ter acesso ao **painel DNS** de `qbcamp.com.br` para adicionar os registros
+- E-mails **não-de-autenticação** (notificações de aprovação, novas oportunidades, certificados, etc.) podem ser implementados em uma etapa seguinte usando a mesma infraestrutura
 
