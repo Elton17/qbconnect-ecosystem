@@ -12,6 +12,7 @@ import { formatPhone, formatCEP, formatCNPJ as formatCNPJMask } from "@/lib/mask
 import { translateAuthError, PASSWORD_HINT } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
@@ -309,8 +310,8 @@ export default function CompanyRegistrationPage() {
                 <div>
                   <Label htmlFor="password">Senha *</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="password" type="password" placeholder="Mínimo 6 caracteres" className="pl-9" {...register("password")} />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                    <PasswordInput id="password" placeholder="Mínimo 6 caracteres" className="pl-9" {...register("password")} />
                   </div>
                   {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
                   <p className="mt-1 text-xs text-muted-foreground">{PASSWORD_HINT}</p>
@@ -318,8 +319,8 @@ export default function CompanyRegistrationPage() {
                 <div>
                   <Label htmlFor="confirmPassword">Confirmar Senha *</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input id="confirmPassword" type="password" placeholder="Repita a senha" className="pl-9" {...register("confirmPassword")} />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                    <PasswordInput id="confirmPassword" placeholder="Repita a senha" className="pl-9" {...register("confirmPassword")} />
                   </div>
                   {errors.confirmPassword && <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>}
                 </div>
