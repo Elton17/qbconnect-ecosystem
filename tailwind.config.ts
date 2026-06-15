@@ -92,8 +92,8 @@ export default {
           to: { opacity: "1", transform: "scale(1)" },
         },
         "pulse-subtle": {
-          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--accent) / 0.4)" },
-          "50%": { boxShadow: "0 0 0 6px hsl(var(--accent) / 0)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--accent) / 0.5)", transform: "scale(1)" },
+          "50%": { boxShadow: "0 0 16px 2px hsl(var(--accent) / 0.35)", transform: "scale(1.02)" },
         },
       },
       animation: {
