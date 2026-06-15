@@ -117,3 +117,38 @@
     background-clip: text;
   }
 }
+
+/* Ripple effect — estilo botão flutuante WhatsApp */
+.ripple-effect {
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+}
+
+.ripple-effect::before,
+.ripple-effect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 hsl(var(--accent) / 0.55);
+  animation: ripple-whatsapp 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.ripple-effect::after {
+  animation-delay: 1.25s;
+}
+
+@keyframes ripple-whatsapp {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--accent) / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 14px hsl(var(--accent) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--accent) / 0);
+  }
+}

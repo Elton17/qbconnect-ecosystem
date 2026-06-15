@@ -13,7 +13,7 @@ export default function MobileCTABar() {
       <Button
         size="lg"
         asChild
-        className="w-full bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold shadow-md animate-pulse-subtle"
+        className="w-full bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold shadow-md ripple-effect"
       >
         <Link to="/cadastro">
           <Crown className="mr-2 h-5 w-5" />
