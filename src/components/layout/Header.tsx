@@ -237,7 +237,7 @@ export default function Header() {
                       <Link to="/login" onClick={() => setMobileOpen(false)}>Entrar</Link>
                     </Button>
                   )}
-                  <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold w-full">
+                  <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold w-full ripple-effect">
                     <Link to="/cadastro" onClick={() => setMobileOpen(false)}>
                       <Crown className="mr-1 h-4 w-4" /> Cadastre-se
                     </Link>
