@@ -105,7 +105,7 @@ export default function Header() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 rounded-md font-heading font-bold shadow-sm animate-pulse-subtle">
+            <Button size="sm" asChild className="bg-accent text-accent-foreground hover:brightness-110 rounded-md font-heading font-bold shadow-sm ripple-effect">
               <Link to="/cadastro">
                 <Crown className="mr-1 h-4 w-4" /> Cadastre-se
               </Link>
