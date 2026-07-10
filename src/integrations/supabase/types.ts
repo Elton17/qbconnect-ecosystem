@@ -931,6 +931,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_registration_by_ticket: {
+        Args: { _ticket: string }
+        Returns: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          ticket_code: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
