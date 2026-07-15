@@ -918,6 +918,7 @@ export default function AdminPage() {
                       <thead>
                         <tr className="bg-muted/50 border-b border-border">
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">CNPJ</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
@@ -925,6 +926,7 @@ export default function AdminPage() {
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
                           <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Ações</th>
                         </tr>
+
                       </thead>
                       <tbody>
                         {filtered.map((w: any) => (
