@@ -12,6 +12,11 @@ import { getWhatsAppUrl } from "@/lib/constants";
 
 const waitlistSchema = z.object({
   company_name: z.string().trim().min(2, "Informe o nome da empresa.").max(120, "Nome da empresa muito longo."),
+  cnpj: z
+    .string()
+    .trim()
+    .refine((v) => v.replace(/\D/g, "").length === 14, { message: "CNPJ deve conter 14 dígitos." })
+    .refine(validateCNPJ, { message: "CNPJ inválido." }),
   contact_name: z.string().trim().min(2, "Informe o nome do responsável.").max(120, "Nome do responsável muito longo."),
   whatsapp: z
     .string()
@@ -22,6 +27,7 @@ const waitlistSchema = z.object({
   segment: z.string().min(1, "Selecione o segmento."),
   is_associate: z.enum(["yes", "no"], { errorMap: () => ({ message: "Informe se a empresa é associada QBCAMP." }) }),
 });
+
 
 // ── Change this date to control the countdown ──
 const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
