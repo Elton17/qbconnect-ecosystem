@@ -206,35 +206,53 @@ export default function PreLaunchPage() {
                   Cadastre sua empresa e receba acesso assim que a plataforma abrir.
                 </p>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  <Input
-                    placeholder="Ex: Metalúrgica Souza Ltda"
-                    value={form.company_name}
-                    onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-                    className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
-                  />
-                  <Input
-                    placeholder="Nome do responsável"
-                    value={form.contact_name}
-                    onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
-                    className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
-                  />
-                  <Input
-                    type="tel"
-                    placeholder="(41) 99999-9999"
-                    value={form.whatsapp}
-                    onChange={(e) => setForm({ ...form, whatsapp: formatPhone(e.target.value) })}
-                    className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
-                  />
-                  <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
-                    <SelectTrigger className="border-white/20 bg-white/10 text-white [&>span]:text-white/40 data-[state=open]:ring-primary focus:ring-primary">
-                      <SelectValue placeholder="Segmento da empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {segments.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <Input
+                      placeholder="Ex: Metalúrgica Souza Ltda"
+                      value={form.company_name}
+                      maxLength={120}
+                      onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+                      aria-invalid={!!errors.company_name}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.company_name && <p className="mt-1 text-xs text-primary">{errors.company_name}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      placeholder="Nome do responsável"
+                      value={form.contact_name}
+                      maxLength={120}
+                      onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+                      aria-invalid={!!errors.contact_name}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.contact_name && <p className="mt-1 text-xs text-primary">{errors.contact_name}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="(41) 99999-9999"
+                      value={form.whatsapp}
+                      onChange={(e) => setForm({ ...form, whatsapp: formatPhone(e.target.value) })}
+                      aria-invalid={!!errors.whatsapp}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.whatsapp && <p className="mt-1 text-xs text-primary">{errors.whatsapp}</p>}
+                  </div>
+                  <div>
+                    <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
+                      <SelectTrigger aria-invalid={!!errors.segment} className="border-white/20 bg-white/10 text-white [&>span]:text-white/40 data-[state=open]:ring-primary focus:ring-primary">
+                        <SelectValue placeholder="Segmento da empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {segments.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.segment && <p className="mt-1 text-xs text-primary">{errors.segment}</p>}
+                  </div>
                   <div className="flex flex-col gap-2">
                     <span className="text-xs font-medium text-white/70">Sua empresa já é associada QBCAMP?</span>
                     <div className="grid grid-cols-2 gap-2">
