@@ -904,7 +904,9 @@ export type Database = {
           cnpj: string | null
           company_name: string
           contact_name: string
+          contacted_at: string | null
           created_at: string
+          forwarded_at: string | null
           id: string
           is_associate: boolean
           segment: string
@@ -914,7 +916,9 @@ export type Database = {
           cnpj?: string | null
           company_name: string
           contact_name: string
+          contacted_at?: string | null
           created_at?: string
+          forwarded_at?: string | null
           id?: string
           is_associate?: boolean
           segment?: string
@@ -924,7 +928,9 @@ export type Database = {
           cnpj?: string | null
           company_name?: string
           contact_name?: string
+          contacted_at?: string | null
           created_at?: string
+          forwarded_at?: string | null
           id?: string
           is_associate?: boolean
           segment?: string
