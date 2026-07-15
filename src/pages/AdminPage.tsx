@@ -41,6 +41,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
+  const [waitlistFilter, setWaitlistFilter] = useState<"all" | "associate" | "non_associate">("all");
 
   // Edit state
   const [editDialog, setEditDialog] = useState<{ open: boolean; table: string; item: any }>({ open: false, table: "", item: null });
@@ -832,73 +833,112 @@ export default function AdminPage() {
                   <ClipboardList className="h-5 w-5 text-primary" /> Lista de Espera
                   <Badge variant="secondary" className="ml-2">{waitlist.length} cadastros</Badge>
                 </h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const headers = "Empresa,Responsável,WhatsApp,Segmento,Data de Cadastro\n";
-                    const rows = waitlist.map((w: any) =>
-                      `"${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
-                    ).join("\n");
-                    const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url; a.download = "waitlist-qbcamp.csv"; a.click();
-                    URL.revokeObjectURL(url);
-                    toast.success("CSV exportado!");
-                  }}
-                >
-                  <Download className="mr-1 h-3.5 w-3.5" /> Exportar CSV
-                </Button>
-              </div>
-              {waitlist.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>
-              ) : (
-                <div className="overflow-x-auto rounded-xl border border-border">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-muted/50 border-b border-border">
-                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
-                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
-                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
-                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
-                        <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
-                        <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filterBySearch(waitlist, ["company_name", "contact_name", "whatsapp", "segment"]).map((w: any) => (
-                        <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                          <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
-                          <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
-                          <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
-                          <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>
-                          <td className="px-4 py-3 text-muted-foreground">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-1">
-                              <Button size="sm" variant="whatsapp" asChild>
-                                <a
-                                  href={getWhatsAppContactUrl(
-                                    w.whatsapp,
-                                    `Olá ${w.contact_name}! O QBCAMP Conecta+ está abrindo e sua empresa ${w.company_name} está na lista. Vamos ativar seu acesso?`
-                                  )}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <MessageCircle className="mr-1 h-3.5 w-3.5" /> Chamar
-                                </a>
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => deleteRecord("waitlist", w.id, setWaitlist)}>
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Select value={waitlistFilter} onValueChange={(v: any) => setWaitlistFilter(v)}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Filtrar por associação" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas ({waitlist.length})</SelectItem>
+                      <SelectItem value="associate">
+                        Associadas ({waitlist.filter((w: any) => w.is_associate).length})
+                      </SelectItem>
+                      <SelectItem value="non_associate">
+                        Não associadas ({waitlist.filter((w: any) => !w.is_associate).length})
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const list = waitlist.filter((w: any) =>
+                        waitlistFilter === "all" ? true :
+                        waitlistFilter === "associate" ? w.is_associate : !w.is_associate
+                      );
+                      const headers = "Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
+                      const rows = list.map((w: any) =>
+                        `"${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
+                      ).join("\n");
+                      const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = "waitlist-qbcamp.csv"; a.click();
+                      URL.revokeObjectURL(url);
+                      toast.success("CSV exportado!");
+                    }}
+                  >
+                    <Download className="mr-1 h-3.5 w-3.5" /> Exportar CSV
+                  </Button>
                 </div>
-              )}
+              </div>
+              {(() => {
+                const filtered = filterBySearch(waitlist, ["company_name", "contact_name", "whatsapp", "segment"])
+                  .filter((w: any) =>
+                    waitlistFilter === "all" ? true :
+                    waitlistFilter === "associate" ? w.is_associate : !w.is_associate
+                  );
+                if (waitlist.length === 0) {
+                  return <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>;
+                }
+                if (filtered.length === 0) {
+                  return <p className="text-sm text-muted-foreground">Nenhum cadastro encontrado com os filtros aplicados.</p>;
+                }
+                return (
+                  <div className="overflow-x-auto rounded-xl border border-border">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/50 border-b border-border">
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Associada</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
+                          <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((w: any) => (
+                          <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                            <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
+                            <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
+                            <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
+                            <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>
+                            <td className="px-4 py-3">
+                              {w.is_associate ? (
+                                <Badge className="bg-primary text-primary-foreground">Sim</Badge>
+                              ) : (
+                                <Badge variant="secondary">Não</Badge>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-muted-foreground">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-end gap-1">
+                                <Button size="sm" variant="whatsapp" asChild>
+                                  <a
+                                    href={getWhatsAppContactUrl(
+                                      w.whatsapp,
+                                      `Olá ${w.contact_name}! O QBCAMP Conecta+ está abrindo e sua empresa ${w.company_name} está na lista. Vamos ativar seu acesso?`
+                                    )}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <MessageCircle className="mr-1 h-3.5 w-3.5" /> Chamar
+                                  </a>
+                                </Button>
+                                <Button size="sm" variant="destructive" onClick={() => deleteRecord("waitlist", w.id, setWaitlist)}>
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
             </div>
           </TabsContent>
         </Tabs>
