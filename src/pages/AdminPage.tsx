@@ -893,12 +893,20 @@ export default function AdminPage() {
 
               </div>
               {(() => {
-                const filtered = filterBySearch(waitlist, ["company_name", "contact_name", "whatsapp", "segment"])
+                const q = waitlistSearch.trim().toLowerCase();
+                const filtered = filterBySearch(waitlist, ["company_name", "cnpj", "contact_name", "whatsapp", "segment"])
                   .filter((w: any) =>
                     waitlistFilter === "all" ? true :
                     waitlistFilter === "associate" ? w.is_associate : !w.is_associate
-                  );
+                  )
+                  .filter((w: any) => {
+                    if (!q) return true;
+                    const company = String(w.company_name || "").toLowerCase();
+                    const cnpj = String(w.cnpj || "").toLowerCase();
+                    return company.includes(q) || cnpj.includes(q);
+                  });
                 if (waitlist.length === 0) {
+
                   return <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>;
                 }
                 if (filtered.length === 0) {
