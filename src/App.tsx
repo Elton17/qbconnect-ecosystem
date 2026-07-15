@@ -36,6 +36,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 import PreLaunchPage from "@/pages/PreLaunchPage";
+import EmailPreviewPage from "@/pages/EmailPreviewPage";
 
 const queryClient = new QueryClient();
 const App = () => (
@@ -82,6 +83,7 @@ const App = () => (
 
               {/* Admin routes */}
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
+              <Route path="/admin/email-preview" element={<ProtectedRoute requiredRole="admin"><EmailPreviewPage /></ProtectedRoute>} />
             </Route>
             <Route path="/em-breve" element={<PreLaunchPage />} />
             <Route path="*" element={<NotFound />} />
