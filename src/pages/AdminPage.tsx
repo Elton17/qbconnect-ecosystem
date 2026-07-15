@@ -932,8 +932,10 @@ export default function AdminPage() {
                         {filtered.map((w: any) => (
                           <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                             <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
+                            <td className="px-4 py-3 text-card-foreground whitespace-nowrap">{formatCnpj(w.cnpj)}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
+
                             <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>
                             <td className="px-4 py-3">
                               {w.is_associate ? (
