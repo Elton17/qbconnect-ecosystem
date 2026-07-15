@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Lock, Building2, Users, MapPin, CheckCircle2, Loader2, MessageCircle } from "lucide-react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getWhatsAppUrl } from "@/lib/constants";
+
+const waitlistSchema = z.object({
+  company_name: z.string().trim().min(2, "Informe o nome da empresa.").max(120, "Nome da empresa muito longo."),
+  contact_name: z.string().trim().min(2, "Informe o nome do responsável.").max(120, "Nome do responsável muito longo."),
+  whatsapp: z
+    .string()
+    .trim()
+    .refine((v) => v.replace(/\D/g, "").length >= 10 && v.replace(/\D/g, "").length <= 11, {
+      message: "WhatsApp inválido. Use DDD + número.",
+    }),
+  segment: z.string().min(1, "Selecione o segmento."),
+  is_associate: z.enum(["yes", "no"], { errorMap: () => ({ message: "Informe se a empresa é associada QBCAMP." }) }),
+});
 
 // ── Change this date to control the countdown ──
 const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
@@ -70,25 +84,36 @@ export default function PreLaunchPage() {
     if (meta) meta.setAttribute("content", "A plataforma de negócios da QBCAMP está chegando. Marketplace, oportunidades e capacitação exclusivo para associados de Quatro Barras e Campina Grande do Sul.");
   }, []);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.company_name.trim() || !form.contact_name.trim() || !form.whatsapp.trim() || !form.segment || !form.is_associate) {
-      toast.error("Preencha todos os campos.");
+    setErrors({});
+    const parsed = waitlistSchema.safeParse(form);
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      parsed.error.issues.forEach((i) => {
+        const key = i.path[0]?.toString() ?? "form";
+        if (!fieldErrors[key]) fieldErrors[key] = i.message;
+      });
+      setErrors(fieldErrors);
+      toast.error(parsed.error.issues[0]?.message ?? "Verifique os campos.");
       return;
     }
     setLoading(true);
     const { error } = await supabase.from("waitlist").insert({
-      company_name: form.company_name.trim(),
-      contact_name: form.contact_name.trim(),
-      whatsapp: form.whatsapp.trim(),
-      segment: form.segment,
-      is_associate: form.is_associate === "yes",
+      company_name: parsed.data.company_name,
+      contact_name: parsed.data.contact_name,
+      whatsapp: parsed.data.whatsapp,
+      segment: parsed.data.segment,
+      is_associate: parsed.data.is_associate === "yes",
     });
     setLoading(false);
     if (error) {
       toast.error("Erro ao cadastrar. Tente novamente ou entre em contato pelo WhatsApp.");
       return;
     }
+    toast.success("Cadastro confirmado! Você está na lista.");
     setSubmitted(true);
   };
 
