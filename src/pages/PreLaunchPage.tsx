@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Lock, Building2, Users, MapPin, CheckCircle2, Loader2, MessageCircle } from "lucide-react";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getWhatsAppUrl } from "@/lib/constants";
+
+const waitlistSchema = z.object({
+  company_name: z.string().trim().min(2, "Informe o nome da empresa.").max(120, "Nome da empresa muito longo."),
+  contact_name: z.string().trim().min(2, "Informe o nome do responsável.").max(120, "Nome do responsável muito longo."),
+  whatsapp: z
+    .string()
+    .trim()
+    .refine((v) => v.replace(/\D/g, "").length >= 10 && v.replace(/\D/g, "").length <= 11, {
+      message: "WhatsApp inválido. Use DDD + número.",
+    }),
+  segment: z.string().min(1, "Selecione o segmento."),
+  is_associate: z.enum(["yes", "no"], { errorMap: () => ({ message: "Informe se a empresa é associada QBCAMP." }) }),
+});
 
 // ── Change this date to control the countdown ──
 const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
@@ -70,25 +84,36 @@ export default function PreLaunchPage() {
     if (meta) meta.setAttribute("content", "A plataforma de negócios da QBCAMP está chegando. Marketplace, oportunidades e capacitação exclusivo para associados de Quatro Barras e Campina Grande do Sul.");
   }, []);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.company_name.trim() || !form.contact_name.trim() || !form.whatsapp.trim() || !form.segment || !form.is_associate) {
-      toast.error("Preencha todos os campos.");
+    setErrors({});
+    const parsed = waitlistSchema.safeParse(form);
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      parsed.error.issues.forEach((i) => {
+        const key = i.path[0]?.toString() ?? "form";
+        if (!fieldErrors[key]) fieldErrors[key] = i.message;
+      });
+      setErrors(fieldErrors);
+      toast.error(parsed.error.issues[0]?.message ?? "Verifique os campos.");
       return;
     }
     setLoading(true);
     const { error } = await supabase.from("waitlist").insert({
-      company_name: form.company_name.trim(),
-      contact_name: form.contact_name.trim(),
-      whatsapp: form.whatsapp.trim(),
-      segment: form.segment,
-      is_associate: form.is_associate === "yes",
+      company_name: parsed.data.company_name,
+      contact_name: parsed.data.contact_name,
+      whatsapp: parsed.data.whatsapp,
+      segment: parsed.data.segment,
+      is_associate: parsed.data.is_associate === "yes",
     });
     setLoading(false);
     if (error) {
       toast.error("Erro ao cadastrar. Tente novamente ou entre em contato pelo WhatsApp.");
       return;
     }
+    toast.success("Cadastro confirmado! Você está na lista.");
     setSubmitted(true);
   };
 
@@ -181,35 +206,53 @@ export default function PreLaunchPage() {
                   Cadastre sua empresa e receba acesso assim que a plataforma abrir.
                 </p>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  <Input
-                    placeholder="Ex: Metalúrgica Souza Ltda"
-                    value={form.company_name}
-                    onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-                    className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
-                  />
-                  <Input
-                    placeholder="Nome do responsável"
-                    value={form.contact_name}
-                    onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
-                    className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
-                  />
-                  <Input
-                    type="tel"
-                    placeholder="(41) 99999-9999"
-                    value={form.whatsapp}
-                    onChange={(e) => setForm({ ...form, whatsapp: formatPhone(e.target.value) })}
-                    className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
-                  />
-                  <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
-                    <SelectTrigger className="border-white/20 bg-white/10 text-white [&>span]:text-white/40 data-[state=open]:ring-primary focus:ring-primary">
-                      <SelectValue placeholder="Segmento da empresa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {segments.map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <Input
+                      placeholder="Ex: Metalúrgica Souza Ltda"
+                      value={form.company_name}
+                      maxLength={120}
+                      onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+                      aria-invalid={!!errors.company_name}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.company_name && <p className="mt-1 text-xs text-primary">{errors.company_name}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      placeholder="Nome do responsável"
+                      value={form.contact_name}
+                      maxLength={120}
+                      onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+                      aria-invalid={!!errors.contact_name}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.contact_name && <p className="mt-1 text-xs text-primary">{errors.contact_name}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      type="tel"
+                      inputMode="tel"
+                      placeholder="(41) 99999-9999"
+                      value={form.whatsapp}
+                      onChange={(e) => setForm({ ...form, whatsapp: formatPhone(e.target.value) })}
+                      aria-invalid={!!errors.whatsapp}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.whatsapp && <p className="mt-1 text-xs text-primary">{errors.whatsapp}</p>}
+                  </div>
+                  <div>
+                    <Select value={form.segment} onValueChange={(v) => setForm({ ...form, segment: v })}>
+                      <SelectTrigger aria-invalid={!!errors.segment} className="border-white/20 bg-white/10 text-white [&>span]:text-white/40 data-[state=open]:ring-primary focus:ring-primary">
+                        <SelectValue placeholder="Segmento da empresa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {segments.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.segment && <p className="mt-1 text-xs text-primary">{errors.segment}</p>}
+                  </div>
                   <div className="flex flex-col gap-2">
                     <span className="text-xs font-medium text-white/70">Sua empresa já é associada QBCAMP?</span>
                     <div className="grid grid-cols-2 gap-2">
@@ -234,6 +277,7 @@ export default function PreLaunchPage() {
                         );
                       })}
                     </div>
+                    {errors.is_associate && <p className="mt-1 text-xs text-primary">{errors.is_associate}</p>}
                   </div>
                   <Button type="submit" disabled={loading} className="w-full bg-primary font-heading font-bold text-white hover:bg-primary-dark">
                     {loading ? (
