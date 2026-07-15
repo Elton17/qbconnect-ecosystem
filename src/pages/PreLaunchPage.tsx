@@ -277,6 +277,7 @@ export default function PreLaunchPage() {
                         );
                       })}
                     </div>
+                    {errors.is_associate && <p className="mt-1 text-xs text-primary">{errors.is_associate}</p>}
                   </div>
                   <Button type="submit" disabled={loading} className="w-full bg-primary font-heading font-bold text-white hover:bg-primary-dark">
                     {loading ? (
