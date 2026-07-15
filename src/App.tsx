@@ -47,9 +47,10 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
+            <Route path="/" element={<PreLaunchPage />} />
             <Route element={<MainLayout />}>
               {/* Public routes */}
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/home" element={<LandingPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
               <Route path="/servicos" element={<ServicosPage />} />
               <Route path="/produto/:id" element={<ProductDetailPage />} />

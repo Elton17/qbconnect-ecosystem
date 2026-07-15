@@ -10,8 +10,7 @@ import { Link } from "react-router-dom";
 import { getWhatsAppUrl } from "@/lib/constants";
 
 // ── Change this date to control the countdown ──
-const LAUNCH_DATE = new Date();
-LAUNCH_DATE.setDate(LAUNCH_DATE.getDate() + 30);
+const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
 
 const segments = [
   "Indústria",
