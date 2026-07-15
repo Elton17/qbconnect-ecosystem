@@ -16,8 +16,9 @@ import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
   ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList, Route, Plus,
-  MessageCircle, Download,
+  MessageCircle, Download, Send,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { getWhatsAppContactUrl } from "@/lib/constants";
 import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
 import AdminCourseReports from "@/components/admin/AdminCourseReports";
@@ -42,7 +43,10 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
   const [waitlistFilter, setWaitlistFilter] = useState<"all" | "associate" | "non_associate">("all");
+  const [waitlistStatus, setWaitlistStatus] = useState<"all" | "pending" | "contacted" | "forwarded">("all");
   const [waitlistSearch, setWaitlistSearch] = useState("");
+  const [waitlistSelected, setWaitlistSelected] = useState<Set<string>>(new Set());
+  const [waitlistBulkLoading, setWaitlistBulkLoading] = useState(false);
 
 
   // Edit state
