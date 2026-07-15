@@ -905,6 +905,7 @@ export type Database = {
           contact_name: string
           created_at: string
           id: string
+          is_associate: boolean
           segment: string
           whatsapp: string
         }
@@ -913,6 +914,7 @@ export type Database = {
           contact_name: string
           created_at?: string
           id?: string
+          is_associate?: boolean
           segment?: string
           whatsapp: string
         }
@@ -921,6 +923,7 @@ export type Database = {
           contact_name?: string
           created_at?: string
           id?: string
+          is_associate?: boolean
           segment?: string
           whatsapp?: string
         }
