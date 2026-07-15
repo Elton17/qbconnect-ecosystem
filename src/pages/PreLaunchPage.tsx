@@ -12,6 +12,11 @@ import { getWhatsAppUrl } from "@/lib/constants";
 
 const waitlistSchema = z.object({
   company_name: z.string().trim().min(2, "Informe o nome da empresa.").max(120, "Nome da empresa muito longo."),
+  cnpj: z
+    .string()
+    .trim()
+    .refine((v) => v.replace(/\D/g, "").length === 14, { message: "CNPJ deve conter 14 dígitos." })
+    .refine(validateCNPJ, { message: "CNPJ inválido." }),
   contact_name: z.string().trim().min(2, "Informe o nome do responsável.").max(120, "Nome do responsável muito longo."),
   whatsapp: z
     .string()
@@ -22,6 +27,7 @@ const waitlistSchema = z.object({
   segment: z.string().min(1, "Selecione o segmento."),
   is_associate: z.enum(["yes", "no"], { errorMap: () => ({ message: "Informe se a empresa é associada QBCAMP." }) }),
 });
+
 
 // ── Change this date to control the countdown ──
 const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
@@ -43,6 +49,35 @@ function formatPhone(value: string) {
   if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
+
+function formatCNPJ(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
+  if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+}
+
+function validateCNPJ(value: string) {
+  const cnpj = value.replace(/\D/g, "");
+  if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+  const calcDigit = (base: string) => {
+    const size = base.length;
+    let sum = 0;
+    let pos = size - 7;
+    for (let i = size; i >= 1; i--) {
+      sum += Number(base.charAt(size - i)) * pos--;
+      if (pos < 2) pos = 9;
+    }
+    return sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  };
+  const first = calcDigit(cnpj.substring(0, 12));
+  if (first !== Number(cnpj.charAt(12))) return false;
+  const second = calcDigit(cnpj.substring(0, 13));
+  return second === Number(cnpj.charAt(13));
+}
+
 
 function useCountdown(target: Date) {
   const calc = useCallback(() => {
@@ -72,11 +107,13 @@ export default function PreLaunchPage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
+    cnpj: "",
     contact_name: "",
     whatsapp: "",
     segment: "",
     is_associate: "" as "" | "yes" | "no",
   });
+
 
   useEffect(() => {
     document.title = "Em Breve · QBCAMP Conecta+";
@@ -103,11 +140,13 @@ export default function PreLaunchPage() {
     setLoading(true);
     const { error } = await supabase.from("waitlist").insert({
       company_name: parsed.data.company_name,
+      cnpj: parsed.data.cnpj,
       contact_name: parsed.data.contact_name,
       whatsapp: parsed.data.whatsapp,
       segment: parsed.data.segment,
       is_associate: parsed.data.is_associate === "yes",
     });
+
     setLoading(false);
     if (error) {
       toast.error("Erro ao cadastrar. Tente novamente ou entre em contato pelo WhatsApp.");
@@ -217,6 +256,19 @@ export default function PreLaunchPage() {
                     />
                     {errors.company_name && <p className="mt-1 text-xs text-primary">{errors.company_name}</p>}
                   </div>
+                  <div>
+                    <Input
+                      placeholder="00.000.000/0000-00"
+                      inputMode="numeric"
+                      maxLength={18}
+                      value={form.cnpj}
+                      onChange={(e) => setForm({ ...form, cnpj: formatCNPJ(e.target.value) })}
+                      aria-invalid={!!errors.cnpj}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.cnpj && <p className="mt-1 text-xs text-primary">{errors.cnpj}</p>}
+                  </div>
+
                   <div>
                     <Input
                       placeholder="Nome do responsável"

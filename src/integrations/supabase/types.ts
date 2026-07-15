@@ -901,6 +901,7 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          cnpj: string | null
           company_name: string
           contact_name: string
           created_at: string
@@ -910,6 +911,7 @@ export type Database = {
           whatsapp: string
         }
         Insert: {
+          cnpj?: string | null
           company_name: string
           contact_name: string
           created_at?: string
@@ -919,6 +921,7 @@ export type Database = {
           whatsapp: string
         }
         Update: {
+          cnpj?: string | null
           company_name?: string
           contact_name?: string
           created_at?: string

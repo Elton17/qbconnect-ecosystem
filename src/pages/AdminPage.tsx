@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
   const [waitlistFilter, setWaitlistFilter] = useState<"all" | "associate" | "non_associate">("all");
+  const [waitlistSearch, setWaitlistSearch] = useState("");
+
 
   // Edit state
   const [editDialog, setEditDialog] = useState<{ open: boolean; table: string; item: any }>({ open: false, table: "", item: null });
@@ -229,12 +231,20 @@ export default function AdminPage() {
     fetchAll();
   }
 
-  // ── Filter helper ──
+  // ── Filter helpers ──
   function filterBySearch<T extends Record<string, any>>(items: T[], fields: string[]): T[] {
     if (!search) return items;
     const q = search.toLowerCase();
     return items.filter((item) => fields.some((f) => String(item[f] || "").toLowerCase().includes(q)));
   }
+
+  function formatCnpj(value: string | null | undefined) {
+    if (!value) return "—";
+    const digits = value.replace(/\D/g, "").slice(0, 14);
+    if (digits.length !== 14) return value;
+    return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+  }
+
 
   if (loading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -834,6 +844,15 @@ export default function AdminPage() {
                   <Badge variant="secondary" className="ml-2">{waitlist.length} cadastros</Badge>
                 </h2>
                 <div className="flex items-center gap-2 flex-wrap">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por CNPJ ou empresa..."
+                      value={waitlistSearch}
+                      onChange={(e) => setWaitlistSearch(e.target.value)}
+                      className="pl-9 w-[240px]"
+                    />
+                  </div>
                   <Select value={waitlistFilter} onValueChange={(v: any) => setWaitlistFilter(v)}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Filtrar por associação" />
@@ -856,9 +875,9 @@ export default function AdminPage() {
                         waitlistFilter === "all" ? true :
                         waitlistFilter === "associate" ? w.is_associate : !w.is_associate
                       );
-                      const headers = "Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
+                      const headers = "CNPJ,Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
                       const rows = list.map((w: any) =>
-                        `"${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
+                        `"${w.cnpj || ""}","${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
                       ).join("\n");
                       const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
                       const url = URL.createObjectURL(blob);
@@ -871,14 +890,23 @@ export default function AdminPage() {
                     <Download className="mr-1 h-3.5 w-3.5" /> Exportar CSV
                   </Button>
                 </div>
+
               </div>
               {(() => {
-                const filtered = filterBySearch(waitlist, ["company_name", "contact_name", "whatsapp", "segment"])
+                const q = waitlistSearch.trim().toLowerCase();
+                const filtered = filterBySearch(waitlist, ["company_name", "cnpj", "contact_name", "whatsapp", "segment"])
                   .filter((w: any) =>
                     waitlistFilter === "all" ? true :
                     waitlistFilter === "associate" ? w.is_associate : !w.is_associate
-                  );
+                  )
+                  .filter((w: any) => {
+                    if (!q) return true;
+                    const company = String(w.company_name || "").toLowerCase();
+                    const cnpj = String(w.cnpj || "").toLowerCase();
+                    return company.includes(q) || cnpj.includes(q);
+                  });
                 if (waitlist.length === 0) {
+
                   return <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>;
                 }
                 if (filtered.length === 0) {
@@ -890,6 +918,7 @@ export default function AdminPage() {
                       <thead>
                         <tr className="bg-muted/50 border-b border-border">
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">CNPJ</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
@@ -897,13 +926,16 @@ export default function AdminPage() {
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
                           <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Ações</th>
                         </tr>
+
                       </thead>
                       <tbody>
                         {filtered.map((w: any) => (
                           <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                             <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
+                            <td className="px-4 py-3 text-card-foreground whitespace-nowrap">{formatCnpj(w.cnpj)}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
+
                             <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>
                             <td className="px-4 py-3">
                               {w.is_associate ? (
