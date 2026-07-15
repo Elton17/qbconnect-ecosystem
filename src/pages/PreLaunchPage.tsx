@@ -107,11 +107,13 @@ export default function PreLaunchPage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     company_name: "",
+    cnpj: "",
     contact_name: "",
     whatsapp: "",
     segment: "",
     is_associate: "" as "" | "yes" | "no",
   });
+
 
   useEffect(() => {
     document.title = "Em Breve · QBCAMP Conecta+";
