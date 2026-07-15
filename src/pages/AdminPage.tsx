@@ -935,6 +935,12 @@ export default function AdminPage() {
                     waitlistFilter === "all" ? true :
                     waitlistFilter === "associate" ? w.is_associate : !w.is_associate
                   )
+                  .filter((w: any) =>
+                    waitlistStatus === "all" ? true :
+                    waitlistStatus === "pending" ? (!w.contacted_at && !w.forwarded_at) :
+                    waitlistStatus === "contacted" ? !!w.contacted_at :
+                    !!w.forwarded_at
+                  )
                   .filter((w: any) => {
                     if (!q) return true;
                     const company = String(w.company_name || "").toLowerCase();
@@ -942,36 +948,103 @@ export default function AdminPage() {
                     return company.includes(q) || cnpj.includes(q);
                   });
                 if (waitlist.length === 0) {
-
                   return <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>;
                 }
                 if (filtered.length === 0) {
                   return <p className="text-sm text-muted-foreground">Nenhum cadastro encontrado com os filtros aplicados.</p>;
                 }
+                const filteredIds = filtered.map((w: any) => w.id);
+                const allSelected = filteredIds.length > 0 && filteredIds.every((id) => waitlistSelected.has(id));
+                const someSelected = filteredIds.some((id) => waitlistSelected.has(id));
+                const selectedIds = Array.from(waitlistSelected);
+                const toggleAll = () => {
+                  setWaitlistSelected((prev) => {
+                    const next = new Set(prev);
+                    if (allSelected) filteredIds.forEach((id) => next.delete(id));
+                    else filteredIds.forEach((id) => next.add(id));
+                    return next;
+                  });
+                };
+                const toggleOne = (id: string) => {
+                  setWaitlistSelected((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(id)) next.delete(id); else next.add(id);
+                    return next;
+                  });
+                };
                 return (
+                  <>
+                    {selectedIds.length > 0 && (
+                      <div className="mb-3 flex items-center justify-between gap-3 flex-wrap rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5">
+                        <span className="text-sm font-medium text-card-foreground">
+                          {selectedIds.length} selecionado(s)
+                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={waitlistBulkLoading}
+                            onClick={() => waitlistBulkAction("contacted", selectedIds)}
+                          >
+                            <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Marcar como contatado
+                          </Button>
+                          <Button
+                            size="sm"
+                            disabled={waitlistBulkLoading}
+                            onClick={() => waitlistBulkAction("forwarded", selectedIds)}
+                          >
+                            <Send className="mr-1 h-3.5 w-3.5" /> Encaminhar para aprovação
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={waitlistBulkLoading}
+                            onClick={() => waitlistBulkAction("reset", selectedIds)}
+                          >
+                            Resetar status
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setWaitlistSelected(new Set())}>
+                            Limpar seleção
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   <div className="overflow-x-auto rounded-xl border border-border">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-muted/50 border-b border-border">
+                          <th className="px-3 py-3 w-10">
+                            <Checkbox
+                              checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                              onCheckedChange={toggleAll}
+                              aria-label="Selecionar todos"
+                            />
+                          </th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">CNPJ</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Associada</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Status</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Data</th>
                           <th className="px-4 py-3 text-right font-semibold text-muted-foreground">Ações</th>
                         </tr>
-
                       </thead>
                       <tbody>
                         {filtered.map((w: any) => (
                           <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                            <td className="px-3 py-3">
+                              <Checkbox
+                                checked={waitlistSelected.has(w.id)}
+                                onCheckedChange={() => toggleOne(w.id)}
+                                aria-label={`Selecionar ${w.company_name}`}
+                              />
+                            </td>
                             <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
                             <td className="px-4 py-3 text-card-foreground whitespace-nowrap">{formatCnpj(w.cnpj)}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
-
                             <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>
                             <td className="px-4 py-3">
                               {w.is_associate ? (
@@ -979,6 +1052,23 @@ export default function AdminPage() {
                               ) : (
                                 <Badge variant="secondary">Não</Badge>
                               )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex flex-col gap-1">
+                                {w.forwarded_at && (
+                                  <Badge className="bg-primary text-primary-foreground w-fit" title={new Date(w.forwarded_at).toLocaleString("pt-BR")}>
+                                    Encaminhado
+                                  </Badge>
+                                )}
+                                {w.contacted_at && (
+                                  <Badge variant="outline" className="w-fit" title={new Date(w.contacted_at).toLocaleString("pt-BR")}>
+                                    Contatado
+                                  </Badge>
+                                )}
+                                {!w.contacted_at && !w.forwarded_at && (
+                                  <Badge variant="secondary" className="w-fit">Pendente</Badge>
+                                )}
+                              </div>
                             </td>
                             <td className="px-4 py-3 text-muted-foreground">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
                             <td className="px-4 py-3">
@@ -1004,6 +1094,10 @@ export default function AdminPage() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                  </>
+                );
+              })()}
                   </div>
                 );
               })()}
