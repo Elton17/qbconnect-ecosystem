@@ -258,6 +258,19 @@ export default function PreLaunchPage() {
                   </div>
                   <div>
                     <Input
+                      placeholder="00.000.000/0000-00"
+                      inputMode="numeric"
+                      maxLength={18}
+                      value={form.cnpj}
+                      onChange={(e) => setForm({ ...form, cnpj: formatCNPJ(e.target.value) })}
+                      aria-invalid={!!errors.cnpj}
+                      className="border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-primary"
+                    />
+                    {errors.cnpj && <p className="mt-1 text-xs text-primary">{errors.cnpj}</p>}
+                  </div>
+
+                  <div>
+                    <Input
                       placeholder="Nome do responsável"
                       value={form.contact_name}
                       maxLength={120}
