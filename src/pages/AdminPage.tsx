@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
   const [waitlistFilter, setWaitlistFilter] = useState<"all" | "associate" | "non_associate">("all");
+  const [waitlistSearch, setWaitlistSearch] = useState("");
+
 
   // Edit state
   const [editDialog, setEditDialog] = useState<{ open: boolean; table: string; item: any }>({ open: false, table: "", item: null });
