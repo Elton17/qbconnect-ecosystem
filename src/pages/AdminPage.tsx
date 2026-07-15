@@ -1098,9 +1098,6 @@ export default function AdminPage() {
                   </>
                 );
               })()}
-                  </div>
-                );
-              })()}
             </div>
           </TabsContent>
         </Tabs>
