@@ -61,6 +61,7 @@ export default function PreLaunchPage() {
     contact_name: "",
     whatsapp: "",
     segment: "",
+    is_associate: "" as "" | "yes" | "no",
   });
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export default function PreLaunchPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.company_name.trim() || !form.contact_name.trim() || !form.whatsapp.trim() || !form.segment) {
+    if (!form.company_name.trim() || !form.contact_name.trim() || !form.whatsapp.trim() || !form.segment || !form.is_associate) {
       toast.error("Preencha todos os campos.");
       return;
     }
@@ -81,6 +82,7 @@ export default function PreLaunchPage() {
       contact_name: form.contact_name.trim(),
       whatsapp: form.whatsapp.trim(),
       segment: form.segment,
+      is_associate: form.is_associate === "yes",
     });
     setLoading(false);
     if (error) {
@@ -208,6 +210,31 @@ export default function PreLaunchPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs font-medium text-white/70">Sua empresa já é associada QBCAMP?</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { value: "yes", label: "Sim, sou associada" },
+                        { value: "no", label: "Ainda não" },
+                      ].map((opt) => {
+                        const active = form.is_associate === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setForm({ ...form, is_associate: opt.value as "yes" | "no" })}
+                            className={`rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${
+                              active
+                                ? "border-primary bg-primary/20 text-white"
+                                : "border-white/20 bg-white/5 text-white/70 hover:bg-white/10"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <Button type="submit" disabled={loading} className="w-full bg-primary font-heading font-bold text-white hover:bg-primary-dark">
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando...</>
