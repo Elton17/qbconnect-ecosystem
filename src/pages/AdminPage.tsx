@@ -249,6 +249,27 @@ export default function AdminPage() {
     return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
   }
 
+  async function waitlistBulkAction(action: "contacted" | "forwarded" | "reset", ids: string[]) {
+    if (ids.length === 0) { toast.error("Selecione ao menos um registro"); return; }
+    setWaitlistBulkLoading(true);
+    const now = new Date().toISOString();
+    const updates: any =
+      action === "contacted" ? { contacted_at: now } :
+      action === "forwarded" ? { forwarded_at: now } :
+      { contacted_at: null, forwarded_at: null };
+    const { error } = await supabase.from("waitlist").update(updates).in("id", ids);
+    setWaitlistBulkLoading(false);
+    if (error) { toast.error("Erro: " + error.message); return; }
+    toast.success(
+      action === "contacted" ? `${ids.length} marcado(s) como contatado(s)` :
+      action === "forwarded" ? `${ids.length} encaminhado(s) para aprovação` :
+      `${ids.length} status resetado(s)`
+    );
+    setWaitlistSelected(new Set());
+    fetchAll();
+  }
+
+
 
   if (loading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
