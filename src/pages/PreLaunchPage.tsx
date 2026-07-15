@@ -277,7 +277,7 @@ export default function PreLaunchPage() {
         {/* ── FOOTER ── */}
         <div className="mt-4 flex flex-col items-center gap-2 text-center">
           <p className="text-xs text-white/30">
-            © 2025 QBCAMP · Associação Industrial e Comercial de Quatro Barras e Campina Grande do Sul
+            © 2026 QBCAMP · Associação Industrial e Comercial de Quatro Barras e Campina Grande do Sul
           </p>
           <Link to="/cadastro" className="text-xs text-white/40 hover:text-white/60 transition-colors">
             Já sou associado → Fazer cadastro
