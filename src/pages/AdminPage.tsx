@@ -892,6 +892,17 @@ export default function AdminPage() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                  <Select value={waitlistStatus} onValueChange={(v: any) => setWaitlistStatus(v)}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filtrar por status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos status</SelectItem>
+                      <SelectItem value="pending">Pendentes ({waitlist.filter((w: any) => !w.contacted_at && !w.forwarded_at).length})</SelectItem>
+                      <SelectItem value="contacted">Contatados ({waitlist.filter((w: any) => w.contacted_at).length})</SelectItem>
+                      <SelectItem value="forwarded">Encaminhados ({waitlist.filter((w: any) => w.forwarded_at).length})</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Button
                     variant="outline"
                     size="sm"
