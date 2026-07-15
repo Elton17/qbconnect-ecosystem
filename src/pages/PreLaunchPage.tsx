@@ -140,11 +140,13 @@ export default function PreLaunchPage() {
     setLoading(true);
     const { error } = await supabase.from("waitlist").insert({
       company_name: parsed.data.company_name,
+      cnpj: parsed.data.cnpj,
       contact_name: parsed.data.contact_name,
       whatsapp: parsed.data.whatsapp,
       segment: parsed.data.segment,
       is_associate: parsed.data.is_associate === "yes",
     });
+
     setLoading(false);
     if (error) {
       toast.error("Erro ao cadastrar. Tente novamente ou entre em contato pelo WhatsApp.");
