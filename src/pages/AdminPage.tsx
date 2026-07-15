@@ -844,6 +844,15 @@ export default function AdminPage() {
                   <Badge variant="secondary" className="ml-2">{waitlist.length} cadastros</Badge>
                 </h2>
                 <div className="flex items-center gap-2 flex-wrap">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por CNPJ ou empresa..."
+                      value={waitlistSearch}
+                      onChange={(e) => setWaitlistSearch(e.target.value)}
+                      className="pl-9 w-[240px]"
+                    />
+                  </div>
                   <Select value={waitlistFilter} onValueChange={(v: any) => setWaitlistFilter(v)}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Filtrar por associação" />
@@ -866,9 +875,9 @@ export default function AdminPage() {
                         waitlistFilter === "all" ? true :
                         waitlistFilter === "associate" ? w.is_associate : !w.is_associate
                       );
-                      const headers = "Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
+                      const headers = "CNPJ,Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
                       const rows = list.map((w: any) =>
-                        `"${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
+                        `"${w.cnpj || ""}","${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
                       ).join("\n");
                       const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
                       const url = URL.createObjectURL(blob);
@@ -881,6 +890,7 @@ export default function AdminPage() {
                     <Download className="mr-1 h-3.5 w-3.5" /> Exportar CSV
                   </Button>
                 </div>
+
               </div>
               {(() => {
                 const filtered = filterBySearch(waitlist, ["company_name", "contact_name", "whatsapp", "segment"])
