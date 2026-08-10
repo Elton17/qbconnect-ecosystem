@@ -29,8 +29,8 @@ const waitlistSchema = z.object({
 });
 
 
-// ── Change this date to control the countdown ──
-const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
+// ── Countdown: 15 days from today ──
+const LAUNCH_DATE = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
 
 const segments = [
   "Indústria",
