@@ -1,5 +1,5 @@
 import { useEffect, useState, ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -14,6 +14,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
   const [checking, setChecking] = useState(!!requiredRole);
   const [hasRole, setHasRole] = useState(false);
 
@@ -37,8 +38,8 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
-  if (requiredRole && !hasRole) return <Navigate to="/" replace />;
+  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  if (requiredRole && !hasRole) return <Navigate to="/home" replace />;
 
   return <>{children}</>;
 }
