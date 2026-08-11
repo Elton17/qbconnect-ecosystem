@@ -16,7 +16,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const from = (location.state as { from?: string } | null)?.from || "/home";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ export default function LoginPage() {
       toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
     } else {
       toast({ title: "Login realizado com sucesso!" });
-      navigate("/");
+      navigate(from, { replace: true });
     }
     setLoading(false);
   };
