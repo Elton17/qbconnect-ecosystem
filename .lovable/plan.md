@@ -1,32 +1,16 @@
-## Objetivo
-Fazer com que qualquer visitante que acesse a raiz do site (`/`) veja a landing page de contagem regressiva até o lançamento oficial em **15/08/2026**. A plataforma real continua acessível via rotas diretas (`/marketplace`, `/login`, `/cadastro` etc.) para testes internos.
+# Deixar "Lista de Espera" fácil de encontrar no /admin
 
-## Alterações
+Hoje a aba existe, mas fica na última posição da faixa de abas, caindo para a segunda linha (e exigindo rolagem no celular).
 
-### 1. `src/pages/PreLaunchPage.tsx`
-- Trocar o `LAUNCH_DATE` dinâmico (hoje + 30 dias) por data fixa:
-  ```ts
-  const LAUNCH_DATE = new Date("2026-08-15T00:00:00-03:00");
-  ```
-- Ajustar o link do rodapé "Já sou associado" para apontar para `/login` (acesso interno enquanto não lança), mantendo também acesso a `/cadastro`.
+## O que muda
 
-### 2. `src/App.tsx`
-- Trocar a rota `/` para renderizar `PreLaunchPage` (fora do `MainLayout`, sem header/footer).
-- Mover a antiga `LandingPage` para uma rota interna, ex.: `/home` (assim quem já conhece pode acessar o site normalmente).
-- Manter todas as outras rotas (`/marketplace`, `/login`, `/cadastro`, `/admin`, etc.) inalteradas e funcionais.
-- A rota `/em-breve` continua existindo como alias.
+- Mover a aba **Lista de Espera** para logo depois de "Visão Geral", como segunda aba do painel.
+- Destacar a aba com um ícone e o contador de registros (ex.: "Lista de Espera (3)").
+- Tornar o card **Lista de Espera** dos indicadores do topo clicável, abrindo direto essa aba (incluindo um card novo caso ainda não exista entre os indicadores).
 
-```text
-/           → PreLaunchPage (contagem regressiva - pública)
-/home       → LandingPage (site real, oculto)
-/em-breve   → PreLaunchPage (alias)
-/marketplace, /login, /cadastro, ... → inalteradas
-```
+Nada muda nos dados, filtros, exportação CSV ou ações em lote já existentes.
 
-### 3. SEO
-- O `PreLaunchPage` já ajusta `title` e `meta description` via `useEffect`. Sem mudanças adicionais em `index.html` necessárias.
+## Detalhes técnicos
 
-## Fora de escopo
-- Não alterar layout visual, formulário de waitlist, ou lógica de autenticação.
-- Não mexer em backend / RLS.
-- Não publicar automaticamente — você faz o deploy quando quiser via "Publish".
+- `src/pages/AdminPage.tsx`: reordenar os `TabsTrigger` dentro do `TabsList` (linhas ~437-451) e adicionar ícone via `lucide-react`.
+- Usar o estado controlado do `Tabs` (`value` / `onValueChange`) para permitir que o card do topo defina a aba ativa como `waitlist`.
