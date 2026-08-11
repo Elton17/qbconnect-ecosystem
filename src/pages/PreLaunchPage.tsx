@@ -375,9 +375,14 @@ export default function PreLaunchPage() {
           <p className="text-xs text-white/30">
             © 2026 QBCAMP · Associação Industrial e Comercial de Quatro Barras e Campina Grande do Sul
           </p>
-          <Link to="/cadastro" className="text-xs text-white/40 hover:text-white/60 transition-colors">
-            Já sou associado → Fazer cadastro
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/cadastro" className="text-xs text-white/40 hover:text-white/60 transition-colors">
+              Já sou associado → Fazer cadastro
+            </Link>
+            <Link to="/home" className="text-xs text-white/20 hover:text-white/50 transition-colors">
+              Acesso interno
+            </Link>
+          </div>
         </div>
       </div>
     </div>
