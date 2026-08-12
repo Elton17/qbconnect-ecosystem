@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Search, Phone, Crown, Link2, Bell, User, ChevronDown, BookOpen } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Search, Phone, Crown, Link2, Bell, User, ChevronDown, BookOpen, KeyRound } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,6 +138,10 @@ export default function Header() {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/instrutor/dashboard")}>
                       <GraduationCap className="mr-2 h-4 w-4" /> Painel Instrutor
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/esqueci-senha")}>
+                      <KeyRound className="mr-2 h-4 w-4" /> Alterar senha
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
