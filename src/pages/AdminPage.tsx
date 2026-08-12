@@ -443,6 +443,7 @@ export default function AdminPage() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6 flex flex-wrap h-auto gap-1">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="waitlist"><Clock className="mr-1 h-4 w-4" /> Lista de Espera ({waitlist.length})</TabsTrigger>
             <TabsTrigger value="companies">Empresas ({profiles.length})</TabsTrigger>
             <TabsTrigger value="products">Produtos ({products.length})</TabsTrigger>
             <TabsTrigger value="courses">Cursos ({courses.length})</TabsTrigger>
@@ -454,7 +455,6 @@ export default function AdminPage() {
             <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
             <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
-            <TabsTrigger value="waitlist">Lista de Espera ({waitlist.length})</TabsTrigger>
           </TabsList>
 
           {/* ── OVERVIEW ── */}
