@@ -140,6 +140,10 @@ export default function Header() {
                       <GraduationCap className="mr-2 h-4 w-4" /> Painel Instrutor
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/esqueci-senha")}>
+                      <KeyRound className="mr-2 h-4 w-4" /> Alterar senha
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" /> Sair
                     </DropdownMenuItem>
