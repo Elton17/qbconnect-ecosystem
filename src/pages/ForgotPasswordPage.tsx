@@ -50,8 +50,8 @@ export default function ForgotPasswordPage() {
               <CardTitle className="text-2xl font-extrabold">Esqueci minha senha</CardTitle>
               <CardDescription>
                 {sent
-                  ? "Enviamos um link de recuperação para o seu e-mail."
-                  : "Informe seu e-mail para receber o link de recuperação."}
+                  ? "Enviamos um link de recuperação para o seu e-mail. Pode levar alguns minutos para chegar — se não encontrar, verifique a caixa de spam ou lixo eletrônico."
+                  : "Informe o e-mail cadastrado da sua empresa para receber o link de redefinição de senha. O e-mail pode levar alguns minutos e, se não aparecer, confira a caixa de spam."}
               </CardDescription>
             </CardHeader>
             {!sent ? (
