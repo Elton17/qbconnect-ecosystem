@@ -99,13 +99,14 @@ export default function AdminPage() {
     setWaitlist(waitlistRes.data || []);
 
     setStats([
-      { label: "Empresas", value: p.length, icon: Building2 },
-      { label: "Produtos", value: pr.length, icon: ShoppingBag },
-      { label: "Cursos", value: c.length, icon: GraduationCap },
-      { label: "Eventos", value: ev.length, icon: CalendarDays },
-      { label: "Oportunidades", value: op.length, icon: Handshake },
-      { label: "Benefícios", value: b.length, icon: Gift },
-      { label: "Promoções", value: pm.length, icon: Tag },
+      { label: "Empresas", value: p.length, icon: Building2, tab: "companies" },
+      { label: "Lista de Espera", value: waitlistRes.data?.length || 0, icon: Clock, tab: "waitlist" },
+      { label: "Produtos", value: pr.length, icon: ShoppingBag, tab: "products" },
+      { label: "Cursos", value: c.length, icon: GraduationCap, tab: "courses" },
+      { label: "Eventos", value: ev.length, icon: CalendarDays, tab: "events" },
+      { label: "Oportunidades", value: op.length, icon: Handshake, tab: "opportunities" },
+      { label: "Benefícios", value: b.length, icon: Gift, tab: "benefits" },
+      { label: "Promoções", value: pm.length, icon: Tag, tab: "promotions" },
       { label: "Matrículas", value: enrollRes.count || 0, icon: Users },
       { label: "Inscrições Eventos", value: eventRegRes.count || 0, icon: Trophy },
     ]);
