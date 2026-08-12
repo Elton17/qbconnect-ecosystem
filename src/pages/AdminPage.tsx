@@ -419,11 +419,17 @@ export default function AdminPage() {
         {/* Stats Grid */}
         <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-3 lg:grid-cols-9">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border bg-card p-3 text-center">
+            <button
+              key={s.label}
+              type="button"
+              onClick={() => s.tab && setTab(s.tab)}
+              disabled={!s.tab}
+              className={`rounded-xl border border-border bg-card p-3 text-center transition-colors hover:border-primary/50 hover:bg-primary/5 ${s.tab ? 'cursor-pointer' : 'cursor-default'}`}
+            >
               <s.icon className="mx-auto mb-1 h-5 w-5 text-primary" />
               <div className="text-xl font-extrabold text-foreground">{s.value}</div>
               <div className="text-[10px] text-muted-foreground leading-tight">{s.label}</div>
-            </div>
+            </button>
           ))}
         </div>
 
