@@ -82,7 +82,12 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="password">Senha</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Senha</Label>
+                    <Link to="/esqueci-senha" className="text-sm font-semibold text-primary hover:underline">
+                      Esqueci minha senha
+                    </Link>
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                     <PasswordInput id="password" placeholder="••••••••" className="pl-9" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
@@ -93,9 +98,11 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" size="lg" disabled={loading}>
                   {loading ? "Entrando..." : "Entrar"}
                 </Button>
-                <Link to="/esqueci-senha" className="text-sm font-medium text-primary hover:underline">
-                  Esqueci minha senha
-                </Link>
+                <Button type="button" variant="outline" className="w-full" asChild>
+                  <Link to="/esqueci-senha">
+                    <KeyRound className="mr-2 h-4 w-4" /> Esqueci minha senha
+                  </Link>
+                </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Não tem conta?{" "}
                   <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">Cadastre sua empresa</a>
