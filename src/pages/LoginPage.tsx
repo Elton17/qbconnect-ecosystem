@@ -8,7 +8,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, Mail, Lock, ArrowRight } from "lucide-react";
+import { LogIn, Mail, Lock, ArrowRight, KeyRound } from "lucide-react";
 import { translateAuthError } from "@/lib/auth-utils";
 
 export default function LoginPage() {
