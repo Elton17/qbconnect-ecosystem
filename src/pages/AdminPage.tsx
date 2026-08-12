@@ -16,14 +16,14 @@ import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
   ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList, Route, Plus,
-  MessageCircle, Download, Send,
+  MessageCircle, Download, Send, Clock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getWhatsAppContactUrl } from "@/lib/constants";
 import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
 import AdminCourseReports from "@/components/admin/AdminCourseReports";
 
-interface Stat { label: string; value: number; icon: any; }
+interface Stat { label: string; value: number; icon: any; tab?: string; }
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -99,13 +99,14 @@ export default function AdminPage() {
     setWaitlist(waitlistRes.data || []);
 
     setStats([
-      { label: "Empresas", value: p.length, icon: Building2 },
-      { label: "Produtos", value: pr.length, icon: ShoppingBag },
-      { label: "Cursos", value: c.length, icon: GraduationCap },
-      { label: "Eventos", value: ev.length, icon: CalendarDays },
-      { label: "Oportunidades", value: op.length, icon: Handshake },
-      { label: "Benefícios", value: b.length, icon: Gift },
-      { label: "Promoções", value: pm.length, icon: Tag },
+      { label: "Empresas", value: p.length, icon: Building2, tab: "companies" },
+      { label: "Lista de Espera", value: waitlistRes.data?.length || 0, icon: Clock, tab: "waitlist" },
+      { label: "Produtos", value: pr.length, icon: ShoppingBag, tab: "products" },
+      { label: "Cursos", value: c.length, icon: GraduationCap, tab: "courses" },
+      { label: "Eventos", value: ev.length, icon: CalendarDays, tab: "events" },
+      { label: "Oportunidades", value: op.length, icon: Handshake, tab: "opportunities" },
+      { label: "Benefícios", value: b.length, icon: Gift, tab: "benefits" },
+      { label: "Promoções", value: pm.length, icon: Tag, tab: "promotions" },
       { label: "Matrículas", value: enrollRes.count || 0, icon: Users },
       { label: "Inscrições Eventos", value: eventRegRes.count || 0, icon: Trophy },
     ]);
@@ -418,11 +419,17 @@ export default function AdminPage() {
         {/* Stats Grid */}
         <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-3 lg:grid-cols-9">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-xl border border-border bg-card p-3 text-center">
+            <button
+              key={s.label}
+              type="button"
+              onClick={() => s.tab && setTab(s.tab)}
+              disabled={!s.tab}
+              className={`rounded-xl border border-border bg-card p-3 text-center transition-colors hover:border-primary/50 hover:bg-primary/5 ${s.tab ? 'cursor-pointer' : 'cursor-default'}`}
+            >
               <s.icon className="mx-auto mb-1 h-5 w-5 text-primary" />
               <div className="text-xl font-extrabold text-foreground">{s.value}</div>
               <div className="text-[10px] text-muted-foreground leading-tight">{s.label}</div>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -436,6 +443,7 @@ export default function AdminPage() {
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="mb-6 flex flex-wrap h-auto gap-1">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="waitlist"><Clock className="mr-1 h-4 w-4" /> Lista de Espera ({waitlist.length})</TabsTrigger>
             <TabsTrigger value="companies">Empresas ({profiles.length})</TabsTrigger>
             <TabsTrigger value="products">Produtos ({products.length})</TabsTrigger>
             <TabsTrigger value="courses">Cursos ({courses.length})</TabsTrigger>
@@ -447,7 +455,6 @@ export default function AdminPage() {
             <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
             <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
-            <TabsTrigger value="waitlist">Lista de Espera ({waitlist.length})</TabsTrigger>
           </TabsList>
 
           {/* ── OVERVIEW ── */}
