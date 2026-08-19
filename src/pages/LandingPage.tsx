@@ -69,7 +69,7 @@ export default function LandingPage() {
     <div className="overflow-x-hidden">
       {/* ===== HERO ===== */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${heroAsset.url}')` }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${heroAsset.url}')`, filter: "contrast(1.15) brightness(0.85) saturate(1.1)" }} />
         <div className="absolute inset-0" style={{
           background: "linear-gradient(to bottom, rgba(26,26,26,0.15) 0%, rgba(26,26,26,0) 40%, rgba(26,26,26,0.20) 100%)"
         }} />
