@@ -81,50 +81,52 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-                Desde 1988 · Quatro Barras & Campina Grande do Sul
-              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-6 md:p-8 backdrop-blur-md shadow-2xl max-w-xl">
+                {/* Badge */}
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+                  Desde 1988 · Quatro Barras & Campina Grande do Sul
+                </div>
 
-              {/* H1 */}
-              <h1 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl font-heading">
-                <span className="text-white">Sua parceria no</span><br />
-                <span className="text-primary">desenvolvimento</span><br />
-                <span className="text-white">empresarial.</span>
-              </h1>
+                {/* H1 */}
+                <h1 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl font-heading">
+                  <span className="text-white">Sua parceria no</span><br />
+                  <span className="text-primary">desenvolvimento</span><br />
+                  <span className="text-white">empresarial.</span>
+                </h1>
 
-              <p className="mb-8 max-w-lg text-lg leading-relaxed text-white/90 md:text-xl">
-                A plataforma B2B que une empresas de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba. Marketplace, oportunidades, capacitação e muito mais.
-              </p>
+                <p className="mb-8 max-w-lg text-lg leading-relaxed text-white/90 md:text-xl">
+                  A plataforma B2B que une empresas de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba. Marketplace, oportunidades, capacitação e muito mais.
+                </p>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                  <Link to="/marketplace">
-                    Explorar Marketplace <ArrowRight className="ml-1 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button size="xl" asChild className="border-2 border-white/50 text-white bg-transparent hover:border-white hover:bg-white/10 backdrop-blur-sm font-heading font-bold">
-                  <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Quero me associar</a>
-                </Button>
-              </div>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button size="xl" asChild className="bg-primary text-white hover:bg-primary-dark font-heading font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                    <Link to="/marketplace">
+                      Explorar Marketplace <ArrowRight className="ml-1 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button size="xl" asChild className="border-2 border-white/50 text-white bg-transparent hover:border-white hover:bg-white/10 backdrop-blur-sm font-heading font-bold">
+                    <a href="https://qbcamp.com.br/filiacao" target="_blank" rel="noopener noreferrer">Quero me associar</a>
+                  </Button>
+                </div>
 
-              {/* Mobile-only CTA */}
-              <div className="mt-4 sm:hidden">
-                <Button size="xl" asChild className="w-full bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold shadow-lg animate-pulse-subtle">
-                  <Link to="/cadastro">
-                    <Crown className="mr-2 h-5 w-5" /> Cadastre sua Empresa
-                  </Link>
-                </Button>
-              </div>
+                {/* Mobile-only CTA */}
+                <div className="mt-4 sm:hidden">
+                  <Button size="xl" asChild className="w-full bg-accent text-accent-foreground hover:brightness-110 font-heading font-bold shadow-lg animate-pulse-subtle">
+                    <Link to="/cadastro">
+                      <Crown className="mr-2 h-5 w-5" /> Cadastre sua Empresa
+                    </Link>
+                  </Button>
+                </div>
 
-              <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
-                {["Acesso gratuito", "Empresas verificadas", "Suporte dedicado"].map((t) => (
-                  <span key={t} className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-primary/70" />
-                    {t}
-                  </span>
-                ))}
+                <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/80">
+                  {["Acesso gratuito", "Empresas verificadas", "Suporte dedicado"].map((t) => (
+                    <span key={t} className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-4 w-4 text-primary/70" />
+                      {t}
+                    </span>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
