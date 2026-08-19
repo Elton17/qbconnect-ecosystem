@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import heroAsset from "@/assets/hero-bg.jpg.asset.json";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -68,9 +69,10 @@ export default function LandingPage() {
     <div className="overflow-x-hidden">
       {/* ===== HERO ===== */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/hero-bg.jpg')" }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${heroAsset.url}')` }} />
         <div className="absolute inset-0" style={{
-          background: "linear-gradient(to right, rgba(26,26,26,0.92) 40%, rgba(26,26,26,0.60) 100%)"
+          background: "linear-gradient(to bottom, rgba(26,26,26,0.40) 0%, rgba(26,26,26,0) 35%), linear-gradient(to right, rgba(26,26,26,0.80) 0%, rgba(26,26,26,0.35) 45%, rgba(26,26,26,0.15) 100%)",
+          mixBlendMode: "overlay"
         }} />
 
         <div className="container relative z-10 py-20 md:py-32">
@@ -93,7 +95,7 @@ export default function LandingPage() {
                 <span className="text-white">empresarial.</span>
               </h1>
 
-              <p className="mb-8 max-w-lg text-lg leading-relaxed text-white/70 md:text-xl">
+              <p className="mb-8 max-w-lg text-lg leading-relaxed text-white/90 md:text-xl">
                 A plataforma B2B que une empresas de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba. Marketplace, oportunidades, capacitação e muito mais.
               </p>
 
@@ -117,7 +119,7 @@ export default function LandingPage() {
                 </Button>
               </div>
 
-              <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/50">
+              <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
                 {["Acesso gratuito", "Empresas verificadas", "Suporte dedicado"].map((t) => (
                   <span key={t} className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-4 w-4 text-primary/70" />
