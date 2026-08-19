@@ -71,8 +71,8 @@ export default function LandingPage() {
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url('${heroAsset.url}')` }} />
         <div className="absolute inset-0" style={{
-          background: "linear-gradient(to bottom, rgba(26,26,26,0.40) 0%, rgba(26,26,26,0) 35%), linear-gradient(to right, rgba(26,26,26,0.80) 0%, rgba(26,26,26,0.35) 45%, rgba(26,26,26,0.15) 100%)",
-          mixBlendMode: "overlay"
+          background: "linear-gradient(to bottom, rgba(26,26,26,0.45) 0%, rgba(26,26,26,0) 35%), linear-gradient(to right, rgba(26,26,26,0.85) 0%, rgba(26,26,26,0.45) 45%, rgba(26,26,26,0.25) 100%)",
+          mixBlendMode: "multiply"
         }} />
 
         <div className="container relative z-10 py-20 md:py-32">
