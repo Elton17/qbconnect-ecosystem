@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_registration_by_ticket(text) FROM anon, authenticated, PUBLIC;
