@@ -14,7 +14,7 @@ import Breadcrumbs from "@/components/layout/Breadcrumbs";
 
 interface Profile {
   id: string; company_name: string; segment: string; city: string; description: string | null;
-  logo_url: string | null; website: string | null; phone: string; email: string; address: string | null;
+  logo_url: string | null; website: string | null; phone: string; email?: string | null; address: string | null;
   plan: string; user_id: string;
 }
 interface Opportunity { id: string; title: string; description: string | null; type: string; value: string | null; urgent: boolean | null; }
@@ -32,12 +32,12 @@ export default function CompanyProfilePage() {
   useEffect(() => {
     if (!id) return;
     async function load() {
-      const [profileRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", id).eq("approved", true).single(),
-        supabase.from("opportunities").select("*").eq("user_id", "").eq("active", true),
-        supabase.from("courses").select("*").eq("user_id", "").eq("active", true),
-        supabase.from("benefits").select("*").eq("user_id", "").eq("active", true),
-      ]);
+      const profileRes = await supabase
+        .from("profiles")
+        .select("id, user_id, company_name, segment, city, description, logo_url, website, phone, address, plan")
+        .eq("id", id)
+        .eq("approved", true)
+        .maybeSingle();
       if (profileRes.data) {
         setProfile(profileRes.data);
         const userId = profileRes.data.user_id;

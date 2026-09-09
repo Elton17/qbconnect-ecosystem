@@ -1,0 +1,1 @@
+GRANT SELECT (contact_phone, contact_name) ON public.profiles TO anon;
