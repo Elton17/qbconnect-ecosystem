@@ -19,16 +19,30 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   const [hasRole, setHasRole] = useState(false);
 
   useEffect(() => {
-    if (!requiredRole || !user) {
+    if (!requiredRole) {
+      setChecking(false);
+      return;
+    }
+    if (authLoading) {
+      setChecking(true);
+      return;
+    }
+    if (!user) {
       setChecking(false);
       return;
     }
 
+    let cancelled = false;
+    setChecking(true);
     supabase.rpc("has_role", { _user_id: user.id, _role: requiredRole }).then(({ data }) => {
+      if (cancelled) return;
       setHasRole(!!data);
       setChecking(false);
     });
-  }, [user, requiredRole]);
+    return () => {
+      cancelled = true;
+    };
+  }, [user, requiredRole, authLoading]);
 
   if (authLoading || checking) {
     return (
