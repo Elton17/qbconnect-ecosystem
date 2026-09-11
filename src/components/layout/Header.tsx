@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { label: "Marketplace", href: "/marketplace" },
+  { label: "Empresas", href: "/empresas" },
   { label: "Oportunidades", href: "/oportunidades" },
   { label: "Escola de Negócios", href: "/academia" },
   { label: "Eventos", href: "/eventos" },
@@ -27,6 +28,7 @@ const navItems = [
 
 const mobileNavItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+  { label: "Empresas", href: "/empresas", icon: Building2 },
   { label: "Oportunidades", href: "/oportunidades", icon: Handshake },
   { label: "Escola de Negócios", href: "/academia", icon: GraduationCap },
   { label: "Eventos", href: "/eventos", icon: CalendarDays },

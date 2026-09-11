@@ -63,7 +63,7 @@ export default function CompanyProfilePage() {
         <Building2 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
         <h2 className="mb-4 text-2xl font-bold text-foreground">Empresa não encontrada</h2>
         <p className="mb-6 text-muted-foreground">Esta empresa não existe ou ainda não foi aprovada.</p>
-        <Link to="/marketplace"><Button variant="outline"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao Marketplace</Button></Link>
+        <Link to="/empresas"><Button variant="outline"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao Guia de Empresas</Button></Link>
       </div>
     );
   }
@@ -80,7 +80,7 @@ export default function CompanyProfilePage() {
         </div>
         <div className="container relative">
           <Breadcrumbs items={[
-            { label: "Marketplace", href: "/marketplace" },
+            { label: "Empresas", href: "/empresas" },
             { label: profile.company_name },
           ]} />
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 md:flex-row md:items-start">
