@@ -19,7 +19,7 @@ import {
   MessageCircle, Download, Send, Clock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getWhatsAppContactUrl } from "@/lib/constants";
+import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
 import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
 import AdminCourseReports from "@/components/admin/AdminCourseReports";
 
@@ -156,7 +156,7 @@ export default function AdminPage() {
       const phone = profile.contact_phone || profile.phone;
       const companyName = profile.company_name || "sua empresa";
       if (phone) {
-        const message = `Olá ${profile.contact_name || ""}.\n\nInformamos que a aprovação da empresa *${companyName}* na plataforma QBCAMP Conecta Mais foi *suspensa temporariamente*.\n\nIsso pode ocorrer por pendências cadastrais ou revisão de dados. Entre em contato conosco para mais informações e regularização.\n\n📞 (41) 3672-1041\n📱 (41) 99122-8567\n\nEquipe QBCAMP`;
+        const message = `Olá ${profile.contact_name || ""}.\n\nInformamos que a aprovação da empresa *${companyName}* na plataforma QBCAMP Conecta Mais foi *suspensa temporariamente*.\n\nIsso pode ocorrer por pendências cadastrais ou revisão de dados. Entre em contato conosco para mais informações e regularização.\n\n📞 ${QBCAMP_PHONE_DISPLAY}\n✉️ ${QBCAMP_EMAIL}\n\nEquipe QBCAMP`;
         const whatsappUrl = getWhatsAppContactUrl(phone, message);
         window.open(whatsappUrl, "_blank");
       }
