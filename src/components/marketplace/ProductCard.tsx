@@ -78,8 +78,8 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
         )}
 
         {isPremium && (
-          <span className="absolute left-1.5 top-1.5 sm:left-2 sm:top-2 flex items-center gap-1 rounded-md bg-amber-400 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold text-amber-900 shadow">
-            <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-900" /> Premium
+          <span className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow sm:left-2 sm:top-2 sm:px-2 sm:text-xs">
+            <Star className="h-2.5 w-2.5 fill-current sm:h-3 sm:w-3" /> Premium
           </span>
         )}
 
