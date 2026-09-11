@@ -5,3 +5,4 @@
 - [x] Padronizar telefone e e-mail institucionais em todos os pontos de contato.
 - [x] Aplicar a opção 1 ao Marketplace preservando as cores da QBCAMP.
 - [x] Criar o Guia de Empresas em página e menu próprios, separado do Marketplace.
+- [x] Remover a função de Promoções e Ofertas da página principal e do painel administrativo.
