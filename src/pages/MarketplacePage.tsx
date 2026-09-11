@@ -22,8 +22,8 @@ interface Company {
   city: string;
   description: string | null;
   logo_url: string | null;
-  phone: string;
-  contact_phone: string;
+  phone: string | null;
+  contact_phone: string | null;
 }
 
 function getWhatsAppUrl(company: Company) {
