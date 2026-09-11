@@ -27,11 +27,13 @@ export default function PremiumHighlights({ products }: Props) {
   };
 
   return (
-    <section className="border-b border-border py-6 sm:py-8">
+    <section className="border-b border-border bg-card py-6 sm:py-8">
       <div className="container">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Star className="h-4 w-4 fill-current" />
+            </span>
             <h2 className="text-lg sm:text-xl font-bold text-foreground">Destaques Premium</h2>
           </div>
           <div className="hidden sm:flex gap-1">
@@ -55,18 +57,18 @@ export default function PremiumHighlights({ products }: Props) {
               <Link
                 key={p.id}
                 to={`/produto/${p.id}`}
-                className="group relative flex-shrink-0 w-[200px] sm:w-[260px] snap-start overflow-hidden rounded-xl border border-amber-300/40 bg-card shadow-sm hover:shadow-lg transition-all duration-200"
+                className="group relative w-[200px] flex-shrink-0 snap-start overflow-hidden rounded-lg border border-border border-l-[3px] border-l-primary bg-background shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg sm:w-[260px]"
               >
                 <div className="relative h-[130px] sm:h-[160px] overflow-hidden">
                   {img ? (
                     <img src={img} alt={p.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   ) : (
                     <div className="h-full w-full bg-muted flex items-center justify-center">
-                      <Star className="h-8 w-8 text-amber-300/30" />
+                      <Star className="h-8 w-8 text-primary/25" />
                     </div>
                   )}
-                  <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 shadow">
-                    <Star className="h-2.5 w-2.5 fill-amber-900" /> Premium
+                  <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow">
+                    <Star className="h-2.5 w-2.5 fill-current" /> Premium
                   </span>
                 </div>
                 <div className="p-2.5 sm:p-3">

@@ -100,19 +100,19 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="border-b border-border bg-card py-6 md:py-8">
+      <section className="border-b border-border bg-card py-6 md:py-9">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid items-center gap-5 lg:grid-cols-[300px_minmax(0,1fr)]"
+            className="grid items-center gap-6 lg:grid-cols-[340px_minmax(0,1fr)]"
           >
             <div>
               <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
                 <ShoppingBag className="h-4 w-4" /> Comércio regional conectado
               </div>
               <h1 className="text-3xl font-extrabold text-foreground md:text-4xl">Marketplace QBCAMP</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Produtos e serviços de empresas da nossa região.</p>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">Encontre produtos, serviços e soluções para sua empresa na região.</p>
             </div>
 
             <label className="relative block">
@@ -123,7 +123,7 @@ export default function MarketplacePage() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar produtos, serviços, empresas ou cidades..."
-                className="h-14 w-full rounded-lg border border-input bg-background pl-14 pr-5 text-base text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
+                className="h-14 w-full rounded-lg border-2 border-primary bg-background pl-14 pr-5 text-base text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
               />
             </label>
           </motion.div>
@@ -132,6 +132,7 @@ export default function MarketplacePage() {
 
       <section className="border-b border-border bg-muted/50 py-4">
         <div className="container">
+          <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Categorias</p>
           <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Categorias do Marketplace">
             <Button
               size="sm"
@@ -158,11 +159,11 @@ export default function MarketplacePage() {
 
       {!loading && !hasFilters && <PremiumHighlights products={products} />}
 
-      <section className="container py-8 md:py-12">
+      <section className="container py-8 md:py-10">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase text-primary">Vitrine comercial</p>
-            <h2 className="mt-1 text-2xl font-bold text-foreground">Encontre o que sua empresa precisa</h2>
+            <h2 className="mt-1 text-2xl font-bold text-foreground">Todos os anúncios</h2>
             {!loading && (
               <p className="mt-1 text-sm text-muted-foreground">
                 {filteredProducts.length} anúncio{filteredProducts.length !== 1 ? "s" : ""} encontrado{filteredProducts.length !== 1 ? "s" : ""}
