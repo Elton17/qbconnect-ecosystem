@@ -55,9 +55,14 @@ async function incrementContact(productId: string) {
 export default function ProductCard({ product }: { product: ProductWithSeller }) {
   const imgs = (product.images && product.images.length > 0) ? product.images : product.image_url ? [product.image_url] : [];
   const isPremium = product.seller_plan === "premium";
+  const priceLabel = product.price_type === "consult" || product.price <= 0
+    ? "Consultar preço"
+    : product.price_type === "negotiable"
+      ? `R$ ${product.price.toFixed(2).replace(".", ",")} · negociável`
+      : `R$ ${product.price.toFixed(2).replace(".", ",")}`;
 
   return (
-    <div className={`group flex flex-col overflow-hidden rounded-lg bg-card shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${isPremium ? "border-l-[3px] border-l-primary border border-border" : "border border-border"}`}>
+    <article className={`group flex h-full flex-col overflow-hidden rounded-lg bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${isPremium ? "border-l-[3px] border-l-primary border border-border" : "border border-border"}`}>
       {/* Image */}
       <Link to={`/produto/${product.id}`} className="relative block overflow-hidden h-[140px] sm:h-[220px]">
         {imgs.length > 0 ? (
@@ -102,8 +107,8 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
         </Link>
 
         {/* Price */}
-        <span className="mb-1 sm:mb-2 text-base sm:text-xl font-extrabold text-primary">
-          {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Consultar preço"}
+        <span className="mb-1 sm:mb-2 text-base sm:text-xl font-extrabold text-foreground">
+          {priceLabel}
         </span>
 
         {/* Seller info */}
@@ -155,6 +160,6 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }
