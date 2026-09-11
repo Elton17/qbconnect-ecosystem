@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
-  ToggleRight, Shield, Loader2, Tag, Pencil, ExternalLink, ClipboardList, Route, Plus,
+  ToggleRight, Shield, Loader2, Pencil, ExternalLink, ClipboardList, Route, Plus,
   MessageCircle, Download, Send, Clock,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,7 +35,6 @@ export default function AdminPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [benefits, setBenefits] = useState<any[]>([]);
-  const [promotions, setPromotions] = useState<any[]>([]);
   const [learningPaths, setLearningPaths] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [waitlist, setWaitlist] = useState<any[]>([]);
@@ -67,7 +66,7 @@ export default function AdminPage() {
     setLoading(true);
     const [
       profilesRes, productsRes, coursesRes, eventsRes,
-      oppsRes, benefitsRes, promosRes, rolesRes,
+      oppsRes, benefitsRes, rolesRes,
       enrollRes, eventRegRes, pathsRes, waitlistRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
@@ -76,7 +75,6 @@ export default function AdminPage() {
       supabase.from("events").select("*").order("created_at", { ascending: false }),
       supabase.from("opportunities").select("*").order("created_at", { ascending: false }),
       supabase.from("benefits").select("*").order("created_at", { ascending: false }),
-      supabase.from("promotions").select("*").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("*"),
       supabase.from("course_enrollments").select("id", { count: "exact", head: true }),
       supabase.from("event_registrations").select("id", { count: "exact", head: true }),
@@ -90,10 +88,9 @@ export default function AdminPage() {
     const ev = eventsRes.data || [];
     const op = oppsRes.data || [];
     const b = benefitsRes.data || [];
-    const pm = promosRes.data || [];
 
     setProfiles(p); setProducts(pr); setCourses(c); setEvents(ev);
-    setOpportunities(op); setBenefits(b); setPromotions(pm);
+    setOpportunities(op); setBenefits(b);
     setLearningPaths(pathsRes.data || []);
     setUserRoles(rolesRes.data || []);
     setWaitlist(waitlistRes.data || []);
@@ -106,7 +103,6 @@ export default function AdminPage() {
       { label: "Eventos", value: ev.length, icon: CalendarDays, tab: "events" },
       { label: "Oportunidades", value: op.length, icon: Handshake, tab: "opportunities" },
       { label: "Benefícios", value: b.length, icon: Gift, tab: "benefits" },
-      { label: "Promoções", value: pm.length, icon: Tag, tab: "promotions" },
       { label: "Matrículas", value: enrollRes.count || 0, icon: Users },
       { label: "Inscrições Eventos", value: eventRegRes.count || 0, icon: Trophy },
     ]);
@@ -346,16 +342,6 @@ export default function AdminPage() {
       { key: "exclusive", label: "Exclusivo Premium", type: "switch" },
       { key: "active", label: "Ativo", type: "switch" },
     ],
-    promotions: [
-      { key: "title", label: "Título" },
-      { key: "description", label: "Descrição", type: "textarea" },
-      { key: "category", label: "Categoria" },
-      { key: "discount_percent", label: "Desconto (%)", type: "number" },
-      { key: "original_price", label: "Preço original", type: "number" },
-      { key: "promo_price", label: "Preço promocional", type: "number" },
-      { key: "expires_at", label: "Expira em", type: "datetime" },
-      { key: "active", label: "Ativo", type: "switch" },
-    ],
     learning_paths: [
       { key: "title", label: "Título" },
       { key: "description", label: "Descrição", type: "textarea" },
@@ -450,7 +436,6 @@ export default function AdminPage() {
             <TabsTrigger value="events">Eventos ({events.length})</TabsTrigger>
             <TabsTrigger value="opportunities">Oportunidades ({opportunities.length})</TabsTrigger>
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
-            <TabsTrigger value="promotions">Promoções ({promotions.length})</TabsTrigger>
             <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
             <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
             <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
@@ -717,30 +702,6 @@ export default function AdminPage() {
                   </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("benefits", item.id, item.active, setBenefits)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("benefits", item.id, setBenefits)}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </>
-              )}
-            />
-          </TabsContent>
-
-          {/* ── PROMOTIONS ── */}
-          <TabsContent value="promotions">
-            <AdminTable
-              items={filterBySearch(promotions, ["title", "category"])}
-              columns={[
-                { key: "title", label: "Título" },
-                { key: "category", label: "Categoria" },
-                { key: "discount_percent", label: "Desconto", render: (v: number) => `${v}%` },
-              ]}
-              renderStatus={(item) => <ActiveBadge active={item.active} />}
-              actions={(item) => (
-                <>
-                  <Button size="sm" variant="outline" onClick={() => openEdit("promotions", item)} title="Editar">
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <ToggleActiveBtn active={item.active} onClick={() => toggleActive("promotions", item.id, item.active, setPromotions)} />
-                  <Button size="sm" variant="destructive" onClick={() => deleteRecord("promotions", item.id, setPromotions)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
