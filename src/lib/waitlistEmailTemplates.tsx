@@ -1,6 +1,8 @@
 // Templates de e-mail de confirmação do pré-cadastro (Waitlist)
 // Renderizados também no preview /admin/email-preview
 
+import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY } from "@/lib/constants";
+
 export interface WaitlistEmailData {
   company_name: string;
   contact_name: string;
@@ -88,7 +90,7 @@ export function renderAssociateEmail(d: WaitlistEmailData): { subject: string; h
       Falar com a QBCAMP no WhatsApp
     </a>
     <p style="font-size:13px;color:${BRAND.muted};margin:22px 0 0 0;">
-      Dúvidas? Responda este e-mail ou fale conosco: (41) 3672-1041 · Seg-Sex 08h às 17h.
+      Dúvidas? Fale conosco: ${QBCAMP_PHONE_DISPLAY} · <a href="mailto:${QBCAMP_EMAIL}" style="color:${BRAND.primary};">${QBCAMP_EMAIL}</a> · Seg-Sex 08h às 17h.
     </p>
     `,
   );
@@ -124,7 +126,8 @@ export function renderNonAssociateEmail(d: WaitlistEmailData): { subject: string
       Falar no WhatsApp →
     </a>
     <p style="font-size:13px;color:${BRAND.muted};margin:22px 0 0 0;">
-      Enquanto isso, você continua na nossa lista e será avisado sobre novidades.
+      Enquanto isso, você continua na nossa lista e será avisado sobre novidades.<br/>
+      Dúvidas? Fale conosco: ${QBCAMP_PHONE_DISPLAY} · <a href="mailto:${QBCAMP_EMAIL}" style="color:${BRAND.primary};">${QBCAMP_EMAIL}</a>.
     </p>
     `,
   );

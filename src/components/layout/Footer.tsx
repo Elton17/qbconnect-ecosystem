@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Link2, Phone, MessageCircle } from "lucide-react";
-import { QBCAMP_PHONE, QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, QBCAMP_WHATSAPP, getWhatsAppUrl } from "@/lib/constants";
+import { Link2, Mail, Phone, MessageCircle } from "lucide-react";
+import { QBCAMP_EMAIL, QBCAMP_PHONE, QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, getWhatsAppUrl } from "@/lib/constants";
 
 export default function Footer() {
   return (
@@ -47,6 +47,10 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
                 <a href={`tel:${QBCAMP_PHONE}`} className="hover:text-primary transition-colors">{QBCAMP_PHONE_DISPLAY}</a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" />
+                <a href={`mailto:${QBCAMP_EMAIL}`} className="break-all hover:text-primary transition-colors">{QBCAMP_EMAIL}</a>
               </li>
               <li>{QBCAMP_HOURS}</li>
             </ul>

@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Phone, MessageCircle, MapPin } from "lucide-react";
+import { Phone, MessageCircle, MapPin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { QBCAMP_WHATSAPP, QBCAMP_PHONE, QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, getWhatsAppUrl } from "@/lib/constants";
+import { QBCAMP_EMAIL, QBCAMP_PHONE, QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, getWhatsAppUrl } from "@/lib/constants";
 
 const faqs = [
   { q: "Como me torno associado da QBCAMP?", a: "O processo de associação é feito diretamente com a QBCAMP. Entre em contato pelo WhatsApp ou telefone e nossa equipe vai te orientar." },
@@ -41,7 +41,7 @@ export default function SACPage() {
 
       {/* Channels */}
       <section className="container py-12 md:py-16">
-        <div className="mx-auto max-w-4xl grid gap-6 md:grid-cols-3">
+        <div className="mx-auto max-w-6xl grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {/* WhatsApp */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="h-full text-center">
@@ -82,8 +82,26 @@ export default function SACPage() {
             </Card>
           </motion.div>
 
-          {/* In-person */}
+          {/* Email */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="h-full text-center">
+              <CardContent className="flex flex-col items-center pt-8 pb-6 px-6">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <Mail className="h-7 w-7 text-primary" />
+                </div>
+                <h3 className="text-lg font-heading font-bold text-foreground">E-mail</h3>
+                <p className="mt-2 break-all text-sm text-muted-foreground">{QBCAMP_EMAIL}</p>
+                <Button variant="outline" asChild className="mt-5 w-full">
+                  <a href={`mailto:${QBCAMP_EMAIL}`}>
+                    <Mail className="mr-1.5 h-4 w-4" /> Enviar e-mail
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* In-person */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Card className="h-full text-center">
               <CardContent className="flex flex-col items-center pt-8 pb-6 px-6">
                 <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">

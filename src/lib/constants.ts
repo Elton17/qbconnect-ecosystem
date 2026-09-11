@@ -3,6 +3,7 @@
 export const QBCAMP_WHATSAPP = "5541991228567";
 export const QBCAMP_PHONE = "+554136721041";
 export const QBCAMP_PHONE_DISPLAY = "(41) 3672-1041";
+export const QBCAMP_EMAIL = "qbcamp@qbcamp.com.br";
 export const QBCAMP_NAME = "QBCAMP Conecta+";
 export const QBCAMP_REGION = "Quatro Barras & Campina Grande do Sul";
 export const QBCAMP_HOURS = "Seg-Sex 08h às 17h";
