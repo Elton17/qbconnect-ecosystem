@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 import LandingPage from "@/pages/LandingPage";
 import MarketplacePage from "@/pages/MarketplacePage";
+import CompaniesPage from "@/pages/CompaniesPage";
 import ServicosPage from "@/pages/ServicosPage";
 import ProductDetailPage from "@/pages/ProductDetailPage";
 import OpportunitiesPage from "@/pages/OpportunitiesPage";
@@ -53,6 +54,7 @@ const App = () => (
               {/* Public routes */}
               <Route path="/home" element={<LandingPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
+              <Route path="/empresas" element={<CompaniesPage />} />
               <Route path="/servicos" element={<ServicosPage />} />
               <Route path="/produto/:id" element={<ProductDetailPage />} />
               <Route path="/oportunidades" element={<OpportunitiesPage />} />

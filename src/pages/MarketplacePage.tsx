@@ -122,7 +122,7 @@ export default function MarketplacePage() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar produtos, serviços, empresas ou cidades..."
+                placeholder="Buscar produtos, serviços, categorias ou cidades..."
                 className="h-14 w-full rounded-lg border-2 border-primary bg-background pl-14 pr-5 text-base text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
               />
             </label>
