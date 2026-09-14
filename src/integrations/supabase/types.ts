@@ -901,37 +901,55 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          activated_at: string | null
+          activated_user_id: string | null
           cnpj: string | null
           company_name: string
           contact_name: string
           contacted_at: string | null
           created_at: string
+          decision_at: string | null
+          decision_status: string
           forwarded_at: string | null
           id: string
+          invitation_expires_at: string | null
+          invitation_token_hash: string | null
           is_associate: boolean
           segment: string
           whatsapp: string
         }
         Insert: {
+          activated_at?: string | null
+          activated_user_id?: string | null
           cnpj?: string | null
           company_name: string
           contact_name: string
           contacted_at?: string | null
           created_at?: string
+          decision_at?: string | null
+          decision_status?: string
           forwarded_at?: string | null
           id?: string
+          invitation_expires_at?: string | null
+          invitation_token_hash?: string | null
           is_associate?: boolean
           segment?: string
           whatsapp: string
         }
         Update: {
+          activated_at?: string | null
+          activated_user_id?: string | null
           cnpj?: string | null
           company_name?: string
           contact_name?: string
           contacted_at?: string | null
           created_at?: string
+          decision_at?: string | null
+          decision_status?: string
           forwarded_at?: string | null
           id?: string
+          invitation_expires_at?: string | null
+          invitation_token_hash?: string | null
           is_associate?: boolean
           segment?: string
           whatsapp?: string
@@ -943,6 +961,61 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_waitlist_invitation: {
+        Args: {
+          _address?: string
+          _city: string
+          _cnpj: string
+          _company_name: string
+          _complement?: string
+          _contact_email: string
+          _contact_name: string
+          _contact_phone: string
+          _contact_role: string
+          _description?: string
+          _neighborhood?: string
+          _phone: string
+          _reference_point?: string
+          _segment: string
+          _state: string
+          _token: string
+          _website?: string
+          _zip_code?: string
+        }
+        Returns: undefined
+      }
+      decide_waitlist_entry: {
+        Args: {
+          _decision: string
+          _expires_at?: string
+          _token_hash?: string
+          _waitlist_id: string
+        }
+        Returns: {
+          activated_at: string | null
+          activated_user_id: string | null
+          cnpj: string | null
+          company_name: string
+          contact_name: string
+          contacted_at: string | null
+          created_at: string
+          decision_at: string | null
+          decision_status: string
+          forwarded_at: string | null
+          id: string
+          invitation_expires_at: string | null
+          invitation_token_hash: string | null
+          is_associate: boolean
+          segment: string
+          whatsapp: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "waitlist"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_registration_by_ticket: {
         Args: { _ticket: string }
         Returns: {
@@ -951,6 +1024,18 @@ export type Database = {
           id: string
           status: string
           ticket_code: string
+        }[]
+      }
+      get_waitlist_invitation: {
+        Args: { _token: string }
+        Returns: {
+          cnpj: string
+          company_name: string
+          contact_name: string
+          decision_status: string
+          invitation_expires_at: string
+          segment: string
+          whatsapp: string
         }[]
       }
       has_role: {
