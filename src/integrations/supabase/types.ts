@@ -901,37 +901,55 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          activated_at: string | null
+          activated_user_id: string | null
           cnpj: string | null
           company_name: string
           contact_name: string
           contacted_at: string | null
           created_at: string
+          decision_at: string | null
+          decision_status: string
           forwarded_at: string | null
           id: string
+          invitation_expires_at: string | null
+          invitation_token_hash: string | null
           is_associate: boolean
           segment: string
           whatsapp: string
         }
         Insert: {
+          activated_at?: string | null
+          activated_user_id?: string | null
           cnpj?: string | null
           company_name: string
           contact_name: string
           contacted_at?: string | null
           created_at?: string
+          decision_at?: string | null
+          decision_status?: string
           forwarded_at?: string | null
           id?: string
+          invitation_expires_at?: string | null
+          invitation_token_hash?: string | null
           is_associate?: boolean
           segment?: string
           whatsapp: string
         }
         Update: {
+          activated_at?: string | null
+          activated_user_id?: string | null
           cnpj?: string | null
           company_name?: string
           contact_name?: string
           contacted_at?: string | null
           created_at?: string
+          decision_at?: string | null
+          decision_status?: string
           forwarded_at?: string | null
           id?: string
+          invitation_expires_at?: string | null
+          invitation_token_hash?: string | null
           is_associate?: boolean
           segment?: string
           whatsapp?: string
