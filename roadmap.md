@@ -7,3 +7,4 @@
 - [x] Criar o Guia de Empresas em página e menu próprios, separado do Marketplace.
 - [x] Remover a função de Promoções e Ofertas da página principal e do painel administrativo.
 - [x] Retirar o contador de lançamento e abrir o portal no domínio principal.
+- [x] Limpar o cache antigo do contador para visitantes recorrentes.
