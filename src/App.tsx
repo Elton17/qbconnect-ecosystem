@@ -36,7 +36,6 @@ import MeusCursosPage from "@/pages/MeusCoursosPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
-import PreLaunchPage from "@/pages/PreLaunchPage";
 import EmailPreviewPage from "@/pages/EmailPreviewPage";
 
 const queryClient = new QueryClient();
@@ -49,9 +48,9 @@ const App = () => (
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
-            <Route path="/" element={<PreLaunchPage />} />
             <Route element={<MainLayout />}>
               {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
               <Route path="/home" element={<LandingPage />} />
               <Route path="/marketplace" element={<MarketplacePage />} />
               <Route path="/empresas" element={<CompaniesPage />} />
@@ -87,7 +86,6 @@ const App = () => (
               <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminPage /></ProtectedRoute>} />
               <Route path="/admin/email-preview" element={<ProtectedRoute requiredRole="admin"><EmailPreviewPage /></ProtectedRoute>} />
             </Route>
-            <Route path="/em-breve" element={<PreLaunchPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
