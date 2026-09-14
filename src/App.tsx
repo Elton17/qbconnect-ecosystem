@@ -35,6 +35,7 @@ import SACPage from "@/pages/SACPage";
 import MeusCursosPage from "@/pages/MeusCoursosPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import WaitlistActivationPage from "@/pages/WaitlistActivationPage";
 
 import EmailPreviewPage from "@/pages/EmailPreviewPage";
 
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/ativar-acesso" element={<WaitlistActivationPage />} />
               <Route path="/certificado" element={<CertificateVerifyPage />} />
               <Route path="/certificado/:codigo" element={<CertificateVerifyPage />} />
               <Route path="/sac" element={<SACPage />} />

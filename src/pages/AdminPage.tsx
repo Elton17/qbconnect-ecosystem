@@ -11,6 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
@@ -42,10 +46,12 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
   const [waitlistFilter, setWaitlistFilter] = useState<"all" | "associate" | "non_associate">("all");
-  const [waitlistStatus, setWaitlistStatus] = useState<"all" | "pending" | "contacted" | "forwarded">("all");
+  const [waitlistStatus, setWaitlistStatus] = useState<"all" | "pending" | "accepted" | "rejected" | "activated">("all");
   const [waitlistSearch, setWaitlistSearch] = useState("");
   const [waitlistSelected, setWaitlistSelected] = useState<Set<string>>(new Set());
   const [waitlistBulkLoading, setWaitlistBulkLoading] = useState(false);
+  const [waitlistDecision, setWaitlistDecision] = useState<{ item: any; decision: "accepted" | "rejected" } | null>(null);
+  const [waitlistDecisionLoading, setWaitlistDecisionLoading] = useState(false);
 
 
   // Edit state
@@ -264,6 +270,26 @@ export default function AdminPage() {
     );
     setWaitlistSelected(new Set());
     fetchAll();
+  }
+
+  async function decideWaitlistEntry() {
+    if (!waitlistDecision) return;
+    setWaitlistDecisionLoading(true);
+    const { data, error } = await supabase.functions.invoke("waitlist-decision", {
+      body: { waitlistId: waitlistDecision.item.id, decision: waitlistDecision.decision },
+    });
+    setWaitlistDecisionLoading(false);
+    if (error || !data?.entry) { toast.error(data?.error || "Não foi possível registrar a decisão."); return; }
+
+    const item = waitlistDecision.item;
+    const accepted = waitlistDecision.decision === "accepted";
+    setWaitlist((current) => current.map((row) => row.id === item.id ? data.entry : row));
+    setWaitlistDecision(null);
+    const message = accepted
+      ? `Olá ${item.contact_name}! O pré-cadastro da empresa *${item.company_name}* foi aceito pela QBCAMP.\n\nComplete seus dados e crie sua senha pelo link individual abaixo:\n${window.location.origin}/ativar-acesso?convite=${encodeURIComponent(data.invitationToken)}\n\nEste convite é pessoal, de uso único e válido por 14 dias.`
+      : `Olá ${item.contact_name}. Após a análise, o pré-cadastro da empresa *${item.company_name}* não foi aprovado neste momento.\n\nCaso queira esclarecer ou regularizar o cadastro, fale com a QBCAMP pelo telefone ${QBCAMP_PHONE_DISPLAY} ou e-mail ${QBCAMP_EMAIL}.`;
+    window.open(getWhatsAppContactUrl(item.whatsapp, message), "_blank", "noopener,noreferrer");
+    toast.success(accepted ? "Cadastro aceito. Mensagem de convite aberta no WhatsApp." : "Cadastro negado. Mensagem aberta no WhatsApp.");
   }
 
 
@@ -865,10 +891,11 @@ export default function AdminPage() {
                       <SelectValue placeholder="Filtrar por status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todos status</SelectItem>
-                      <SelectItem value="pending">Pendentes ({waitlist.filter((w: any) => !w.contacted_at && !w.forwarded_at).length})</SelectItem>
-                      <SelectItem value="contacted">Contatados ({waitlist.filter((w: any) => w.contacted_at).length})</SelectItem>
-                      <SelectItem value="forwarded">Encaminhados ({waitlist.filter((w: any) => w.forwarded_at).length})</SelectItem>
+                      <SelectItem value="all">Todos os status</SelectItem>
+                      <SelectItem value="pending">Pendentes ({waitlist.filter((w: any) => w.decision_status === "pending").length})</SelectItem>
+                      <SelectItem value="accepted">Aceitos ({waitlist.filter((w: any) => w.decision_status === "accepted").length})</SelectItem>
+                      <SelectItem value="rejected">Negados ({waitlist.filter((w: any) => w.decision_status === "rejected").length})</SelectItem>
+                      <SelectItem value="activated">Acesso ativado ({waitlist.filter((w: any) => w.decision_status === "activated").length})</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button
@@ -905,9 +932,7 @@ export default function AdminPage() {
                   )
                   .filter((w: any) =>
                     waitlistStatus === "all" ? true :
-                    waitlistStatus === "pending" ? (!w.contacted_at && !w.forwarded_at) :
-                    waitlistStatus === "contacted" ? !!w.contacted_at :
-                    !!w.forwarded_at
+                    w.decision_status === waitlistStatus
                   )
                   .filter((w: any) => {
                     if (!q) return true;
@@ -1023,24 +1048,26 @@ export default function AdminPage() {
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex flex-col gap-1">
-                                {w.forwarded_at && (
-                                  <Badge className="bg-primary text-primary-foreground w-fit" title={new Date(w.forwarded_at).toLocaleString("pt-BR")}>
-                                    Encaminhado
-                                  </Badge>
-                                )}
-                                {w.contacted_at && (
-                                  <Badge variant="outline" className="w-fit" title={new Date(w.contacted_at).toLocaleString("pt-BR")}>
-                                    Contatado
-                                  </Badge>
-                                )}
-                                {!w.contacted_at && !w.forwarded_at && (
-                                  <Badge variant="secondary" className="w-fit">Pendente</Badge>
-                                )}
+                                {w.decision_status === "activated" && <Badge className="w-fit">Acesso ativado</Badge>}
+                                {w.decision_status === "accepted" && <Badge className="w-fit">Aceito</Badge>}
+                                {w.decision_status === "rejected" && <Badge variant="destructive" className="w-fit">Negado</Badge>}
+                                {w.decision_status === "pending" && <Badge variant="secondary" className="w-fit">Pendente</Badge>}
+                                {w.decision_at && <span className="text-xs text-muted-foreground">{new Date(w.decision_at).toLocaleDateString("pt-BR")}</span>}
                               </div>
                             </td>
                             <td className="px-4 py-3 text-muted-foreground">{new Date(w.created_at).toLocaleDateString("pt-BR")}</td>
                             <td className="px-4 py-3">
                               <div className="flex items-center justify-end gap-1">
+                                {w.decision_status !== "activated" && (
+                                  <>
+                                    <Button size="sm" onClick={() => setWaitlistDecision({ item: w, decision: "accepted" })}>
+                                      <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Aceitar
+                                    </Button>
+                                    <Button size="sm" variant="outline" onClick={() => setWaitlistDecision({ item: w, decision: "rejected" })}>
+                                      <XCircle className="mr-1 h-3.5 w-3.5" /> Negar
+                                    </Button>
+                                  </>
+                                )}
                                 <Button size="sm" variant="whatsapp" asChild>
                                   <a
                                     href={getWhatsAppContactUrl(
@@ -1069,6 +1096,26 @@ export default function AdminPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        <AlertDialog open={!!waitlistDecision} onOpenChange={(open) => { if (!open && !waitlistDecisionLoading) setWaitlistDecision(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{waitlistDecision?.decision === "accepted" ? "Aceitar este pré-cadastro?" : "Negar este pré-cadastro?"}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {waitlistDecision?.decision === "accepted"
+                  ? "Um convite individual será criado e a mensagem pronta abrirá no WhatsApp. O acesso só será liberado após o empresário completar o cadastro."
+                  : "A decisão ficará registrada e uma mensagem respeitosa será aberta no WhatsApp para você enviar."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={waitlistDecisionLoading}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={(event) => { event.preventDefault(); void decideWaitlistEntry(); }} disabled={waitlistDecisionLoading} className={waitlistDecision?.decision === "rejected" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}>
+                {waitlistDecisionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Confirmar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* ── EDIT DIALOG ── */}
         <Dialog open={editDialog.open} onOpenChange={(open) => { if (!open) setEditDialog({ open: false, table: "", item: null }); }}>
