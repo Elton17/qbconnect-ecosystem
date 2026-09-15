@@ -44,7 +44,7 @@ async function readPublicRows(table: string, select: string, filters: string) {
 async function addDynamicEntries() {
   try {
     const [news, products, events, profiles] = await Promise.all([
-      readPublicRows("news", "id,updated_at,published_at", "status=eq.approved"),
+      readPublicRows("news", "id,updated_at,published_at,profiles!inner(approved)", "status=eq.approved&profiles.approved=eq.true"),
       readPublicRows("products", "id,updated_at", "active=eq.true&moderation_status=eq.approved"),
       readPublicRows("events", "id,updated_at", "active=eq.true&moderation_status=eq.approved"),
       readPublicRows("profiles", "id,updated_at", "approved=eq.true"),
