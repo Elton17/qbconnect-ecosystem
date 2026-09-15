@@ -39,6 +39,32 @@ const hashToken = async (token: string) => {
   return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
+const onlyDigits = (value: string) => value.replace(/\D/g, '')
+const isValidCpf = (value: string) => {
+  const digits = onlyDigits(value)
+  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false
+  const digit = (length: number) => {
+    const sum = digits.slice(0, length).split('').reduce((total, item, index) => total + Number(item) * (length + 1 - index), 0)
+    const remainder = (sum * 10) % 11
+    return remainder === 10 ? 0 : remainder
+  }
+  return digit(9) === Number(digits[9]) && digit(10) === Number(digits[10])
+}
+const isValidCnpj = (value: string) => {
+  const digits = onlyDigits(value)
+  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false
+  const digit = (base: string) => {
+    let sum = 0
+    let position = base.length - 7
+    for (let index = base.length; index >= 1; index -= 1) {
+      sum += Number(base.charAt(base.length - index)) * position--
+      if (position < 2) position = 9
+    }
+    return sum % 11 < 2 ? 0 : 11 - (sum % 11)
+  }
+  return digit(digits.slice(0, 12)) === Number(digits[12]) && digit(digits.slice(0, 13)) === Number(digits[13])
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'Método não permitido' }, 405)
@@ -83,6 +109,8 @@ Deno.serve(async (req) => {
   const parsed = ActivateSchema.safeParse(body)
   if (!parsed.success) return json({ error: 'Revise os dados obrigatórios do formulário.' }, 400)
   const value = parsed.data
+  if (value.cnpj && !isValidCnpj(value.cnpj)) return json({ error: 'CNPJ inválido.' }, 400)
+  if (value.cpf && !isValidCpf(value.cpf)) return json({ error: 'CPF inválido.' }, 400)
 
   if (value.cnpj) {
     const { data: existingProfile } = await admin.from('profiles').select('id').eq('cnpj', value.cnpj).maybeSingle()
