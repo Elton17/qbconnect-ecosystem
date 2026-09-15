@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Building2, MapPin, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PublicPageBanner from "@/components/ui/public-page-banner";
@@ -19,7 +18,6 @@ interface Company {
 }
 
 export default function CompaniesPage() {
-  usePageTitle("Guia de Empresas");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

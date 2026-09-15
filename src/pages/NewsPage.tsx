@@ -4,7 +4,6 @@ import { CalendarDays, FileText, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
-import { usePageTitle } from "@/hooks/usePageTitle";
 import { attachNewsPresentation, NEWS_CATEGORIES, type NewsItem } from "@/lib/news";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import PublicPageBanner from "@/components/ui/public-page-banner";
 import bannerNews from "@/assets/banner-news.jpg";
 
 export default function NewsPage() {
-  usePageTitle("Notícias");
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
