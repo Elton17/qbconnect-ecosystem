@@ -113,6 +113,7 @@ export default function EventsPage() {
       .from("events")
       .select("*")
       .eq("active", true)
+      .eq("moderation_status", "approved")
       .order("start_date", { ascending: true });
 
     if (!data) { setLoading(false); return; }

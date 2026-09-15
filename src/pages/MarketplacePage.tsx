@@ -31,7 +31,7 @@ export default function MarketplacePage() {
   useEffect(() => {
     async function loadProducts() {
       setLoading(true);
-      const { data: productRows } = await supabase.from("products").select("*").eq("active", true).order("created_at", { ascending: false });
+      const { data: productRows } = await supabase.from("products").select("*").eq("active", true).eq("moderation_status", "approved").order("created_at", { ascending: false });
       if (!productRows?.length) {
         setProducts([]);
         setLoading(false);

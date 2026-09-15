@@ -251,10 +251,11 @@ export default function ProfilePage() {
       phone: form.phone, email: form.email, website: form.website, address: form.address,
       description: form.description, contact_name: form.contact_name, contact_role: form.contact_role,
       contact_email: form.contact_email, contact_phone: form.contact_phone,
+      approved: false,
     }).eq("user_id", user.id);
     setSaving(false);
     if (error) { toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" }); }
-    else { toast({ title: "Perfil atualizado!", description: "Suas alterações foram salvas com sucesso." }); }
+    else { setProfile((current) => current ? { ...current, approved: false } : current); toast({ title: "Alterações enviadas!", description: "Seu perfil ficará em análise antes de voltar ao guia público." }); }
   };
 
   if (authLoading || loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;

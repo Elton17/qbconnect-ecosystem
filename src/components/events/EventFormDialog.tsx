@@ -142,6 +142,7 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
       max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
       featured: form.featured,
       registration_fields: registrationFields,
+      moderation_status: "approved",
     };
 
     let error;

@@ -83,7 +83,7 @@ export default function BenefitsPage() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const fetchData = async () => {
-    const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
+    const { data: items } = await supabase.from("benefits").select("*").eq("active", true).eq("moderation_status", "approved").order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
     const userIds = [...new Set(items.map((b: any) => b.user_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url, plan").in("user_id", userIds);
@@ -102,15 +102,15 @@ export default function BenefitsPage() {
     if (!user) return;
     setSaving(true);
     if (editingId) {
-      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null }).eq("id", editingId);
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "pending" }).eq("id", editingId);
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Benefício atualizado!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Alterações enviadas para aprovação!" }); resetForm(); fetchData(); }
     } else {
-      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null });
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "pending" });
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Benefício criado!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Benefício enviado para aprovação!" }); resetForm(); fetchData(); }
     }
   };
 

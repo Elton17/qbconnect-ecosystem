@@ -73,7 +73,7 @@ export default function OpportunitiesPage() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const fetchData = async () => {
-    const { data: opps } = await supabase.from("opportunities").select("*").eq("active", true).order("created_at", { ascending: false });
+    const { data: opps } = await supabase.from("opportunities").select("*").eq("active", true).eq("moderation_status", "approved").order("created_at", { ascending: false });
     if (!opps) { setLoading(false); return; }
 
     const userIds = [...new Set(opps.map((o: any) => o.user_id))];
@@ -96,18 +96,18 @@ export default function OpportunitiesPage() {
     setSaving(true);
     if (editingId) {
       const { error } = await supabase.from("opportunities").update({
-        title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent,
+        title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent, moderation_status: "pending",
       }).eq("id", editingId);
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Oportunidade atualizada!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Alterações enviadas para aprovação!" }); resetForm(); fetchData(); }
     } else {
       const { error } = await supabase.from("opportunities").insert({
-        user_id: user.id, title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent,
+        user_id: user.id, title: form.title, type: form.type, value: form.value, description: form.description, urgent: form.urgent, moderation_status: "pending",
       });
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Oportunidade publicada!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Oportunidade enviada para aprovação!" }); resetForm(); fetchData(); }
     }
   };
 
