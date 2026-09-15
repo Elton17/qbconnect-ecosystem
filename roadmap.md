@@ -21,3 +21,4 @@
 - [x] Criar sitemap automático com páginas e conteúdos públicos aprovados.
 - [x] Aplicar metadados, canonicals, indexação e dados estruturados por página.
 - [x] Validar SEO técnico, páginas públicas e áreas restritas antes do lançamento.
+- [ ] Tornar CPF e CNPJ opcionais em todos os cadastros e edições de empresas.

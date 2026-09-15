@@ -9,7 +9,8 @@ const ActivateSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(72),
   companyName: z.string().trim().min(2).max(120),
-  cnpj: z.string().trim().min(14).max(18),
+  cnpj: z.string().trim().max(18).optional().default(''),
+  cpf: z.string().trim().max(14).optional().default(''),
   segment: z.string().trim().min(1).max(100),
   city: z.string().trim().min(2).max(100),
   state: z.string().trim().length(2),
@@ -74,6 +75,7 @@ Deno.serve(async (req) => {
       whatsapp: invitation.whatsapp,
       segment: invitation.segment,
       cnpj: invitation.cnpj,
+      cpf: invitation.cpf,
       expiresAt: invitation.invitation_expires_at,
     } })
   }
@@ -82,8 +84,14 @@ Deno.serve(async (req) => {
   if (!parsed.success) return json({ error: 'Revise os dados obrigatórios do formulário.' }, 400)
   const value = parsed.data
 
-  const { data: existingProfile } = await admin.from('profiles').select('id').eq('cnpj', value.cnpj).maybeSingle()
-  if (existingProfile) return json({ error: 'Este CNPJ já possui cadastro no portal.' }, 409)
+  if (value.cnpj) {
+    const { data: existingProfile } = await admin.from('profiles').select('id').eq('cnpj', value.cnpj).maybeSingle()
+    if (existingProfile) return json({ error: 'Este CNPJ já possui cadastro no portal.' }, 409)
+  }
+  if (value.cpf) {
+    const { data: existingProfile } = await admin.from('profiles').select('id').eq('cpf', value.cpf).maybeSingle()
+    if (existingProfile) return json({ error: 'Este CPF já possui cadastro no portal.' }, 409)
+  }
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email: value.email,
@@ -111,7 +119,8 @@ Deno.serve(async (req) => {
   const { data: logoData } = admin.storage.from('logos').getPublicUrl(logoPath)
   const profileUpdates = {
     company_name: value.companyName,
-    cnpj: value.cnpj,
+    cnpj: value.cnpj || null,
+    cpf: value.cpf || null,
     segment: value.segment,
     city: value.city,
     state: value.state.toUpperCase(),

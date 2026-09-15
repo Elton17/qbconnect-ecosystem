@@ -8,7 +8,7 @@ import { QBCAMP_EMAIL, QBCAMP_PHONE, QBCAMP_PHONE_DISPLAY, QBCAMP_HOURS, getWhat
 const faqs = [
   { q: "Como me torno associado da QBCAMP?", a: "O processo de associação é feito diretamente com a QBCAMP. Entre em contato pelo WhatsApp ou telefone e nossa equipe vai te orientar." },
   { q: "Preciso ser associado para usar o Conecta+?", a: "Sim. O QBCAMP Conecta+ é exclusivo para empresas associadas à QBCAMP, garantindo uma rede confiável e qualificada de negócios." },
-  { q: "Como cadastro minha empresa na plataforma?", a: "Após se tornar associado, acesse /cadastro, preencha os dados da sua empresa com CNPJ e aguarde a aprovação da equipe QBCAMP. O prazo é de até 2 dias úteis." },
+  { q: "Como cadastro minha empresa na plataforma?", a: "Após se tornar associado, acesse /cadastro, preencha os dados da sua empresa e aguarde a aprovação da equipe QBCAMP. CPF e CNPJ são opcionais. O prazo é de até 2 dias úteis." },
   { q: "Como funciona o Marketplace?", a: "Empresas aprovadas podem cadastrar produtos e serviços. O contato entre comprador e vendedor é feito diretamente via WhatsApp, de forma rápida e humanizada." },
   { q: "O que são as Oportunidades?", a: "É onde empresas publicam demandas reais: procuro fornecedor, busco parceiro, estou contratando. Qualquer associado pode demonstrar interesse e negociar diretamente." },
   { q: "Como funciona o Ranking?", a: "O ranking pontua empresas por engajamento real: negócios fechados, cursos publicados e benefícios cadastrados. As melhores recebem selos e destaque na plataforma." },
