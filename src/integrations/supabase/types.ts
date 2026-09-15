@@ -790,13 +790,14 @@ export type Database = {
           address: string | null
           approved: boolean
           city: string
-          cnpj: string
+          cnpj: string | null
           company_name: string
           complement: string | null
           contact_email: string
           contact_name: string
           contact_phone: string
           contact_role: string
+          cpf: string | null
           created_at: string
           description: string | null
           email: string
@@ -817,13 +818,14 @@ export type Database = {
           address?: string | null
           approved?: boolean
           city?: string
-          cnpj?: string
+          cnpj?: string | null
           company_name?: string
           complement?: string | null
           contact_email?: string
           contact_name?: string
           contact_phone?: string
           contact_role?: string
+          cpf?: string | null
           created_at?: string
           description?: string | null
           email?: string
@@ -844,13 +846,14 @@ export type Database = {
           address?: string | null
           approved?: boolean
           city?: string
-          cnpj?: string
+          cnpj?: string | null
           company_name?: string
           complement?: string | null
           contact_email?: string
           contact_name?: string
           contact_phone?: string
           contact_role?: string
+          cpf?: string | null
           created_at?: string
           description?: string | null
           email?: string
@@ -975,6 +978,7 @@ export type Database = {
           company_name: string
           contact_name: string
           contacted_at: string | null
+          cpf: string | null
           created_at: string
           decision_at: string | null
           decision_status: string
@@ -993,6 +997,7 @@ export type Database = {
           company_name: string
           contact_name: string
           contacted_at?: string | null
+          cpf?: string | null
           created_at?: string
           decision_at?: string | null
           decision_status?: string
@@ -1011,6 +1016,7 @@ export type Database = {
           company_name?: string
           contact_name?: string
           contacted_at?: string | null
+          cpf?: string | null
           created_at?: string
           decision_at?: string | null
           decision_status?: string
