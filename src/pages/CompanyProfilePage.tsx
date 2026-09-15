@@ -42,9 +42,9 @@ export default function CompanyProfilePage() {
         setProfile(profileRes.data);
         const userId = profileRes.data.user_id;
         const [o, c, b] = await Promise.all([
-          supabase.from("opportunities").select("id, title, description, type, value, urgent").eq("user_id", userId).eq("active", true),
+          supabase.from("opportunities").select("id, title, description, type, value, urgent").eq("user_id", userId).eq("active", true).eq("moderation_status", "approved"),
           supabase.from("courses").select("id, title, description, category, duration, premium").eq("user_id", userId).eq("active", true),
-          supabase.from("benefits").select("id, offer, category, exclusive").eq("user_id", userId).eq("active", true),
+          supabase.from("benefits").select("id, offer, category, exclusive").eq("user_id", userId).eq("active", true).eq("moderation_status", "approved"),
         ]);
         setOpportunities(o.data || []);
         setCourses(c.data || []);
@@ -85,7 +85,7 @@ export default function CompanyProfilePage() {
           ]} />
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 md:flex-row md:items-start">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-primary-foreground/10 text-4xl font-bold text-secondary-foreground overflow-hidden border-2 border-secondary-foreground/10">
-              {profile.logo_url ? <img src={profile.logo_url} alt={profile.company_name} className="h-full w-full object-cover" /> : profile.company_name.charAt(0)}
+              {profile.logo_url ? <img src={profile.logo_url} alt={profile.company_name} className="h-full w-full object-contain p-2" /> : profile.company_name.charAt(0)}
             </div>
             <div className="flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-3">

@@ -149,7 +149,7 @@ export default function ProductDetailPage() {
     if (!id) return;
     async function load() {
       setLoading(true);
-      const { data: prod } = await supabase.from("products").select("*").eq("id", id).eq("active", true).single();
+      const { data: prod } = await supabase.from("products").select("*").eq("id", id).eq("active", true).eq("moderation_status", "approved").single();
       if (!prod) { setLoading(false); return; }
       setProduct(prod as Product);
       setSelectedImage(0);
@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
       await loadReviews(id);
 
       // Other products from seller
-      const { data: others } = await supabase.from("products").select("*").eq("user_id", prod.user_id).eq("active", true).neq("id", id).limit(4);
+      const { data: others } = await supabase.from("products").select("*").eq("user_id", prod.user_id).eq("active", true).eq("moderation_status", "approved").neq("id", id).limit(4);
       setOtherProducts((others || []).map((p: any) => ({
         ...p, view_count: p.view_count || 0, contact_count: p.contact_count || 0,
         price_type: p.price_type || "fixed", product_type: p.product_type || "product",
@@ -176,7 +176,7 @@ export default function ProductDetailPage() {
 
       // Related products (same category, different seller)
       if (prod.category) {
-        const { data: related } = await supabase.from("products").select("*").eq("active", true).eq("category", prod.category).neq("user_id", prod.user_id).limit(6);
+        const { data: related } = await supabase.from("products").select("*").eq("active", true).eq("moderation_status", "approved").eq("category", prod.category).neq("user_id", prod.user_id).limit(6);
         // Enrich related with seller data (simplified)
         setRelatedProducts((related || []).map((p: any) => ({
           ...p, view_count: p.view_count || 0, contact_count: p.contact_count || 0,

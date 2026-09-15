@@ -36,8 +36,8 @@ export default function ActivityFeed() {
     async function fetch() {
       const [newsResponse, events, opportunities] = await Promise.all([
         supabase.from("news").select("*").eq("status", "approved").order("published_at", { ascending: false }).limit(4),
-        supabase.from("events").select("id, title, short_description, description, image_url, start_date, created_at").eq("active", true).order("start_date", { ascending: true }).limit(4),
-        supabase.from("opportunities").select("id, title, description, created_at").eq("active", true).eq("status", "open").order("created_at", { ascending: false }).limit(4),
+        supabase.from("events").select("id, title, short_description, description, image_url, start_date, created_at").eq("active", true).eq("moderation_status", "approved").order("start_date", { ascending: true }).limit(4),
+        supabase.from("opportunities").select("id, title, description, created_at").eq("active", true).eq("status", "open").eq("moderation_status", "approved").order("created_at", { ascending: false }).limit(4),
       ]);
 
       const news = await attachNewsPresentation(newsResponse.data || []);
