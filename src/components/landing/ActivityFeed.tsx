@@ -2,27 +2,27 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { ShoppingBag, GraduationCap, CalendarDays, Clock } from "lucide-react";
+import { ShoppingBag, Newspaper, CalendarDays, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface FeedItem {
   id: string;
   title: string;
-  type: "product" | "course" | "event";
+  type: "product" | "news" | "event";
   created_at: string;
   href: string;
 }
 
 const icons = {
   product: ShoppingBag,
-  course: GraduationCap,
+  news: Newspaper,
   event: CalendarDays,
 };
 
 const labels = {
   product: "Novo produto",
-  course: "Novo curso",
+  news: "Nova notícia",
   event: "Novo evento",
 };
 
@@ -33,13 +33,13 @@ export default function ActivityFeed() {
     async function fetch() {
       const [products, courses, events] = await Promise.all([
         supabase.from("products").select("id, title, created_at").eq("active", true).order("created_at", { ascending: false }).limit(5),
-        supabase.from("courses").select("id, title, created_at").eq("active", true).order("created_at", { ascending: false }).limit(5),
+        supabase.from("news").select("id, title, created_at").eq("status", "approved").order("published_at", { ascending: false }).limit(5),
         supabase.from("events").select("id, title, created_at").eq("active", true).order("created_at", { ascending: false }).limit(5),
       ]);
 
       const all: FeedItem[] = [
         ...(products.data || []).map(p => ({ id: p.id, title: p.title, type: "product" as const, created_at: p.created_at!, href: `/produto/${p.id}` })),
-        ...(courses.data || []).map(c => ({ id: c.id, title: c.title, type: "course" as const, created_at: c.created_at!, href: `/curso/${c.id}` })),
+        ...(courses.data || []).map(c => ({ id: c.id, title: c.title, type: "news" as const, created_at: c.created_at, href: `/noticias/${c.id}` })),
         ...(events.data || []).map(e => ({ id: e.id, title: e.title, type: "event" as const, created_at: e.created_at!, href: `/evento/${e.id}` })),
       ]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())

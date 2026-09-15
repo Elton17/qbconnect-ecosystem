@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ShoppingBag, Handshake, GraduationCap, Trophy, ArrowRight, ArrowUpRight,
+  ShoppingBag, Handshake, Newspaper, Trophy, ArrowRight, ArrowUpRight,
   Building2, TrendingUp, Users, Gift, Briefcase, CalendarDays,
   CheckCircle2, Zap, Shield, Star, Smartphone, Download, Crown, Check,
 } from "lucide-react";
@@ -17,7 +17,7 @@ const modules = [
   { title: "Marketplace", description: "Compre e venda produtos e serviços entre empresas da região.", icon: ShoppingBag, href: "/marketplace" },
   { title: "Serviços", description: "Serviços institucionais de apoio ao empresário.", icon: Briefcase, href: "/servicos" },
   { title: "Oportunidades", description: "Encontre fornecedores, parceiros e feche negócios.", icon: Handshake, href: "/oportunidades" },
-  { title: "Escola de Negócios", description: "Cursos e capacitações para sua empresa crescer.", icon: GraduationCap, href: "/academia" },
+  { title: "Notícias", description: "Informação e novidades das empresas da nossa região.", icon: Newspaper, href: "/noticias" },
   { title: "Eventos", description: "Networking, feiras e encontros empresariais.", icon: CalendarDays, href: "/eventos" },
   { title: "Benefícios", description: "Descontos e vantagens exclusivas para associados.", icon: Gift, href: "/beneficios" },
   { title: "Ranking", description: "Gamificação e reconhecimento das melhores empresas.", icon: Trophy, href: "/ranking" },
@@ -26,7 +26,7 @@ const modules = [
 const benefits = [
   { icon: Zap, title: "Negócios Rápidos", description: "Conecte-se com fornecedores e compradores da região em minutos." },
   { icon: Shield, title: "Rede Confiável", description: "Todas as empresas são verificadas e aprovadas pela associação." },
-  { icon: Star, title: "Capacitação Contínua", description: "Acesso a cursos, eventos e conteúdos exclusivos para crescer." },
+  { icon: Star, title: "Informação Regional", description: "Acompanhe notícias, eventos e conteúdos das empresas da região." },
 ];
 
 const fadeInUp = {
@@ -40,19 +40,19 @@ const stagger = {
 
 export default function LandingPage() {
   usePageTitle("Início");
-  const [stats, setStats] = useState({ companies: 0, opportunities: 0, courses: 0 });
+  const [stats, setStats] = useState({ companies: 0, opportunities: 0, news: 0 });
 
   useEffect(() => {
     async function fetchStats() {
-      const [profilesRes, oppsRes, coursesRes] = await Promise.all([
+      const [profilesRes, oppsRes, newsRes] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("approved", true),
         supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("active", true),
-        supabase.from("courses").select("id", { count: "exact", head: true }).eq("active", true),
+        supabase.from("news").select("id", { count: "exact", head: true }).eq("status", "approved"),
       ]);
       setStats({
         companies: profilesRes.count || 0,
         opportunities: oppsRes.count || 0,
-        courses: coursesRes.count || 0,
+        news: newsRes.count || 0,
       });
     }
     fetchStats();
@@ -61,7 +61,7 @@ export default function LandingPage() {
   const displayStats = [
     { label: "Empresas Associadas", value: stats.companies > 0 ? `${stats.companies}+` : "—", icon: Building2 },
     { label: "Oportunidades Ativas", value: stats.opportunities > 0 ? `${stats.opportunities}` : "—", icon: TrendingUp },
-    { label: "Cursos Disponíveis", value: stats.courses > 0 ? `${stats.courses}` : "—", icon: Users },
+    { label: "Notícias Publicadas", value: stats.news > 0 ? `${stats.news}` : "—", icon: Newspaper },
   ];
 
   return (
@@ -92,7 +92,7 @@ export default function LandingPage() {
                 </h1>
 
                 <p className="mb-8 max-w-lg text-lg leading-relaxed text-white/90 md:text-xl">
-                  A plataforma B2B que une empresas de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba. Marketplace, oportunidades, capacitação e muito mais.
+                  A plataforma B2B que une empresas de Quatro Barras, Campina Grande do Sul, Colombo, Pinhais e Curitiba. Marketplace, oportunidades, notícias e muito mais.
                 </p>
 
                 <div className="flex flex-col gap-3 sm:flex-row">

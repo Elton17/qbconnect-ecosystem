@@ -20,12 +20,11 @@ import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
   ToggleRight, Shield, Loader2, Pencil, ExternalLink, ClipboardList, Route, Plus,
-  MessageCircle, Download, Send, Clock,
+  MessageCircle, Download, Send, Clock, Newspaper,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
-import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
-import AdminCourseReports from "@/components/admin/AdminCourseReports";
+import AdminNewsManagement from "@/components/admin/AdminNewsManagement";
 
 interface Stat { label: string; value: number; icon: any; tab?: string; }
 
@@ -42,6 +41,7 @@ export default function AdminPage() {
   const [learningPaths, setLearningPaths] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
@@ -73,7 +73,7 @@ export default function AdminPage() {
     const [
       profilesRes, productsRes, coursesRes, eventsRes,
       oppsRes, benefitsRes, rolesRes,
-      enrollRes, eventRegRes, pathsRes, waitlistRes,
+      enrollRes, eventRegRes, pathsRes, waitlistRes, newsRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("products").select("*").order("created_at", { ascending: false }),
@@ -86,6 +86,7 @@ export default function AdminPage() {
       supabase.from("event_registrations").select("id", { count: "exact", head: true }),
       supabase.from("learning_paths").select("*").order("sort_order"),
       supabase.from("waitlist").select("*").order("created_at", { ascending: false }),
+      supabase.from("news").select("*").order("created_at", { ascending: false }),
     ]);
 
     const p = profilesRes.data || [];
@@ -100,16 +101,16 @@ export default function AdminPage() {
     setLearningPaths(pathsRes.data || []);
     setUserRoles(rolesRes.data || []);
     setWaitlist(waitlistRes.data || []);
+    setNews(newsRes.data || []);
 
     setStats([
       { label: "Empresas", value: p.length, icon: Building2, tab: "companies" },
       { label: "Lista de Espera", value: waitlistRes.data?.length || 0, icon: Clock, tab: "waitlist" },
       { label: "Produtos", value: pr.length, icon: ShoppingBag, tab: "products" },
-      { label: "Cursos", value: c.length, icon: GraduationCap, tab: "courses" },
+      { label: "Notícias", value: newsRes.data?.length || 0, icon: Newspaper, tab: "news" },
       { label: "Eventos", value: ev.length, icon: CalendarDays, tab: "events" },
       { label: "Oportunidades", value: op.length, icon: Handshake, tab: "opportunities" },
       { label: "Benefícios", value: b.length, icon: Gift, tab: "benefits" },
-      { label: "Matrículas", value: enrollRes.count || 0, icon: Users },
       { label: "Inscrições Eventos", value: eventRegRes.count || 0, icon: Trophy },
     ]);
     setLoading(false);
@@ -458,13 +459,10 @@ export default function AdminPage() {
             <TabsTrigger value="waitlist"><Clock className="mr-1 h-4 w-4" /> Lista de Espera ({waitlist.length})</TabsTrigger>
             <TabsTrigger value="companies">Empresas ({profiles.length})</TabsTrigger>
             <TabsTrigger value="products">Produtos ({products.length})</TabsTrigger>
-            <TabsTrigger value="courses">Cursos ({courses.length})</TabsTrigger>
+            <TabsTrigger value="news"><Newspaper className="mr-1 h-4 w-4" /> Notícias ({news.length})</TabsTrigger>
             <TabsTrigger value="events">Eventos ({events.length})</TabsTrigger>
             <TabsTrigger value="opportunities">Oportunidades ({opportunities.length})</TabsTrigger>
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
-            <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
-            <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
-            <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
           </TabsList>
 
@@ -506,7 +504,7 @@ export default function AdminPage() {
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                   {[
                     ...products.slice(0, 3).map((p) => ({ type: "Produto", title: p.title, active: p.active, link: `/produto/${p.id}` })),
-                    ...courses.slice(0, 3).map((c) => ({ type: "Curso", title: c.title, active: c.active, link: `/curso/${c.id}` })),
+                    ...news.slice(0, 3).map((item) => ({ type: "Notícia", title: item.title, active: item.status === "approved", link: `/noticias/${item.id}` })),
                     ...events.slice(0, 3).map((e) => ({ type: "Evento", title: e.title, active: e.active, link: `/evento/${e.id}` })),
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(item.link)}>
@@ -523,6 +521,10 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="news">
+            <AdminNewsManagement />
           </TabsContent>
 
           {/* ── COMPANIES ── */}

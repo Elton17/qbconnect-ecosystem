@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, GraduationCap, CalendarDays, Handshake, Loader2 } from "lucide-react";
+import { Search, ShoppingBag, Newspaper, CalendarDays, Handshake, Loader2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 interface SearchResult {
   id: string;
   title: string;
-  type: "product" | "course" | "event" | "opportunity";
+  type: "product" | "news" | "event" | "opportunity";
   subtitle?: string;
 }
 
 const typeConfig = {
   product: { icon: ShoppingBag, label: "Produto", path: "/produto" },
-  course: { icon: GraduationCap, label: "Curso", path: "/curso" },
+  news: { icon: Newspaper, label: "Notícia", path: "/noticias" },
   event: { icon: CalendarDays, label: "Evento", path: "/evento" },
   opportunity: { icon: Handshake, label: "Oportunidade", path: "/oportunidades" },
 };
@@ -29,15 +29,15 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
     if (q.trim().length < 2) { setResults([]); return; }
     setLoading(true);
     const term = `%${q}%`;
-    const [products, courses, events, opportunities] = await Promise.all([
+    const [products, news, events, opportunities] = await Promise.all([
       supabase.from("products").select("id, title, category").eq("active", true).ilike("title", term).limit(5),
-      supabase.from("courses").select("id, title, category").eq("active", true).ilike("title", term).limit(5),
+      supabase.from("news").select("id, title, category").eq("status", "approved").ilike("title", term).limit(5),
       supabase.from("events").select("id, title, category").eq("active", true).ilike("title", term).limit(5),
       supabase.from("opportunities").select("id, title, type").eq("active", true).ilike("title", term).limit(5),
     ]);
     const r: SearchResult[] = [
       ...(products.data || []).map(p => ({ id: p.id, title: p.title, type: "product" as const, subtitle: p.category })),
-      ...(courses.data || []).map(c => ({ id: c.id, title: c.title, type: "course" as const, subtitle: c.category })),
+      ...(news.data || []).map(item => ({ id: item.id, title: item.title, type: "news" as const, subtitle: item.category })),
       ...(events.data || []).map(e => ({ id: e.id, title: e.title, type: "event" as const, subtitle: e.category })),
       ...(opportunities.data || []).map(o => ({ id: o.id, title: o.title, type: "opportunity" as const, subtitle: o.type })),
     ];
@@ -72,7 +72,7 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
           <Input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Buscar produtos, cursos, eventos, oportunidades..."
+            placeholder="Buscar produtos, notícias, eventos, oportunidades..."
             className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
             autoFocus
           />

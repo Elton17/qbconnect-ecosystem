@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Loader2, ShoppingBag, GraduationCap, Handshake, Gift, CalendarDays, Users, TrendingUp, BarChart3, Crown, ArrowUpRight } from "lucide-react";
+import { Loader2, ShoppingBag, Newspaper, Handshake, Gift, CalendarDays, TrendingUp, BarChart3, Crown, ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
@@ -15,10 +15,11 @@ import PremiumBadge from "@/components/PremiumBadge";
 import { getPlanLimits, getUpgradeWhatsAppUrl } from "@/lib/plans";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import MyNewsManager from "@/components/news/MyNewsManager";
 
 interface DashboardStats {
   products: number;
-  courses: number;
+  news: number;
   opportunities: number;
   benefits: number;
   events: number;
@@ -43,9 +44,9 @@ export default function CompanyDashboardPage() {
   useEffect(() => {
     if (!user) return;
     async function fetchData() {
-      const [products, courses, opportunities, benefits, events, profile] = await Promise.all([
+      const [products, news, opportunities, benefits, events, profile] = await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("active", true),
-        supabase.from("courses").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
+        supabase.from("news").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
         supabase.from("opportunities").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("active", true).eq("status", "open"),
         supabase.from("benefits").select("id", { count: "exact", head: true }).eq("user_id", user!.id).eq("active", true),
         supabase.from("events").select("id", { count: "exact", head: true }).eq("user_id", user!.id),
@@ -100,7 +101,7 @@ export default function CompanyDashboardPage() {
       setMonthlyData(months);
       setStats({
         products: products.count || 0,
-        courses: courses.count || 0,
+        news: news.count || 0,
         opportunities: opportunities.count || 0,
         benefits: benefits.count || 0,
         events: events.count || 0,
@@ -119,11 +120,10 @@ export default function CompanyDashboardPage() {
 
   const cards = [
     { label: "Produtos", value: stats?.products || 0, icon: ShoppingBag, color: "bg-primary/10 text-primary" },
-    { label: "Cursos", value: stats?.courses || 0, icon: GraduationCap, color: "bg-accent/10 text-accent" },
+    { label: "Notícias", value: stats?.news || 0, icon: Newspaper, color: "bg-accent/10 text-accent" },
     { label: "Oportunidades", value: stats?.opportunities || 0, icon: Handshake, color: "bg-secondary text-secondary-foreground" },
     { label: "Benefícios", value: stats?.benefits || 0, icon: Gift, color: "bg-primary/10 text-primary" },
     { label: "Eventos", value: stats?.events || 0, icon: CalendarDays, color: "bg-accent/10 text-accent" },
-    { label: "Alunos Inscritos", value: stats?.enrollments || 0, icon: Users, color: "bg-muted text-foreground" },
     { label: "Participantes Eventos", value: stats?.eventRegistrations || 0, icon: TrendingUp, color: "bg-primary/10 text-primary" },
   ];
 
@@ -207,6 +207,8 @@ export default function CompanyDashboardPage() {
             </motion.div>
           ))}
         </div>
+
+        <MyNewsManager />
 
         {/* Charts */}
         <div className="mt-8">

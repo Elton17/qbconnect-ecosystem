@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, GraduationCap, Trophy, Gift, LogOut, Building2, Briefcase, CalendarDays, Search, Phone, Crown, Link2, Bell, User, ChevronDown, BookOpen, KeyRound } from "lucide-react";
+import { Menu, X, ShoppingBag, Handshake, LayoutDashboard, Newspaper, Trophy, Gift, LogOut, Building2, CalendarDays, Search, Crown, Link2, Bell, User, ChevronDown, KeyRound } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +20,7 @@ const navItems = [
   { label: "Marketplace", href: "/marketplace" },
   { label: "Empresas", href: "/empresas" },
   { label: "Oportunidades", href: "/oportunidades" },
-  { label: "Escola de Negócios", href: "/academia" },
+  { label: "Notícias", href: "/noticias" },
   { label: "Eventos", href: "/eventos" },
   { label: "Benefícios", href: "/beneficios" },
   { label: "Ranking", href: "/ranking" },
@@ -30,7 +30,7 @@ const mobileNavItems = [
   { label: "Marketplace", href: "/marketplace", icon: ShoppingBag },
   { label: "Empresas", href: "/empresas", icon: Building2 },
   { label: "Oportunidades", href: "/oportunidades", icon: Handshake },
-  { label: "Escola de Negócios", href: "/academia", icon: GraduationCap },
+  { label: "Notícias", href: "/noticias", icon: Newspaper },
   { label: "Eventos", href: "/eventos", icon: CalendarDays },
   { label: "Benefícios", href: "/beneficios", icon: Gift },
   { label: "Ranking", href: "/ranking", icon: Trophy },
@@ -135,12 +135,6 @@ export default function Header() {
                     <DropdownMenuItem onClick={() => navigate("/perfil")}>
                       <User className="mr-2 h-4 w-4" /> Meu Perfil
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/meus-cursos")}>
-                      <BookOpen className="mr-2 h-4 w-4" /> Meus Cursos
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/instrutor/dashboard")}>
-                      <GraduationCap className="mr-2 h-4 w-4" /> Painel Instrutor
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate("/esqueci-senha")}>
                       <KeyRound className="mr-2 h-4 w-4" /> Alterar senha
@@ -178,7 +172,7 @@ export default function Header() {
               className="mx-auto flex w-full max-w-xl items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground hover:border-primary/40 hover:shadow-sm transition-all"
             >
               <Search className="h-4 w-4 text-muted-foreground/60" />
-              <span className="flex-1 text-left">Buscar produtos, cursos, eventos, oportunidades...</span>
+              <span className="flex-1 text-left">Buscar produtos, notícias, eventos, oportunidades...</span>
               <kbd className="hidden sm:inline-flex rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">⌘K</kbd>
             </button>
           </div>
@@ -227,11 +221,6 @@ export default function Header() {
                       <Button variant="ghost" size="sm" asChild className="justify-start">
                         <Link to="/perfil" onClick={() => setMobileOpen(false)}>
                           <User className="mr-1 h-4 w-4" /> Meu Perfil
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" size="sm" asChild className="justify-start">
-                        <Link to="/meus-cursos" onClick={() => setMobileOpen(false)}>
-                          <BookOpen className="mr-1 h-4 w-4" /> Meus Cursos
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
