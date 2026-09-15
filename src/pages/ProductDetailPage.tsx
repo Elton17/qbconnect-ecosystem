@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import ProductCard, { type ProductWithSeller } from "@/components/marketplace/ProductCard";
+import { Seo, SITE_URL } from "@/components/Seo";
 
 interface Product {
   id: string; user_id: string; title: string; description: string | null; price: number;
@@ -202,6 +203,7 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className="container py-16 text-center">
+        <Seo title="Produto não encontrado" noindex />
         <Package className="mx-auto mb-4 h-16 w-16 text-muted-foreground/40" />
         <h2 className="mb-2 text-2xl font-bold text-foreground">Produto não encontrado</h2>
         <Link to="/marketplace"><Button variant="outline">Voltar ao Marketplace</Button></Link>
@@ -216,6 +218,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="container py-8">
+      <Seo title={product.title} description={product.description || `${product.title} no Marketplace QBCAMP.`} canonicalPath={`/produto/${product.id}`} image={images[0]} type="product" structuredData={{ "@context": "https://schema.org", "@type": "Product", name: product.title, description: product.description || undefined, image: images.length ? images : undefined, category: product.category || undefined, url: `${SITE_URL}/produto/${product.id}`, brand: seller ? { "@type": "Brand", name: seller.company_name } : undefined, offers: product.price_type !== "consult" && product.price > 0 ? { "@type": "Offer", priceCurrency: "BRL", price: product.price, availability: "https://schema.org/InStock", url: `${SITE_URL}/produto/${product.id}` } : undefined }} />
       <Breadcrumbs items={[
         { label: "Marketplace", href: "/marketplace" },
         ...(product.category ? [{ label: product.category }] : []),
@@ -246,7 +249,7 @@ export default function ProductDetailPage() {
             <div className="flex gap-2 overflow-x-auto pb-1">
               {images.map((img, idx) => (
                 <button key={idx} onClick={() => setSelectedImage(idx)} className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${idx === selectedImage ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-muted-foreground/40"}`}>
-                  <img src={img} alt="" className="h-full w-full object-cover" />
+                  <img src={img} alt={`${product.title} — imagem ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" />
                 </button>
               ))}
             </div>
@@ -291,7 +294,7 @@ export default function ProductDetailPage() {
             <div className="rounded-xl bg-muted p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-bold text-primary overflow-hidden">
-                  {seller.logo_url ? <img src={seller.logo_url} alt="" className="h-full w-full object-cover" /> : seller.company_name.charAt(0)}
+                  {seller.logo_url ? <img src={seller.logo_url} alt={`Logo da ${seller.company_name}`} className="h-full w-full object-contain" loading="lazy" /> : seller.company_name.charAt(0)}
                 </div>
                 <div className="min-w-0">
                   <p className="font-bold text-card-foreground truncate">{seller.company_name}</p>

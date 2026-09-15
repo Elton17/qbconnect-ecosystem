@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Building2, Filter, MapPinned, Package, Search, ShoppingBag, Store, Wrench, X } from "lucide-react";
-import { usePageTitle } from "@/hooks/usePageTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +19,6 @@ const shortcuts = [
 ];
 
 export default function MarketplacePage() {
-  usePageTitle("Marketplace");
   const [products, setProducts] = useState<ProductWithSeller[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

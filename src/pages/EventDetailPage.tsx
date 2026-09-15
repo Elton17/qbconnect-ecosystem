@@ -15,6 +15,7 @@ import RegistrationFormDialog from "@/components/events/RegistrationFormDialog";
 import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { Seo, SITE_URL } from "@/components/Seo";
 
 function generateTicketCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -69,7 +70,7 @@ export default function EventDetailPage() {
 
   const fetchEvent = async () => {
     if (!id) return;
-    const { data } = await supabase.from("events").select("*").eq("id", id).single();
+    const { data } = await supabase.from("events").select("*").eq("id", id).eq("active", true).eq("moderation_status", "approved").single();
     if (!data) { setLoading(false); return; }
 
     const { data: profile } = await supabase.from("profiles").select("company_name").eq("user_id", data.user_id).single();
@@ -161,7 +162,7 @@ export default function EventDetailPage() {
   };
 
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!event) return <div className="container py-20 text-center"><p className="text-muted-foreground">Evento não encontrado.</p></div>;
+  if (!event) return <div className="container py-20 text-center"><Seo title="Evento não encontrado" noindex /><h1 className="text-2xl font-bold text-foreground">Evento não encontrado</h1><p className="mt-2 text-muted-foreground">Este evento não existe ou não está disponível.</p></div>;
 
   const isPast = new Date(event.start_date) < new Date();
   const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
@@ -169,6 +170,7 @@ export default function EventDetailPage() {
 
   return (
     <div>
+      <Seo title={event.title} description={event.short_description || event.description} canonicalPath={`/evento/${event.id}`} image={event.image_url} structuredData={{ "@context": "https://schema.org", "@type": "Event", name: event.title, description: event.short_description || event.description, image: event.image_url || undefined, startDate: event.start_date, endDate: event.end_date || undefined, eventAttendanceMode: event.event_type === "online" ? "https://schema.org/OnlineEventAttendanceMode" : event.event_type === "hibrido" ? "https://schema.org/MixedEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", eventStatus: "https://schema.org/EventScheduled", location: event.event_type === "online" ? { "@type": "VirtualLocation", url: event.online_url || `${SITE_URL}/evento/${event.id}` } : { "@type": "Place", name: event.location || event.company_name, address: { "@type": "PostalAddress", streetAddress: event.address || undefined, addressLocality: event.city || undefined, addressRegion: event.state || "PR", addressCountry: "BR" } }, organizer: { "@type": "Organization", name: event.company_name || "QBCAMP Conecta Mais" }, url: `${SITE_URL}/evento/${event.id}`, isAccessibleForFree: event.is_free }} />
       {/* Hero Image */}
       <section className="relative">
         <div className="aspect-[3/1] max-h-[400px] w-full overflow-hidden bg-muted">

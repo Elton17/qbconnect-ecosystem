@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Phone, MessageCircle, MapPin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,10 +17,6 @@ const faqs = [
 ];
 
 export default function SACPage() {
-  useEffect(() => {
-    document.title = "Central de Atendimento · QBCAMP Conecta+";
-  }, []);
-
   return (
     <div>
       {/* Hero */}

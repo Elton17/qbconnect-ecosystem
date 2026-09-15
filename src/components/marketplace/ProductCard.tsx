@@ -69,6 +69,7 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
           <img
             src={imgs[0]}
             alt={product.title}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
@@ -115,7 +116,7 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
         <div className="mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
           <div className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[9px] sm:text-[10px] font-bold text-primary-foreground overflow-hidden">
             {product.seller_logo ? (
-              <img src={product.seller_logo} alt="" className="h-full w-full object-cover" />
+              <img src={product.seller_logo} alt={`Logo da ${product.seller_name || "empresa anunciante"}`} className="h-full w-full object-contain" loading="lazy" />
             ) : (
               (product.seller_name || "?").charAt(0)
             )}

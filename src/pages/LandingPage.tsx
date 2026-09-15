@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import heroAsset from "@/assets/hero-bg.jpg.asset.json";
-import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -39,7 +38,6 @@ const stagger = {
 };
 
 export default function LandingPage() {
-  usePageTitle("Início");
   const [stats, setStats] = useState({ companies: 0, opportunities: 0, news: 0 });
 
   useEffect(() => {

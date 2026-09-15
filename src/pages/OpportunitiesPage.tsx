@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,7 +55,6 @@ interface Opportunity {
 }
 
 export default function OpportunitiesPage() {
-  usePageTitle("Oportunidades");
   const { user } = useAuth();
   const { toast } = useToast();
   const { approved } = useApprovedCompany();
