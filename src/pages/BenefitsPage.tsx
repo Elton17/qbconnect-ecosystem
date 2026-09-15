@@ -202,7 +202,6 @@ export default function BenefitsPage() {
                 </DialogContent>
               </Dialog>
             )}
-      </PublicPageBanner>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-6">
             {[
               { label: "Benefícios Ativos", value: `${benefits.length}`, icon: Percent },
@@ -220,8 +219,7 @@ export default function BenefitsPage() {
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       {/* Content */}
       <div className="container py-10">
