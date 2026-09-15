@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
+import { formatCNPJ, formatCPF, isValidCNPJ, isValidCPF } from "@/lib/masks";
 import AdminNewsManagement from "@/components/admin/AdminNewsManagement";
 
 interface Stat { label: string; value: number; icon: any; tab?: string; }
@@ -231,6 +232,10 @@ export default function AdminPage() {
   async function saveEdit() {
     const { table, item } = editDialog;
     if (!item) return;
+    if (table === "profiles") {
+      if (editForm.cnpj && !isValidCNPJ(editForm.cnpj)) { toast.error("CNPJ inválido"); return; }
+      if (editForm.cpf && !isValidCPF(editForm.cpf)) { toast.error("CPF inválido"); return; }
+    }
     setEditSaving(true);
     const updates = { ...editForm };
     delete updates.id;
@@ -319,8 +324,8 @@ export default function AdminPage() {
   const editFields: Record<string, { key: string; label: string; type?: string; options?: string[] }[]> = {
     profiles: [
       { key: "company_name", label: "Empresa" },
-      { key: "cnpj", label: "CNPJ" },
-      { key: "cpf", label: "CPF" },
+      { key: "cnpj", label: "CNPJ (opcional)" },
+      { key: "cpf", label: "CPF (opcional)" },
       { key: "email", label: "E-mail" },
       { key: "phone", label: "Telefone" },
       { key: "city", label: "Cidade" },
