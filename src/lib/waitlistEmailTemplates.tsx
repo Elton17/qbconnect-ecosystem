@@ -7,6 +7,7 @@ export interface WaitlistEmailData {
   company_name: string;
   contact_name: string;
   cnpj: string;
+  cpf?: string;
   whatsapp: string;
   segment: string;
 }
@@ -56,7 +57,8 @@ const summaryBlock = (d: WaitlistEmailData) => `
     <div style="font-weight:700;margin-bottom:8px;color:${BRAND.dark};">Resumo do seu cadastro</div>
     <div style="color:${BRAND.muted};line-height:1.9;">
       <strong style="color:${BRAND.dark};">Empresa:</strong> ${d.company_name}<br/>
-      <strong style="color:${BRAND.dark};">CNPJ:</strong> ${d.cnpj}<br/>
+      ${d.cnpj ? `<strong style="color:${BRAND.dark};">CNPJ:</strong> ${d.cnpj}<br/>` : ""}
+      ${d.cpf ? `<strong style="color:${BRAND.dark};">CPF:</strong> ${d.cpf}<br/>` : ""}
       <strong style="color:${BRAND.dark};">Responsável:</strong> ${d.contact_name}<br/>
       <strong style="color:${BRAND.dark};">WhatsApp:</strong> ${d.whatsapp}<br/>
       <strong style="color:${BRAND.dark};">Segmento:</strong> ${d.segment}

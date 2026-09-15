@@ -1,0 +1,7 @@
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS cpf text,
+  ALTER COLUMN cnpj DROP NOT NULL,
+  ALTER COLUMN cnpj DROP DEFAULT;
+
+ALTER TABLE public.waitlist
+  ADD COLUMN IF NOT EXISTS cpf text;

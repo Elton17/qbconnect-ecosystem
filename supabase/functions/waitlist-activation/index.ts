@@ -9,7 +9,8 @@ const ActivateSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(72),
   companyName: z.string().trim().min(2).max(120),
-  cnpj: z.string().trim().min(14).max(18),
+  cnpj: z.string().trim().max(18).optional().default(''),
+  cpf: z.string().trim().max(14).optional().default(''),
   segment: z.string().trim().min(1).max(100),
   city: z.string().trim().min(2).max(100),
   state: z.string().trim().length(2),
@@ -36,6 +37,32 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 const hashToken = async (token: string) => {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))
   return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('')
+}
+
+const onlyDigits = (value: string) => value.replace(/\D/g, '')
+const isValidCpf = (value: string) => {
+  const digits = onlyDigits(value)
+  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false
+  const digit = (length: number) => {
+    const sum = digits.slice(0, length).split('').reduce((total, item, index) => total + Number(item) * (length + 1 - index), 0)
+    const remainder = (sum * 10) % 11
+    return remainder === 10 ? 0 : remainder
+  }
+  return digit(9) === Number(digits[9]) && digit(10) === Number(digits[10])
+}
+const isValidCnpj = (value: string) => {
+  const digits = onlyDigits(value)
+  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false
+  const digit = (base: string) => {
+    let sum = 0
+    let position = base.length - 7
+    for (let index = base.length; index >= 1; index -= 1) {
+      sum += Number(base.charAt(base.length - index)) * position--
+      if (position < 2) position = 9
+    }
+    return sum % 11 < 2 ? 0 : 11 - (sum % 11)
+  }
+  return digit(digits.slice(0, 12)) === Number(digits[12]) && digit(digits.slice(0, 13)) === Number(digits[13])
 }
 
 Deno.serve(async (req) => {
@@ -74,6 +101,7 @@ Deno.serve(async (req) => {
       whatsapp: invitation.whatsapp,
       segment: invitation.segment,
       cnpj: invitation.cnpj,
+      cpf: invitation.cpf,
       expiresAt: invitation.invitation_expires_at,
     } })
   }
@@ -81,9 +109,17 @@ Deno.serve(async (req) => {
   const parsed = ActivateSchema.safeParse(body)
   if (!parsed.success) return json({ error: 'Revise os dados obrigatórios do formulário.' }, 400)
   const value = parsed.data
+  if (value.cnpj && !isValidCnpj(value.cnpj)) return json({ error: 'CNPJ inválido.' }, 400)
+  if (value.cpf && !isValidCpf(value.cpf)) return json({ error: 'CPF inválido.' }, 400)
 
-  const { data: existingProfile } = await admin.from('profiles').select('id').eq('cnpj', value.cnpj).maybeSingle()
-  if (existingProfile) return json({ error: 'Este CNPJ já possui cadastro no portal.' }, 409)
+  if (value.cnpj) {
+    const { data: existingProfile } = await admin.from('profiles').select('id').eq('cnpj', value.cnpj).maybeSingle()
+    if (existingProfile) return json({ error: 'Este CNPJ já possui cadastro no portal.' }, 409)
+  }
+  if (value.cpf) {
+    const { data: existingProfile } = await admin.from('profiles').select('id').eq('cpf', value.cpf).maybeSingle()
+    if (existingProfile) return json({ error: 'Este CPF já possui cadastro no portal.' }, 409)
+  }
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
     email: value.email,
@@ -111,7 +147,8 @@ Deno.serve(async (req) => {
   const { data: logoData } = admin.storage.from('logos').getPublicUrl(logoPath)
   const profileUpdates = {
     company_name: value.companyName,
-    cnpj: value.cnpj,
+    cnpj: value.cnpj || null,
+    cpf: value.cpf || null,
     segment: value.segment,
     city: value.city,
     state: value.state.toUpperCase(),

@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Building2, Upload, User, ArrowRight, Lock, Loader2, Shield, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getWhatsAppUrl } from "@/lib/constants";
-import { formatPhone, formatCEP, formatCNPJ as formatCNPJMask } from "@/lib/masks";
+import { formatPhone, formatCEP, formatCNPJ as formatCNPJMask, formatCPF, isValidCNPJ, isValidCPF } from "@/lib/masks";
 import { translateAuthError, PASSWORD_HINT } from "@/lib/auth-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,11 +50,10 @@ const segments = [
 
 
 
-const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
-
 const formSchema = z.object({
   companyName: z.string().trim().min(2, "Nome da empresa é obrigatório").max(120),
-  cnpj: z.string().regex(cnpjRegex, "CNPJ inválido (XX.XXX.XXX/XXXX-XX)"),
+  cnpj: z.string().trim().refine((value) => !value || isValidCNPJ(value), "CNPJ inválido"),
+  cpf: z.string().trim().refine((value) => !value || isValidCPF(value), "CPF inválido"),
   segment: z.string().min(1, "Selecione um segmento"),
   city: z.string().trim().min(1, "Cidade é obrigatória").max(100),
   website: z.string().max(200).optional().or(z.literal("")),
@@ -103,7 +102,7 @@ export default function CompanyRegistrationPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: { plan: "basic" },
+    defaultValues: { plan: "basic", cnpj: "", cpf: "" },
   });
 
   const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,7 +185,8 @@ export default function CompanyRegistrationPage() {
         .from("profiles")
         .update({
           company_name: data.companyName,
-          cnpj: data.cnpj,
+          cnpj: data.cnpj || null,
+          cpf: data.cpf || null,
           segment: data.segment,
           city: data.city,
           phone: data.phone,
@@ -265,7 +265,7 @@ export default function CompanyRegistrationPage() {
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="cnpj">CNPJ *</Label>
+                  <Label htmlFor="cnpj">CNPJ (opcional)</Label>
                   <div className="relative">
                     <Input
                       id="cnpj"
@@ -284,6 +284,17 @@ export default function CompanyRegistrationPage() {
                     )}
                   </div>
                   {errors.cnpj && <p className="mt-1 text-xs text-destructive">{errors.cnpj.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="cpf">CPF (opcional)</Label>
+                  <Input
+                    id="cpf"
+                    placeholder="000.000.000-00"
+                    inputMode="numeric"
+                    {...register("cpf")}
+                    onChange={(e) => setValue("cpf", formatCPF(e.target.value), { shouldValidate: true })}
+                  />
+                  {errors.cpf && <p className="mt-1 text-xs text-destructive">{errors.cpf.message}</p>}
                 </div>
                 <div>
                   <Label htmlFor="companyName">Nome da Empresa *</Label>

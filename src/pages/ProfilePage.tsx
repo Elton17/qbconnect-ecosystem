@@ -17,7 +17,7 @@ import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handsha
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
-import { formatPhone, formatCNPJ as formatCNPJMask } from "@/lib/masks";
+import { formatPhone, formatCNPJ as formatCNPJMask, formatCPF, isValidCNPJ, isValidCPF } from "@/lib/masks";
 
 
 
@@ -191,7 +191,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
-    company_name: "", cnpj: "", segment: "", city: "", phone: "", email: "",
+    company_name: "", cnpj: "", cpf: "", segment: "", city: "", phone: "", email: "",
     website: "", address: "", description: "", contact_name: "", contact_role: "",
     contact_email: "", contact_phone: "", logo_url: "",
   });
@@ -206,7 +206,7 @@ export default function ProfilePage() {
       else if (data) {
         setProfile(data);
         setForm({
-          company_name: data.company_name || "", cnpj: data.cnpj || "", segment: data.segment || "",
+          company_name: data.company_name || "", cnpj: data.cnpj || "", cpf: data.cpf || "", segment: data.segment || "",
           city: data.city || "", phone: data.phone || "", email: data.email || "", website: data.website || "",
           address: data.address || "", description: data.description || "", contact_name: data.contact_name || "",
           contact_role: data.contact_role || "", contact_email: data.contact_email || "",
@@ -220,6 +220,7 @@ export default function ProfilePage() {
 
   const handleChange = (field: string, value: string) => {
     if (field === "cnpj") value = formatCNPJ(value);
+    if (field === "cpf") value = formatCPF(value);
     if (field === "phone" || field === "contact_phone") value = formatPhone(value);
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -245,9 +246,11 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!user) return;
+    if (form.cnpj && !isValidCNPJ(form.cnpj)) { toast({ title: "CNPJ inválido", variant: "destructive" }); return; }
+    if (form.cpf && !isValidCPF(form.cpf)) { toast({ title: "CPF inválido", variant: "destructive" }); return; }
     setSaving(true);
     const { error } = await supabase.from("profiles").update({
-      company_name: form.company_name, cnpj: form.cnpj, segment: form.segment, city: form.city,
+      company_name: form.company_name, cnpj: form.cnpj || null, cpf: form.cpf || null, segment: form.segment, city: form.city,
       phone: form.phone, email: form.email, website: form.website, address: form.address,
       description: form.description, contact_name: form.contact_name, contact_role: form.contact_role,
       contact_email: form.contact_email, contact_phone: form.contact_phone,
@@ -322,7 +325,8 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2"><Label htmlFor="company_name">Razão Social</Label><Input id="company_name" value={form.company_name} onChange={(e) => handleChange("company_name", e.target.value)} /></div>
-                <div className="space-y-2"><Label htmlFor="cnpj">CNPJ</Label><Input id="cnpj" value={form.cnpj} onChange={(e) => handleChange("cnpj", e.target.value)} placeholder="00.000.000/0000-00" /></div>
+                <div className="space-y-2"><Label htmlFor="cnpj">CNPJ (opcional)</Label><Input id="cnpj" inputMode="numeric" value={form.cnpj} onChange={(e) => handleChange("cnpj", e.target.value)} placeholder="00.000.000/0000-00" /></div>
+                <div className="space-y-2"><Label htmlFor="cpf">CPF (opcional)</Label><Input id="cpf" inputMode="numeric" value={form.cpf} onChange={(e) => handleChange("cpf", e.target.value)} placeholder="000.000.000-00" /></div>
                 <div className="space-y-2"><Label htmlFor="segment">Segmento</Label>
                   <Select value={form.segment} onValueChange={(v) => handleChange("segment", v)}>
                     <SelectTrigger id="segment"><SelectValue placeholder="Selecione" /></SelectTrigger>

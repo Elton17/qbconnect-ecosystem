@@ -9,12 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PasswordInput } from "@/components/ui/password-input";
-import { formatCEP, formatCNPJ, formatPhone } from "@/lib/masks";
+import { formatCEP, formatCNPJ, formatCPF, formatPhone, isValidCNPJ, isValidCPF } from "@/lib/masks";
 import { toast } from "sonner";
 
 const schema = z.object({
   companyName: z.string().trim().min(2),
-  cnpj: z.string().trim().min(14),
+  cnpj: z.string().trim().refine((value) => !value || isValidCNPJ(value)),
+  cpf: z.string().trim().refine((value) => !value || isValidCPF(value)),
   segment: z.string().trim().min(1),
   city: z.string().trim().min(2),
   state: z.string().trim().length(2),
@@ -35,7 +36,7 @@ const schema = z.object({
 }).refine((value) => value.password === value.confirmPassword, { path: ["confirmPassword"] });
 
 const emptyForm = {
-  companyName: "", cnpj: "", segment: "", city: "", state: "PR", phone: "", email: "",
+  companyName: "", cnpj: "", cpf: "", segment: "", city: "", state: "PR", phone: "", email: "",
   password: "", confirmPassword: "", website: "", description: "", address: "", neighborhood: "",
   complement: "", referencePoint: "", zipCode: "", contactName: "", contactRole: "", contactPhone: "",
 };
@@ -66,6 +67,7 @@ export default function WaitlistActivationPage() {
           ...current,
           companyName: invitation.companyName || "",
           cnpj: formatCNPJ(invitation.cnpj || ""),
+          cpf: formatCPF(invitation.cpf || ""),
           segment: invitation.segment || "",
           phone: formatPhone(invitation.whatsapp || ""),
           contactName: invitation.contactName || "",
@@ -125,7 +127,8 @@ export default function WaitlistActivationPage() {
         <Card><CardHeader><CardTitle>Empresa</CardTitle><CardDescription>Os dados do pré-cadastro já foram preenchidos.</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2"><Label htmlFor="activation-logo">Logo da empresa *</Label><div className="mt-2 flex items-center gap-4">{logoPreview ? <img src={logoPreview} alt="Prévia da logo" className="h-20 w-32 rounded-md border border-border bg-card p-2 object-contain" /> : <div className="flex h-20 w-32 items-center justify-center rounded-md border-2 border-dashed border-border bg-muted"><ImagePlus className="h-6 w-6 text-muted-foreground" /></div>}<Input id="activation-logo" type="file" accept="image/png,image/jpeg,image/webp" required onChange={(event) => { const selected = event.target.files?.[0]; if (!selected) return; if (!selected.type.startsWith("image/") || selected.size > 2 * 1024 * 1024) { toast.error("Use uma imagem JPG, PNG ou WebP de até 2 MB."); event.target.value = ""; return; } setLogoFile(selected); setLogoPreview(URL.createObjectURL(selected)); }} /></div><p className="mt-2 text-xs text-muted-foreground">A logo aparecerá automaticamente na página inicial após a aprovação.</p></div>
           {field("companyName", "Nome da empresa")}
-          <div><Label htmlFor="cnpj">CNPJ *</Label><Input id="cnpj" value={form.cnpj} onChange={(e) => change("cnpj", formatCNPJ(e.target.value))} required /></div>
+          <div><Label htmlFor="cnpj">CNPJ (opcional)</Label><Input id="cnpj" inputMode="numeric" value={form.cnpj} onChange={(e) => change("cnpj", formatCNPJ(e.target.value))} /></div>
+          <div><Label htmlFor="cpf">CPF (opcional)</Label><Input id="cpf" inputMode="numeric" value={form.cpf} onChange={(e) => change("cpf", formatCPF(e.target.value))} /></div>
           {field("segment", "Segmento")}{field("city", "Cidade")}{field("state", "Estado (UF)")}
           <div><Label htmlFor="phone">Telefone *</Label><Input id="phone" value={form.phone} onChange={(e) => change("phone", formatPhone(e.target.value))} required /></div>
           {field("website", "Site", false, "url")}

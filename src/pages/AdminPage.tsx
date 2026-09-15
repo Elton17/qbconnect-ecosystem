@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
+import { isValidCNPJ, isValidCPF } from "@/lib/masks";
 import AdminNewsManagement from "@/components/admin/AdminNewsManagement";
 
 interface Stat { label: string; value: number; icon: any; tab?: string; }
@@ -231,6 +232,10 @@ export default function AdminPage() {
   async function saveEdit() {
     const { table, item } = editDialog;
     if (!item) return;
+    if (table === "profiles") {
+      if (editForm.cnpj && !isValidCNPJ(editForm.cnpj)) { toast.error("CNPJ inválido"); return; }
+      if (editForm.cpf && !isValidCPF(editForm.cpf)) { toast.error("CPF inválido"); return; }
+    }
     setEditSaving(true);
     const updates = { ...editForm };
     delete updates.id;
@@ -258,6 +263,13 @@ export default function AdminPage() {
     const digits = value.replace(/\D/g, "").slice(0, 14);
     if (digits.length !== 14) return value;
     return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+  }
+
+  function formatCpf(value: string | null | undefined) {
+    if (!value) return "—";
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length !== 11) return value;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
   }
 
   async function waitlistBulkAction(action: "contacted" | "forwarded" | "reset", ids: string[]) {
@@ -312,7 +324,8 @@ export default function AdminPage() {
   const editFields: Record<string, { key: string; label: string; type?: string; options?: string[] }[]> = {
     profiles: [
       { key: "company_name", label: "Empresa" },
-      { key: "cnpj", label: "CNPJ" },
+      { key: "cnpj", label: "CNPJ (opcional)" },
+      { key: "cpf", label: "CPF (opcional)" },
       { key: "email", label: "E-mail" },
       { key: "phone", label: "Telefone" },
       { key: "city", label: "Cidade" },
@@ -757,7 +770,7 @@ export default function AdminPage() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Buscar por CNPJ ou empresa..."
+                      placeholder="Buscar por empresa, CPF ou CNPJ..."
                       value={waitlistSearch}
                       onChange={(e) => setWaitlistSearch(e.target.value)}
                       className="pl-9 w-[240px]"
@@ -797,9 +810,9 @@ export default function AdminPage() {
                         waitlistFilter === "all" ? true :
                         waitlistFilter === "associate" ? w.is_associate : !w.is_associate
                       );
-                      const headers = "CNPJ,Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
+                      const headers = "CNPJ,CPF,Empresa,Responsável,WhatsApp,Segmento,Associada,Data de Cadastro\n";
                       const rows = list.map((w: any) =>
-                        `"${w.cnpj || ""}","${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
+                        `"${w.cnpj || ""}","${w.cpf || ""}","${w.company_name}","${w.contact_name}","${w.whatsapp}","${w.segment}","${w.is_associate ? "Sim" : "Não"}","${new Date(w.created_at).toLocaleDateString("pt-BR")}"`
                       ).join("\n");
                       const blob = new Blob([headers + rows], { type: "text/csv;charset=utf-8;" });
                       const url = URL.createObjectURL(blob);
@@ -816,7 +829,7 @@ export default function AdminPage() {
               </div>
               {(() => {
                 const q = waitlistSearch.trim().toLowerCase();
-                const filtered = filterBySearch(waitlist, ["company_name", "cnpj", "contact_name", "whatsapp", "segment"])
+                const filtered = filterBySearch(waitlist, ["company_name", "cnpj", "cpf", "contact_name", "whatsapp", "segment"])
                   .filter((w: any) =>
                     waitlistFilter === "all" ? true :
                     waitlistFilter === "associate" ? w.is_associate : !w.is_associate
@@ -829,7 +842,8 @@ export default function AdminPage() {
                     if (!q) return true;
                     const company = String(w.company_name || "").toLowerCase();
                     const cnpj = String(w.cnpj || "").toLowerCase();
-                    return company.includes(q) || cnpj.includes(q);
+                    const cpf = String(w.cpf || "").toLowerCase();
+                    return company.includes(q) || cnpj.includes(q) || cpf.includes(q);
                   });
                 if (waitlist.length === 0) {
                   return <p className="text-sm text-muted-foreground">Nenhum cadastro na lista de espera ainda.</p>;
@@ -906,6 +920,7 @@ export default function AdminPage() {
                           </th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Empresa</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">CNPJ</th>
+                          <th className="px-4 py-3 text-left font-semibold text-muted-foreground">CPF</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Responsável</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">WhatsApp</th>
                           <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Segmento</th>
@@ -927,6 +942,7 @@ export default function AdminPage() {
                             </td>
                             <td className="px-4 py-3 font-medium text-card-foreground">{w.company_name}</td>
                             <td className="px-4 py-3 text-card-foreground whitespace-nowrap">{formatCnpj(w.cnpj)}</td>
+                            <td className="px-4 py-3 text-card-foreground whitespace-nowrap">{formatCpf(w.cpf)}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.contact_name}</td>
                             <td className="px-4 py-3 text-card-foreground">{w.whatsapp}</td>
                             <td className="px-4 py-3"><Badge variant="outline">{w.segment}</Badge></td>

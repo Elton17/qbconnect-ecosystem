@@ -38,9 +38,10 @@ export default function EmailPreviewPage() {
         {/* Dados de exemplo */}
         <div className="mb-6 rounded-xl border bg-card p-4">
           <div className="mb-3 text-sm font-semibold">Dados de exemplo (edite para testar)</div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-6">
             <div><Label className="text-xs">Empresa</Label><Input value={data.company_name} onChange={update("company_name")} /></div>
             <div><Label className="text-xs">CNPJ</Label><Input value={data.cnpj} onChange={update("cnpj")} /></div>
+            <div><Label className="text-xs">CPF</Label><Input value={data.cpf || ""} onChange={update("cpf")} /></div>
             <div><Label className="text-xs">Responsável</Label><Input value={data.contact_name} onChange={update("contact_name")} /></div>
             <div><Label className="text-xs">WhatsApp</Label><Input value={data.whatsapp} onChange={update("whatsapp")} /></div>
             <div><Label className="text-xs">Segmento</Label><Input value={data.segment} onChange={update("segment")} /></div>

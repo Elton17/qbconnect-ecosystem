@@ -29,6 +29,34 @@ export function formatCPF(value: string): string {
     .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+export function isValidCPF(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
+  const calculateDigit = (length: number) => {
+    const sum = digits.slice(0, length).split("").reduce((total, digit, index) => total + Number(digit) * (length + 1 - index), 0);
+    const remainder = (sum * 10) % 11;
+    return remainder === 10 ? 0 : remainder;
+  };
+  return calculateDigit(9) === Number(digits[9]) && calculateDigit(10) === Number(digits[10]);
+}
+
+export function isValidCNPJ(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false;
+  const calculateDigit = (base: string) => {
+    let sum = 0;
+    let position = base.length - 7;
+    for (let index = base.length; index >= 1; index -= 1) {
+      sum += Number(base.charAt(base.length - index)) * position;
+      position -= 1;
+      if (position < 2) position = 9;
+    }
+    return sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  };
+  return calculateDigit(digits.slice(0, 12)) === Number(digits[12])
+    && calculateDigit(digits.slice(0, 13)) === Number(digits[13]);
+}
+
 export function formatWhatsApp(value: string): string {
   // Aceita formato internacional BR: 55 + DDD + número
   const digits = value.replace(/\D/g, "").slice(0, 13);
