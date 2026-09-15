@@ -30,10 +30,10 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
     setLoading(true);
     const term = `%${q}%`;
     const [products, news, events, opportunities] = await Promise.all([
-      supabase.from("products").select("id, title, category").eq("active", true).ilike("title", term).limit(5),
+      supabase.from("products").select("id, title, category").eq("active", true).eq("moderation_status", "approved").ilike("title", term).limit(5),
       supabase.from("news").select("id, title, category").eq("status", "approved").ilike("title", term).limit(5),
-      supabase.from("events").select("id, title, category").eq("active", true).ilike("title", term).limit(5),
-      supabase.from("opportunities").select("id, title, type").eq("active", true).ilike("title", term).limit(5),
+      supabase.from("events").select("id, title, category").eq("active", true).eq("moderation_status", "approved").ilike("title", term).limit(5),
+      supabase.from("opportunities").select("id, title, type").eq("active", true).eq("moderation_status", "approved").ilike("title", term).limit(5),
     ]);
     const r: SearchResult[] = [
       ...(products.data || []).map(p => ({ id: p.id, title: p.title, type: "product" as const, subtitle: p.category })),
