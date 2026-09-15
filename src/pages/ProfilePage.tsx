@@ -227,6 +227,10 @@ export default function ProfilePage() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) {
+      toast({ title: "Logo inválida", description: "Use uma imagem JPG, PNG ou WebP de até 2 MB.", variant: "destructive" });
+      return;
+    }
     setUploading(true);
     const fileExt = file.name.split(".").pop();
     const filePath = `${user.id}/logo.${fileExt}`;
@@ -269,11 +273,11 @@ export default function ProfilePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="relative group">
-                <Avatar className="h-20 w-20 border-2 border-secondary-foreground/10">
-                  {form.logo_url ? <AvatarImage src={form.logo_url} alt="Logo da empresa" /> : null}
+                <Avatar className="h-20 w-28 rounded-md border-2 border-secondary-foreground/10 bg-background p-2">
+                  {form.logo_url ? <AvatarImage src={form.logo_url} alt="Logo da empresa" className="object-contain" /> : null}
                   <AvatarFallback className="bg-primary/20 text-primary text-2xl"><Building2 className="h-10 w-10" /></AvatarFallback>
                 </Avatar>
-                <label htmlFor="logo-upload" className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100">
+                 <label htmlFor="logo-upload" className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-md bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100">
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
                 </label>
                 <input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />

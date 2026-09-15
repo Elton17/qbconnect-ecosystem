@@ -92,6 +92,7 @@ export default function CompanyRegistrationPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [cnpjLoading, setCnpjLoading] = useState(false);
 
   const {
@@ -108,6 +109,15 @@ export default function CompanyRegistrationPage() {
   const onLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!file.type.startsWith("image/")) {
+        toast({ title: "Arquivo inválido", description: "Selecione uma imagem para a logo.", variant: "destructive" });
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        toast({ title: "Imagem muito grande", description: "A logo deve ter no máximo 2 MB.", variant: "destructive" });
+        return;
+      }
+      setLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => setLogoPreview(reader.result as string);
       reader.readAsDataURL(file);
@@ -148,6 +158,10 @@ export default function CompanyRegistrationPage() {
   };
 
   const onSubmit = async (data: FormData) => {
+    if (!logoFile) {
+      toast({ title: "Logo obrigatória", description: "Adicione a logo da empresa antes de continuar.", variant: "destructive" });
+      return;
+    }
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -160,6 +174,14 @@ export default function CompanyRegistrationPage() {
     }
 
     if (authData.user) {
+      const extension = logoFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      const logoPath = `${authData.user.id}/logo.${extension}`;
+      const { error: logoError } = await supabase.storage.from("logos").upload(logoPath, logoFile, { upsert: true, contentType: logoFile.type });
+      if (logoError) {
+        toast({ title: "Erro ao enviar a logo", description: "Tente novamente com uma imagem JPG, PNG ou WebP.", variant: "destructive" });
+        return;
+      }
+      const { data: logoData } = supabase.storage.from("logos").getPublicUrl(logoPath);
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -181,6 +203,7 @@ export default function CompanyRegistrationPage() {
           contact_role: data.contactRole,
           contact_email: data.contactEmail,
           contact_phone: data.contactPhone,
+          logo_url: logoData.publicUrl,
         })
         .eq("user_id", authData.user.id);
 
@@ -339,17 +362,18 @@ export default function CompanyRegistrationPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label>Logo da Empresa</Label>
+                   <Label htmlFor="company-logo">Logo da Empresa *</Label>
                   <div className="mt-2 flex items-center gap-4">
                     {logoPreview ? (
-                      <img src={logoPreview} alt="Logo preview" className="h-20 w-20 rounded-xl border border-border object-cover" />
+                       <img src={logoPreview} alt="Prévia da logo" className="h-20 w-32 rounded-md border border-border bg-card p-2 object-contain" />
                     ) : (
-                      <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted">
+                       <div className="flex h-20 w-32 items-center justify-center rounded-md border-2 border-dashed border-border bg-muted">
                         <Upload className="h-6 w-6 text-muted-foreground" />
                       </div>
                     )}
-                    <Input type="file" accept="image/*" onChange={onLogoChange} className="max-w-xs" />
+                     <Input id="company-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={onLogoChange} className="max-w-xs" required />
                   </div>
+                   <p className="mt-2 text-xs text-muted-foreground">JPG, PNG ou WebP, até 2 MB. A imagem será ajustada sem cortes.</p>
                 </div>
                 <div>
                   <Label htmlFor="description">Descrição *</Label>

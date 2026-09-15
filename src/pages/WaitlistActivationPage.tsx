@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { Building2, CheckCircle2, Loader2, Lock, ShieldAlert } from "lucide-react";
+import { Building2, CheckCircle2, ImagePlus, Loader2, Lock, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +49,8 @@ export default function WaitlistActivationPage() {
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState("");
 
   useEffect(() => {
     document.title = "Ativar acesso · QBCAMP Conecta Mais";
@@ -79,10 +81,18 @@ export default function WaitlistActivationPage() {
     event.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error("Revise os campos obrigatórios e a senha."); return; }
+    if (!logoFile) { toast.error("Adicione a logo da empresa."); return; }
     setSubmitting(true);
+    const logoBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+      reader.onerror = () => reject(new Error("Logo inválida"));
+      reader.readAsDataURL(logoFile);
+    }).catch(() => "");
+    if (!logoBase64) { setSubmitting(false); toast.error("Não foi possível processar a logo."); return; }
     const { confirmPassword: _confirmPassword, ...payload } = parsed.data;
     const { data, error: invokeError } = await supabase.functions.invoke("waitlist-activation", {
-      body: { action: "activate", token, ...payload },
+       body: { action: "activate", token, ...payload, logoBase64, logoType: logoFile.type },
     });
     setSubmitting(false);
     if (invokeError || !data?.success) { toast.error(data?.error || "Não foi possível ativar seu acesso."); return; }
@@ -113,6 +123,7 @@ export default function WaitlistActivationPage() {
       <div className="mb-8 text-center"><Building2 className="mx-auto mb-3 h-10 w-10 text-primary" /><h1 className="text-3xl font-extrabold text-foreground">Ative o acesso da sua empresa</h1><p className="mt-2 text-muted-foreground">Confirme os dados e crie sua senha para entrar no QBCAMP Conecta Mais.</p></div>
       <form onSubmit={submit} className="space-y-6">
         <Card><CardHeader><CardTitle>Empresa</CardTitle><CardDescription>Os dados do pré-cadastro já foram preenchidos.</CardDescription></CardHeader><CardContent className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2"><Label htmlFor="activation-logo">Logo da empresa *</Label><div className="mt-2 flex items-center gap-4">{logoPreview ? <img src={logoPreview} alt="Prévia da logo" className="h-20 w-32 rounded-md border border-border bg-card p-2 object-contain" /> : <div className="flex h-20 w-32 items-center justify-center rounded-md border-2 border-dashed border-border bg-muted"><ImagePlus className="h-6 w-6 text-muted-foreground" /></div>}<Input id="activation-logo" type="file" accept="image/png,image/jpeg,image/webp" required onChange={(event) => { const selected = event.target.files?.[0]; if (!selected) return; if (!selected.type.startsWith("image/") || selected.size > 2 * 1024 * 1024) { toast.error("Use uma imagem JPG, PNG ou WebP de até 2 MB."); event.target.value = ""; return; } setLogoFile(selected); setLogoPreview(URL.createObjectURL(selected)); }} /></div><p className="mt-2 text-xs text-muted-foreground">A logo aparecerá automaticamente na página inicial após a aprovação.</p></div>
           {field("companyName", "Nome da empresa")}
           <div><Label htmlFor="cnpj">CNPJ *</Label><Input id="cnpj" value={form.cnpj} onChange={(e) => change("cnpj", formatCNPJ(e.target.value))} required /></div>
           {field("segment", "Segmento")}{field("city", "Cidade")}{field("state", "Estado (UF)")}
