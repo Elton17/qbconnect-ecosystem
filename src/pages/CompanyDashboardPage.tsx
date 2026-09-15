@@ -5,8 +5,7 @@ import { motion } from "framer-motion";
 import { Loader2, ShoppingBag, Newspaper, Handshake, Gift, CalendarDays, TrendingUp, BarChart3, Crown, ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,13 +22,11 @@ interface DashboardStats {
   opportunities: number;
   benefits: number;
   events: number;
-  enrollments: number;
   eventRegistrations: number;
 }
 
 interface MonthlyData {
   month: string;
-  alunos: number;
   eventos: number;
 }
 
@@ -56,27 +53,11 @@ export default function CompanyDashboardPage() {
       setCompanyName(profile.data?.company_name || "Minha Empresa");
       setPlan(profile.data?.plan || "basic");
 
-      const [{ data: userCourses }, { data: userEvents }] = await Promise.all([
-        supabase.from("courses").select("id").eq("user_id", user!.id),
-        supabase.from("events").select("id").eq("user_id", user!.id),
-      ]);
-
-      const courseIds = (userCourses || []).map(c => c.id);
+      const { data: userEvents } = await supabase.from("events").select("id").eq("user_id", user!.id);
       const eventIds = (userEvents || []).map(e => e.id);
 
-      let enrollments = 0;
       let eventRegistrations = 0;
-      let enrollmentRows: { enrolled_at: string | null }[] = [];
       let registrationRows: { created_at: string | null }[] = [];
-
-      if (courseIds.length > 0) {
-        const [countRes, rowsRes] = await Promise.all([
-          supabase.from("course_enrollments").select("id", { count: "exact", head: true }).in("course_id", courseIds),
-          supabase.from("course_enrollments").select("enrolled_at").in("course_id", courseIds),
-        ]);
-        enrollments = countRes.count || 0;
-        enrollmentRows = rowsRes.data || [];
-      }
 
       if (eventIds.length > 0) {
         const [countRes, rowsRes] = await Promise.all([
@@ -93,9 +74,8 @@ export default function CompanyDashboardPage() {
         const monthStart = startOfMonth(date);
         const nextMonth = startOfMonth(subMonths(new Date(), i - 1));
         const label = format(date, "MMM yy", { locale: ptBR });
-        const alunos = enrollmentRows.filter(r => { if (!r.enrolled_at) return false; const d = new Date(r.enrolled_at); return d >= monthStart && d < nextMonth; }).length;
         const eventos = registrationRows.filter(r => { if (!r.created_at) return false; const d = new Date(r.created_at); return d >= monthStart && d < nextMonth; }).length;
-        months.push({ month: label, alunos, eventos });
+        months.push({ month: label, eventos });
       }
 
       setMonthlyData(months);
@@ -105,7 +85,6 @@ export default function CompanyDashboardPage() {
         opportunities: opportunities.count || 0,
         benefits: benefits.count || 0,
         events: events.count || 0,
-        enrollments,
         eventRegistrations,
       });
       setLoading(false);
@@ -128,7 +107,6 @@ export default function CompanyDashboardPage() {
   ];
 
   const chartConfig = {
-    alunos: { label: "Novos Alunos", color: "hsl(var(--primary))" },
     eventos: { label: "Inscrições Eventos", color: "hsl(var(--accent))" },
   };
 
@@ -210,68 +188,10 @@ export default function CompanyDashboardPage() {
 
         <MyNewsManager />
 
-        {/* Charts */}
-        <div className="mt-8">
-          <Tabs defaultValue="alunos">
-            <TabsList>
-              <TabsTrigger value="alunos">Novos Alunos</TabsTrigger>
-              <TabsTrigger value="eventos">Inscrições Eventos</TabsTrigger>
-              <TabsTrigger value="ambos">Comparativo</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="alunos">
-              <Card>
-                <CardHeader><CardTitle className="text-base">Novos alunos por mês</CardTitle></CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                    <BarChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                      <XAxis dataKey="month" className="text-xs" />
-                      <YAxis allowDecimals={false} className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="alunos" fill="var(--color-alunos)" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="eventos">
-              <Card>
-                <CardHeader><CardTitle className="text-base">Inscrições em eventos por mês</CardTitle></CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                    <BarChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                      <XAxis dataKey="month" className="text-xs" />
-                      <YAxis allowDecimals={false} className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="eventos" fill="var(--color-eventos)" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="ambos">
-              <Card>
-                <CardHeader><CardTitle className="text-base">Comparativo mensal</CardTitle></CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-[300px] w-full">
-                    <LineChart data={monthlyData}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                      <XAxis dataKey="month" className="text-xs" />
-                      <YAxis allowDecimals={false} className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="alunos" stroke="var(--color-alunos)" strokeWidth={2} dot={{ r: 4 }} />
-                      <Line type="monotone" dataKey="eventos" stroke="var(--color-eventos)" strokeWidth={2} dot={{ r: 4 }} />
-                    </LineChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+        <Card className="mt-8">
+          <CardHeader><CardTitle className="text-base">Inscrições em eventos por mês</CardTitle></CardHeader>
+          <CardContent><ChartContainer config={chartConfig} className="h-[300px] w-full"><BarChart data={monthlyData}><CartesianGrid strokeDasharray="3 3" className="stroke-border" /><XAxis dataKey="month" className="text-xs" /><YAxis allowDecimals={false} className="text-xs" /><ChartTooltip content={<ChartTooltipContent />} /><Bar dataKey="eventos" fill="var(--color-eventos)" radius={[4, 4, 0, 0]} /></BarChart></ChartContainer></CardContent>
+        </Card>
       </motion.div>
     </div>
   );
