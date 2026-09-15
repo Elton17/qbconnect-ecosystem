@@ -12,3 +12,5 @@
 - [x] Criar convite individual para o empresário completar o cadastro e ativar o painel.
 - [x] Ocultar temporariamente cursos, vídeos e áreas de alunos sem apagar dados ou endereços diretos.
 - [x] Criar Portal de Notícias com envio por associados aprovados e moderação administrativa.
+- [ ] Criar banners institucionais e segmentação no Marketplace
+- [ ] Adicionar filtros completos e adaptados ao celular no Marketplace
