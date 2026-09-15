@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import PublicPageBanner from "@/components/ui/public-page-banner";
+import bannerEvents from "@/assets/banner-events.jpg";
 
 const eventCategories = ["Todos", "Networking", "Palestra", "Workshop", "Feira", "Curso", "Assembleia", "Social", "Outro"];
 
@@ -111,6 +113,7 @@ export default function EventsPage() {
       .from("events")
       .select("*")
       .eq("active", true)
+      .eq("moderation_status", "approved")
       .order("start_date", { ascending: true });
 
     if (!data) { setLoading(false); return; }
@@ -181,26 +184,7 @@ export default function EventsPage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-secondary py-16 md:py-24">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary blur-3xl" />
-          <div className="absolute -bottom-10 right-1/4 h-64 w-64 rounded-full bg-accent blur-3xl" />
-          <div className="absolute right-0 top-1/3 h-48 w-48 rounded-full bg-primary/60 blur-2xl" />
-        </div>
-        <div className="container relative">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
-              <CalendarDays className="h-4 w-4" /> Portal de Eventos
-            </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl lg:text-6xl">
-              Eventos & Experiências{" "}
-              <span className="text-gradient">QBCAMP</span>
-            </h1>
-            <p className="mb-8 text-lg text-secondary-foreground/70 md:text-xl">
-              Feiras, workshops, networking e capacitações exclusivas para associados e comunidade empresarial.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <PublicPageBanner image={bannerEvents} imageAlt="Encontro de networking entre empresários da região" eyebrow="Portal de eventos" title={<>Eventos & Experiências <span className="text-primary">QBCAMP</span></>} description="Feiras, workshops, networking e encontros para associados e comunidade empresarial." icon={CalendarDays} align="center">
               {isAdmin && (
                 <Button variant="hero" size="xl" onClick={handleCreate}>
                   <Plus className="mr-1 h-5 w-5" /> Criar Evento
@@ -209,18 +193,14 @@ export default function EventsPage() {
               <Button variant="heroOutline" size="xl" onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}>
                 Explorar Eventos
               </Button>
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }}
-            className="mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap items-center justify-center gap-3">
             {[
               { label: "Eventos Próximos", value: `${upcomingEvents.length}`, icon: CalendarDays },
               { label: "Inscritos Total", value: `${events.reduce((acc, e) => acc + (e.registration_count || 0), 0)}`, icon: Users },
               { label: "Categorias", value: `${eventCategories.length - 1}`, icon: Tag },
             ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+              <div key={stat.label} className="flex items-center gap-3 rounded-lg border border-secondary-foreground/15 bg-secondary/60 px-4 py-2 backdrop-blur-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/20">
                   <stat.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -230,8 +210,7 @@ export default function EventsPage() {
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       {/* Featured Events */}
       {featuredEvents.length > 0 && (

@@ -142,11 +142,13 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
       max_attendees: form.max_attendees ? parseInt(form.max_attendees) : null,
       featured: form.featured,
       registration_fields: registrationFields,
+      moderation_status: "pending",
     };
 
     let error;
     if (isEditing) {
-      ({ error } = await supabase.from("events").update(payload as any).eq("id", initialData!.id!));
+      if (!initialData?.id) return;
+      ({ error } = await supabase.from("events").update(payload as any).eq("id", initialData.id));
     } else {
       ({ error } = await supabase.from("events").insert({ ...payload, user_id: user.id } as any));
     }
@@ -155,7 +157,7 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: isEditing ? "Evento atualizado!" : "Evento criado com sucesso!" });
+      toast({ title: isEditing ? "Alterações enviadas para aprovação!" : "Evento enviado para aprovação!" });
       onOpenChange(false);
       onSuccess();
     }

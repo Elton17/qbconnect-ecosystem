@@ -197,6 +197,13 @@ export default function AdminPage() {
     setter((prev: any[]) => prev.map((item: any) => item.id === id ? { ...item, active: !current } : item));
   }
 
+  async function approveContent(table: string, id: string, setter: Function) {
+    const { error } = await (supabase.from(table as any) as any).update({ moderation_status: "approved", active: true }).eq("id", id);
+    if (error) { toast.error("Erro ao aprovar"); return; }
+    setter((current: any[]) => current.map((item: any) => item.id === id ? { ...item, moderation_status: "approved", active: true } : item));
+    toast.success("Conteúdo aprovado e publicado!");
+  }
+
   async function deleteRecord(table: string, id: string, setter: Function) {
     if (!confirm("Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.")) return;
     const { error } = await (supabase.from(table as any) as any).delete().eq("id", id);
@@ -590,7 +597,7 @@ export default function AdminPage() {
                 { key: "category", label: "Categoria" },
                 { key: "price", label: "Preço", render: (v: number) => `R$ ${Number(v).toFixed(2)}` },
               ]}
-              renderStatus={(item) => <ActiveBadge active={item.active} />}
+              renderStatus={(item) => <div className="flex gap-1"><ActiveBadge active={item.active} /><ModerationBadge status={item.moderation_status} /></div>}
               actions={(item) => (
                 <>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/produto/${item.id}`)} title="Ver">
@@ -599,6 +606,7 @@ export default function AdminPage() {
                   <Button size="sm" variant="outline" onClick={() => openEdit("products", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
                   </Button>
+                  {item.moderation_status !== "approved" && <Button size="sm" onClick={() => approveContent("products", item.id, setProducts)}>Aprovar</Button>}
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("products", item.id, item.active, setProducts)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("products", item.id, setProducts)}>
                     <Trash2 className="h-3 w-3" />
@@ -623,6 +631,7 @@ export default function AdminPage() {
                 <div className="flex gap-1">
                   <ActiveBadge active={item.active} />
                   {item.featured && <Badge className="text-[10px] bg-amber-500">Destaque</Badge>}
+                  <ModerationBadge status={item.moderation_status} />
                 </div>
               )}
               actions={(item) => (
@@ -636,6 +645,7 @@ export default function AdminPage() {
                   <Button size="sm" variant="outline" onClick={() => openEdit("events", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
                   </Button>
+                  {item.moderation_status !== "approved" && <Button size="sm" onClick={() => approveContent("events", item.id, setEvents)}>Aprovar</Button>}
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("events", item.id, item.active, setEvents)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("events", item.id, setEvents)}>
                     <Trash2 className="h-3 w-3" />
@@ -658,6 +668,7 @@ export default function AdminPage() {
                 <div className="flex gap-1">
                   <ActiveBadge active={item.active} />
                   {item.urgent && <Badge variant="destructive" className="text-[10px]">Urgente</Badge>}
+                  <ModerationBadge status={item.moderation_status} />
                 </div>
               )}
               actions={(item) => (
@@ -665,6 +676,7 @@ export default function AdminPage() {
                   <Button size="sm" variant="outline" onClick={() => openEdit("opportunities", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
                   </Button>
+                  {item.moderation_status !== "approved" && <Button size="sm" onClick={() => approveContent("opportunities", item.id, setOpportunities)}>Aprovar</Button>}
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("opportunities", item.id, item.active, setOpportunities)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("opportunities", item.id, setOpportunities)}>
                     <Trash2 className="h-3 w-3" />
@@ -686,6 +698,7 @@ export default function AdminPage() {
                 <div className="flex gap-1">
                   <ActiveBadge active={item.active} />
                   {item.exclusive && <Badge className="text-[10px] bg-purple-500">Exclusivo</Badge>}
+                  <ModerationBadge status={item.moderation_status} />
                 </div>
               )}
               actions={(item) => (
@@ -693,6 +706,7 @@ export default function AdminPage() {
                   <Button size="sm" variant="outline" onClick={() => openEdit("benefits", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
                   </Button>
+                  {item.moderation_status !== "approved" && <Button size="sm" onClick={() => approveContent("benefits", item.id, setBenefits)}>Aprovar</Button>}
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("benefits", item.id, item.active, setBenefits)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("benefits", item.id, setBenefits)}>
                     <Trash2 className="h-3 w-3" />
@@ -1066,6 +1080,12 @@ function ActiveBadge({ active }: { active: boolean }) {
       {active ? "Ativo" : "Inativo"}
     </Badge>
   );
+}
+
+function ModerationBadge({ status }: { status?: string | null }) {
+  const label = status === "pending" ? "Em análise" : status === "rejected" ? "Recusado" : "Aprovado";
+  const variant = status === "approved" || !status ? "default" : status === "rejected" ? "destructive" : "outline";
+  return <Badge variant={variant} className="text-[10px]">{label}</Badge>;
 }
 
 function ToggleActiveBtn({ active, onClick }: { active: boolean; onClick: () => void }) {

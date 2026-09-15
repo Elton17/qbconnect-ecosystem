@@ -23,6 +23,8 @@ import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import PlanUpgradeModal from "@/components/PlanUpgradeModal";
 import PremiumBadge from "@/components/PremiumBadge";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import PublicPageBanner from "@/components/ui/public-page-banner";
+import bannerBenefits from "@/assets/banner-benefits.jpg";
 
 const benefitCategories = ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"];
 
@@ -81,7 +83,7 @@ export default function BenefitsPage() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const fetchData = async () => {
-    const { data: items } = await supabase.from("benefits").select("*").eq("active", true).order("created_at", { ascending: false });
+    const { data: items } = await supabase.from("benefits").select("*").eq("active", true).eq("moderation_status", "approved").order("created_at", { ascending: false });
     if (!items) { setLoading(false); return; }
     const userIds = [...new Set(items.map((b: any) => b.user_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, company_name, logo_url, plan").in("user_id", userIds);
@@ -100,15 +102,15 @@ export default function BenefitsPage() {
     if (!user) return;
     setSaving(true);
     if (editingId) {
-      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null }).eq("id", editingId);
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "pending" }).eq("id", editingId);
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Benefício atualizado!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Alterações enviadas para aprovação!" }); resetForm(); fetchData(); }
     } else {
-      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null });
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "pending" });
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Benefício criado!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Benefício enviado para aprovação!" }); resetForm(); fetchData(); }
     }
   };
 
@@ -159,23 +161,7 @@ export default function BenefitsPage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-secondary py-16 md:py-20">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -left-10 top-1/4 h-72 w-72 rounded-full bg-accent blur-3xl" />
-          <div className="absolute -bottom-10 right-1/4 h-64 w-64 rounded-full bg-primary blur-3xl" />
-        </div>
-        <div className="container relative">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
-              <Gift className="h-4 w-4" /> Clube Exclusivo
-            </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
-              Clube de <span className="text-gradient">Benefícios</span>
-            </h1>
-            <p className="mb-8 text-lg text-secondary-foreground/70">
-              Descontos e condições exclusivas entre empresas associadas da QBCAMP.
-            </p>
+      <PublicPageBanner image={bannerBenefits} imageAlt="Empresários utilizando vantagens do comércio regional" eyebrow="Clube exclusivo" title={<>Clube de <span className="text-primary">Benefícios</span></>} description="Descontos e condições exclusivas entre empresas associadas da QBCAMP." icon={Gift} align="center">
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>
@@ -216,8 +202,6 @@ export default function BenefitsPage() {
                 </DialogContent>
               </Dialog>
             )}
-          </motion.div>
-
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-6">
             {[
               { label: "Benefícios Ativos", value: `${benefits.length}`, icon: Percent },
@@ -235,8 +219,7 @@ export default function BenefitsPage() {
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       {/* Content */}
       <div className="container py-10">

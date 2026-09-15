@@ -11,6 +11,7 @@ interface Company {
 
 export default function CompanyLogosCarousel() {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,15 +57,16 @@ export default function CompanyLogosCarousel() {
           {items.map((c, i) => (
             <div
               key={`${c.id}-${i}`}
-              className="flex h-20 w-40 shrink-0 items-center justify-center rounded-xl border border-border bg-card px-4 transition-shadow hover:shadow-md"
+              className="flex h-20 w-40 shrink-0 items-center justify-center rounded-lg border border-border bg-card px-4 transition-shadow hover:shadow-md"
               title={c.company_name}
             >
-              {c.logo_url ? (
+              {c.logo_url && !failedLogos.has(c.id) ? (
                 <img
                   src={c.logo_url}
                   alt={c.company_name}
-                  className="max-h-14 max-w-full object-contain"
+                  className="h-14 w-full object-contain"
                   loading="lazy"
+                  onError={() => setFailedLogos((current) => new Set(current).add(c.id))}
                 />
               ) : (
                 <div className="flex flex-col items-center gap-1 text-muted-foreground">

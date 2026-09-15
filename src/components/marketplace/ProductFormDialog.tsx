@@ -125,15 +125,16 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
         product_type: form.product_type,
         city: form.city,
         active: true,
+        moderation_status: "pending",
       };
       if (product) {
         const { error } = await supabase.from("products").update(payload).eq("id", product.id);
         if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
-        toast({ title: "Produto atualizado!" });
+        toast({ title: "Alterações enviadas para aprovação!" });
       } else {
         const { error } = await supabase.from("products").insert(payload);
         if (error) { toast({ title: "Erro ao cadastrar", variant: "destructive" }); return; }
-        toast({ title: "Produto cadastrado!" });
+        toast({ title: "Anúncio enviado para aprovação!" });
       }
       onOpenChange(false);
       onSaved();

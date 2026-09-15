@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import PublicPageBanner from "@/components/ui/public-page-banner";
+import bannerCompanies from "@/assets/banner-companies.jpg";
 
 interface Company {
   id: string;
@@ -68,16 +70,8 @@ export default function CompaniesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <section className="border-b border-border bg-card py-8 md:py-12">
-        <div className="container">
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-primary">
-              <Building2 className="h-4 w-4" /> Rede empresarial regional
-            </div>
-            <h1 className="text-3xl font-extrabold text-foreground md:text-4xl">Guia de Empresas</h1>
-            <p className="mt-2 text-muted-foreground">Encontre empresas associadas, parceiros e fornecedores da região.</p>
-
-            <label className="relative mt-6 block max-w-3xl">
+      <PublicPageBanner image={bannerCompanies} imageAlt="Empresários da região em frente aos seus negócios" eyebrow="Rede empresarial regional" title="Guia de Empresas" description="Encontre empresas associadas, parceiros e fornecedores da região." icon={Building2}>
+            <label className="relative block w-full max-w-3xl">
               <span className="sr-only">Buscar empresas</span>
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -85,12 +79,10 @@ export default function CompaniesPage() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar por empresa, segmento ou cidade..."
-                className="h-12 w-full rounded-lg border border-border bg-background pl-12 pr-4 text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring"
+                className="h-12 w-full rounded-lg border border-secondary-foreground/20 bg-background pl-12 pr-4 text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring"
               />
             </label>
-          </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       <section className="container py-8 md:py-10">
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">

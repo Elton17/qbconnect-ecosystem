@@ -5,6 +5,8 @@ import {
   ArrowRight, ExternalLink, Briefcase, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PublicPageBanner from "@/components/ui/public-page-banner";
+import bannerServices from "@/assets/banner-services.jpg";
 
 const services = [
   { title: "Consulta ao SCPC", description: "Informações na área de liberação de crédito, consultas, registros ao SCPC, bancos e cartórios.", icon: ShieldCheck, link: "https://associado.scpc.inf.br/?entidade=83420" },
@@ -29,33 +31,15 @@ const fadeInUp = {
 export default function ServicosPage() {
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-secondary py-16 md:py-20">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -left-10 -top-20 h-80 w-80 rounded-full bg-primary blur-3xl" />
-          <div className="absolute bottom-0 right-1/3 h-64 w-64 rounded-full bg-accent blur-3xl" />
-        </div>
-        <div className="container relative">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
-              <Briefcase className="h-4 w-4" /> Serviços Especializados
-            </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
-              Principais <span className="text-gradient">Serviços</span>
-            </h1>
-            <p className="mb-6 text-lg text-secondary-foreground/70">
-              Somos a ponte que aproxima a indústria e a empresa do mercado. Oferecemos os mais diversos serviços para o crescimento do seu negócio.
-            </p>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+      <PublicPageBanner image={bannerServices} imageAlt="Atendimento consultivo a empresário regional" eyebrow="Serviços especializados" title={<>Principais <span className="text-primary">Serviços</span></>} description="Somos a ponte que aproxima a indústria e a empresa do mercado, com soluções para o crescimento do seu negócio." icon={Briefcase} align="center">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap justify-center gap-3">
             {[
               { label: "Serviços", value: `${services.length}`, icon: Briefcase },
               { label: "Com Link Direto", value: `${services.filter(s => s.link).length}`, icon: ExternalLink },
               { label: "Desde 1988", value: "36+", icon: Star },
             ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+              <div key={stat.label} className="flex items-center gap-3 rounded-lg border border-secondary-foreground/15 bg-secondary/60 px-5 py-3 backdrop-blur-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/20">
                   <stat.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -65,8 +49,7 @@ export default function ServicosPage() {
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       {/* Content */}
       <div className="container py-10">

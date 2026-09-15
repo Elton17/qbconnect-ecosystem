@@ -22,6 +22,7 @@ export type Database = {
           exclusive: boolean | null
           expires_at: string | null
           id: string
+          moderation_status: string
           offer: string
           updated_at: string | null
           user_id: string
@@ -34,6 +35,7 @@ export type Database = {
           exclusive?: boolean | null
           expires_at?: string | null
           id?: string
+          moderation_status?: string
           offer: string
           updated_at?: string | null
           user_id: string
@@ -46,6 +48,7 @@ export type Database = {
           exclusive?: boolean | null
           expires_at?: string | null
           id?: string
+          moderation_status?: string
           offer?: string
           updated_at?: string | null
           user_id?: string
@@ -390,6 +393,7 @@ export type Database = {
           is_free: boolean | null
           location: string | null
           max_attendees: number | null
+          moderation_status: string
           online_url: string | null
           price: number | null
           registration_fields: Json | null
@@ -415,6 +419,7 @@ export type Database = {
           is_free?: boolean | null
           location?: string | null
           max_attendees?: number | null
+          moderation_status?: string
           online_url?: string | null
           price?: number | null
           registration_fields?: Json | null
@@ -440,6 +445,7 @@ export type Database = {
           is_free?: boolean | null
           location?: string | null
           max_attendees?: number | null
+          moderation_status?: string
           online_url?: string | null
           price?: number | null
           registration_fields?: Json | null
@@ -629,6 +635,7 @@ export type Database = {
           description: string | null
           id: string
           interested_count: number
+          moderation_status: string
           status: string
           title: string
           type: string
@@ -647,6 +654,7 @@ export type Database = {
           description?: string | null
           id?: string
           interested_count?: number
+          moderation_status?: string
           status?: string
           title: string
           type?: string
@@ -665,6 +673,7 @@ export type Database = {
           description?: string | null
           id?: string
           interested_count?: number
+          moderation_status?: string
           status?: string
           title?: string
           type?: string
@@ -723,6 +732,7 @@ export type Database = {
           id: string
           image_url: string | null
           images: string[] | null
+          moderation_status: string
           price: number
           price_type: string
           product_type: string
@@ -743,6 +753,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          moderation_status?: string
           price?: number
           price_type?: string
           product_type?: string
@@ -763,6 +774,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          moderation_status?: string
           price?: number
           price_type?: string
           product_type?: string

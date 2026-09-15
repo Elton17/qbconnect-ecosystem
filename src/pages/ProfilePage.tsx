@@ -201,7 +201,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     async function fetchProfile() {
-      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user!.id).single();
+      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
       if (error) { toast({ title: "Erro ao carregar perfil", description: error.message, variant: "destructive" }); }
       else if (data) {
         setProfile(data);
@@ -227,6 +227,10 @@ export default function ProfilePage() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) {
+      toast({ title: "Logo inválida", description: "Use uma imagem JPG, PNG ou WebP de até 2 MB.", variant: "destructive" });
+      return;
+    }
     setUploading(true);
     const fileExt = file.name.split(".").pop();
     const filePath = `${user.id}/logo.${fileExt}`;
@@ -247,10 +251,11 @@ export default function ProfilePage() {
       phone: form.phone, email: form.email, website: form.website, address: form.address,
       description: form.description, contact_name: form.contact_name, contact_role: form.contact_role,
       contact_email: form.contact_email, contact_phone: form.contact_phone,
+      approved: false,
     }).eq("user_id", user.id);
     setSaving(false);
     if (error) { toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" }); }
-    else { toast({ title: "Perfil atualizado!", description: "Suas alterações foram salvas com sucesso." }); }
+    else { setProfile((current) => current ? { ...current, approved: false } : current); toast({ title: "Alterações enviadas!", description: "Seu perfil ficará em análise antes de voltar ao guia público." }); }
   };
 
   if (authLoading || loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -269,11 +274,11 @@ export default function ProfilePage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="relative group">
-                <Avatar className="h-20 w-20 border-2 border-secondary-foreground/10">
-                  {form.logo_url ? <AvatarImage src={form.logo_url} alt="Logo da empresa" /> : null}
+                <Avatar className="h-20 w-28 rounded-md border-2 border-secondary-foreground/10 bg-background p-2">
+                  {form.logo_url ? <AvatarImage src={form.logo_url} alt="Logo da empresa" className="object-contain" /> : null}
                   <AvatarFallback className="bg-primary/20 text-primary text-2xl"><Building2 className="h-10 w-10" /></AvatarFallback>
                 </Avatar>
-                <label htmlFor="logo-upload" className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100">
+                 <label htmlFor="logo-upload" className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-md bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100">
                   {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
                 </label>
                 <input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />
