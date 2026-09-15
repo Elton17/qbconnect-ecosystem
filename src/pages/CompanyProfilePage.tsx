@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CompanyMatchmaking from "@/components/CompanyMatchmaking";
 
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { Seo, SITE_URL } from "@/components/Seo";
 
 
 interface Profile {
@@ -60,6 +61,7 @@ export default function CompanyProfilePage() {
   if (!profile) {
     return (
       <div className="container py-16 text-center">
+        <Seo title="Empresa não encontrada" noindex />
         <Building2 className="mx-auto mb-4 h-12 w-12 text-muted-foreground/30" />
         <h2 className="mb-4 text-2xl font-bold text-foreground">Empresa não encontrada</h2>
         <p className="mb-6 text-muted-foreground">Esta empresa não existe ou ainda não foi aprovada.</p>
@@ -72,6 +74,7 @@ export default function CompanyProfilePage() {
 
   return (
     <div>
+      <Seo title={profile.company_name} description={profile.description || `${profile.company_name}, empresa do segmento ${profile.segment} em ${profile.city}.`} canonicalPath={`/empresa/${profile.id}`} image={profile.logo_url} structuredData={{ "@context": "https://schema.org", "@type": "LocalBusiness", name: profile.company_name, description: profile.description || undefined, logo: profile.logo_url || undefined, url: `${SITE_URL}/empresa/${profile.id}`, telephone: profile.phone || undefined, address: { "@type": "PostalAddress", streetAddress: profile.address || undefined, addressLocality: profile.city, addressCountry: "BR" }, sameAs: profile.website ? [profile.website.startsWith("http") ? profile.website : `https://${profile.website}`] : undefined }} />
       {/* Profile Hero */}
       <section className="relative overflow-hidden bg-secondary py-12 md:py-16">
         <div className="absolute inset-0 opacity-10">
@@ -85,7 +88,7 @@ export default function CompanyProfilePage() {
           ]} />
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 md:flex-row md:items-start">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-primary-foreground/10 text-4xl font-bold text-secondary-foreground overflow-hidden border-2 border-secondary-foreground/10">
-              {profile.logo_url ? <img src={profile.logo_url} alt={profile.company_name} className="h-full w-full object-contain p-2" /> : profile.company_name.charAt(0)}
+              {profile.logo_url ? <img src={profile.logo_url} alt={`Logo da ${profile.company_name}`} className="h-full w-full object-contain p-2" /> : profile.company_name.charAt(0)}
             </div>
             <div className="flex-1">
               <div className="mb-2 flex flex-wrap items-center gap-3">

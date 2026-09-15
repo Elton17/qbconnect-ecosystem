@@ -99,6 +99,7 @@ const STATIC_PAGES: Record<string, Omit<SeoProps, "canonicalPath"> & { canonical
     title: "QBCAMP Conecta Mais — Conecte sua empresa ao futuro dos negócios regionais",
     description: "Plataforma B2B da QBCAMP para empresas de Quatro Barras, Campina Grande do Sul e Região Metropolitana de Curitiba.",
     canonicalPath: "/",
+    noindex: true,
   },
   "/marketplace": { title: "Marketplace empresarial regional", description: "Encontre produtos e serviços de empresas de Quatro Barras e Região Metropolitana de Curitiba." },
   "/empresas": { title: "Guia de empresas associadas", description: "Conheça empresas associadas, parceiros e fornecedores de Quatro Barras e região." },

@@ -18,3 +18,6 @@
 - [x] Adicionar banners fotográficos regionais aos menus públicos.
 - [x] Tornar a logo obrigatória no cadastro e na ativação, com exibição automática ajustada.
 - [x] Padronizar edição e nova aprovação para todos os conteúdos empresariais.
+- [ ] Criar sitemap automático com páginas e conteúdos públicos aprovados.
+- [ ] Aplicar metadados, canonicals, indexação e dados estruturados por página.
+- [ ] Validar SEO técnico, páginas públicas e áreas restritas antes do lançamento.
