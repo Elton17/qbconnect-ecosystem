@@ -3,6 +3,8 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Trophy, ShoppingBag, GraduationCap, Handshake, Loader2, Crown, Medal, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import PublicPageBanner from "@/components/ui/public-page-banner";
+import bannerRanking from "@/assets/banner-ranking.jpg";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -70,44 +72,25 @@ export default function RankingPage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-secondary py-14 md:py-20">
-        <div className="h-[3px] bg-primary absolute top-0 left-0 right-0" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute right-1/4 -top-10 h-80 w-80 rounded-full bg-primary blur-3xl" />
-        </div>
-        <div className="container relative">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/80">
-              <Trophy className="h-4 w-4" /> Gamificação & Reconhecimento
-            </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl font-heading">
-              Ranking <span className="text-primary">Empresarial</span>
-            </h1>
-            <p className="mb-6 text-lg text-white/60">
-              As empresas mais ativas e engajadas da associação QBCAMP.
-            </p>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-8 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+      <PublicPageBanner image={bannerRanking} imageAlt="Empresário regional recebendo reconhecimento" eyebrow="Gamificação e reconhecimento" title={<>Ranking <span className="text-primary">Empresarial</span></>} description="As empresas mais ativas e engajadas da associação QBCAMP." icon={Trophy} align="center">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap items-center justify-center gap-3">
             {[
               { label: "Empresas Rankeadas", value: `${ranking.length}`, icon: Crown },
               { label: "Pontuação Máxima", value: `${ranking[0]?.score || 0}`, icon: Star },
               { label: "Medalhas", value: `${Math.min(ranking.length, 3)}`, icon: Medal },
             ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm">
+              <div key={stat.label} className="flex items-center gap-3 rounded-lg border border-secondary-foreground/15 bg-secondary/60 px-5 py-3 backdrop-blur-sm">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
                   <stat.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-xl font-extrabold text-white font-heading">{stat.value}</div>
-                  <div className="text-xs text-white/60">{stat.label}</div>
+                   <div className="text-xl font-extrabold text-secondary-foreground font-heading">{stat.value}</div>
+                   <div className="text-xs text-secondary-foreground/60">{stat.label}</div>
                 </div>
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       <div className="container py-10">
         {ranking.length === 0 ? (

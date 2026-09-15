@@ -18,6 +18,8 @@ import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import PlanUpgradeModal from "@/components/PlanUpgradeModal";
 import PremiumBadge from "@/components/PremiumBadge";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
+import PublicPageBanner from "@/components/ui/public-page-banner";
+import bannerOpportunities from "@/assets/banner-opportunities.jpg";
 
 const types = [
   { label: "Todos", value: "all" },
@@ -155,24 +157,7 @@ export default function OpportunitiesPage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-secondary py-16 md:py-20">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary blur-3xl" />
-          <div className="absolute -bottom-10 left-10 h-64 w-64 rounded-full bg-accent blur-3xl" />
-        </div>
-        <div className="container relative">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-secondary-foreground/20 bg-secondary-foreground/10 px-4 py-1.5 text-sm text-secondary-foreground/80">
-              <Handshake className="h-4 w-4" /> Matchmaking Empresarial
-            </div>
-            <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-secondary-foreground md:text-5xl">
-              Encontre o <span className="text-gradient">parceiro ideal</span> para seu negócio
-            </h1>
-            <p className="mb-8 text-lg text-secondary-foreground/70">
-              Conecte-se com fornecedores, parceiros e oportunidades de negócios da região.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <PublicPageBanner image={bannerOpportunities} imageAlt="Empresários fechando parceria em uma indústria regional" eyebrow="Matchmaking empresarial" title={<>Encontre o <span className="text-primary">parceiro ideal</span> para seu negócio</>} description="Conecte-se com fornecedores, parceiros e oportunidades de negócios da região." icon={Handshake} align="center">
               {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                   <DialogTrigger asChild>
@@ -199,18 +184,14 @@ export default function OpportunitiesPage() {
                   </DialogContent>
                 </Dialog>
               )}
-            </div>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5 }} className="mt-10 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap items-center justify-center gap-3">
             {[
               { label: "Oportunidades Ativas", value: `${opportunities.length}`, icon: TrendingUp },
               { label: "Urgentes", value: `${urgentCount}`, icon: Zap },
               { label: "Tipos", value: "4", icon: Briefcase },
             ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3 rounded-2xl border border-secondary-foreground/10 bg-secondary-foreground/5 px-5 py-3 backdrop-blur-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20">
+              <div key={stat.label} className="flex items-center gap-3 rounded-lg border border-secondary-foreground/15 bg-secondary/60 px-4 py-2 backdrop-blur-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/20">
                   <stat.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -220,8 +201,7 @@ export default function OpportunitiesPage() {
               </div>
             ))}
           </motion.div>
-        </div>
-      </section>
+      </PublicPageBanner>
 
       {/* Content */}
       <div className="container py-8">
