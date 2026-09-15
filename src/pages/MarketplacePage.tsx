@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Building2, Filter, Map, Package, Search, ShoppingBag, Store, Wrench, X } from "lucide-react";
+import { Building2, Filter, MapPinned, Package, Search, ShoppingBag, Store, Wrench, X } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ type SortOrder = "recent" | "price-low" | "price-high" | "popular";
 const shortcuts = [
   { label: "Produtos", description: "Itens para sua empresa", icon: ShoppingBag, type: "product" as const },
   { label: "Serviços", description: "Profissionais da região", icon: Wrench, type: "service" as const },
-  { label: "Por cidade", description: "Compre mais perto", icon: Map, type: "all" as const },
+  { label: "Por cidade", description: "Compre mais perto", icon: MapPinned, type: "all" as const },
   { label: "Todos os anúncios", description: "Explore a vitrine", icon: Store, type: "all" as const },
 ];
 
