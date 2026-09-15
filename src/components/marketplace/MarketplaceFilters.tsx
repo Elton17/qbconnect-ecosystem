@@ -1,142 +1,156 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Star, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RotateCcw } from "lucide-react";
 
-const segments = ["Indústria", "Comércio", "Serviços", "Tecnologia", "Saúde", "Construção", "Agronegócio"];
-const cities = ["Quatro Barras", "Campina Grande do Sul", "Colombo", "Pinhais", "Piraquara", "Curitiba"];
+export const MARKETPLACE_REGIONS = [
+  { name: "Quatro Barras", cities: ["Quatro Barras"] },
+  { name: "Campina Grande do Sul", cities: ["Campina Grande do Sul"] },
+  { name: "Grande Curitiba", cities: ["Curitiba", "Colombo", "Pinhais", "Piraquara", "São José dos Pinhais"] },
+  { name: "Litoral e Serra do Mar", cities: ["Antonina", "Morretes", "Paranaguá"] },
+];
 
 export interface FilterState {
-  productType: string;
+  productType: "all" | "product" | "service";
+  categories: string[];
   segments: string[];
+  regions: string[];
+  cities: string[];
   priceMin: string;
   priceMax: string;
-  cities: string[];
-  premiumOnly: boolean;
 }
 
-interface Props {
+interface MarketplaceFiltersProps {
   filters: FilterState;
-  onChange: (f: FilterState) => void;
+  categories: string[];
+  cities: string[];
+  segments: string[];
+  onChange: (filters: FilterState) => void;
   onClear: () => void;
 }
 
 export const defaultFilters: FilterState = {
   productType: "all",
+  categories: [],
   segments: [],
+  regions: [],
+  cities: [],
   priceMin: "",
   priceMax: "",
-  cities: [],
-  premiumOnly: false,
 };
 
-export default function MarketplaceFilters({ filters, onChange, onClear }: Props) {
-  const toggleArray = (arr: string[], val: string) =>
-    arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
+function FilterChecks({
+  idPrefix,
+  items,
+  selected,
+  onToggle,
+}: {
+  idPrefix: string;
+  items: string[];
+  selected: string[];
+  onToggle: (item: string) => void;
+}) {
+  if (items.length === 0) return <p className="pb-3 text-xs text-muted-foreground">Nenhuma opção disponível.</p>;
 
   return (
-    <div className="space-y-2">
-      <Accordion type="multiple" defaultValue={["categoria", "segmento", "preco", "cidade", "plano"]} className="space-y-1">
-        <AccordionItem value="categoria" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-sm font-semibold py-3">Categoria</AccordionTrigger>
+    <div className="max-h-44 space-y-2 overflow-y-auto pb-3 pr-1">
+      {items.map((item) => (
+        <div key={item} className="flex items-center gap-2.5">
+          <Checkbox id={`${idPrefix}-${item}`} checked={selected.includes(item)} onCheckedChange={() => onToggle(item)} />
+          <Label htmlFor={`${idPrefix}-${item}`} className="cursor-pointer text-sm font-normal leading-tight text-foreground">
+            {item}
+          </Label>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function MarketplaceFilters({ filters, categories, cities, segments, onChange, onClear }: MarketplaceFiltersProps) {
+  const toggle = (key: "categories" | "segments" | "regions" | "cities", value: string) => {
+    const current = filters[key];
+    onChange({ ...filters, [key]: current.includes(value) ? current.filter((item) => item !== value) : [...current, value] });
+  };
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase text-primary">Refine sua busca</p>
+          <h2 className="font-heading text-lg font-bold text-card-foreground">Filtros</h2>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onClear} className="h-8 px-2 text-xs text-muted-foreground">
+          <RotateCcw className="h-3.5 w-3.5" /> Limpar
+        </Button>
+      </div>
+
+      <Accordion type="multiple" defaultValue={["tipo", "categoria", "regiao", "cidade", "segmento", "preco"]}>
+        <AccordionItem value="tipo">
+          <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">Tipo de anúncio</AccordionTrigger>
           <AccordionContent>
-            <RadioGroup value={filters.productType} onValueChange={(v) => onChange({ ...filters, productType: v })} className="space-y-2 pb-3">
+            <RadioGroup value={filters.productType} onValueChange={(value) => onChange({ ...filters, productType: value as FilterState["productType"] })} className="space-y-2 pb-3">
               {[
-                { value: "all", label: "Todas as categorias" },
-                { value: "product", label: "Produtos físicos" },
-                { value: "service", label: "Serviços" },
-                { value: "plan", label: "Planos corporativos" },
-              ].map((opt) => (
-                <div key={opt.value} className="flex items-center gap-2">
-                  <RadioGroupItem value={opt.value} id={`pt-${opt.value}`} />
-                  <Label htmlFor={`pt-${opt.value}`} className="text-sm cursor-pointer">{opt.label}</Label>
+                { value: "all", label: "Produtos e serviços" },
+                { value: "product", label: "Somente produtos" },
+                { value: "service", label: "Somente serviços" },
+              ].map((option) => (
+                <div key={option.value} className="flex items-center gap-2.5">
+                  <RadioGroupItem value={option.value} id={`type-${option.value}`} />
+                  <Label htmlFor={`type-${option.value}`} className="cursor-pointer text-sm font-normal">{option.label}</Label>
                 </div>
               ))}
             </RadioGroup>
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="segmento" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-sm font-semibold py-3">Segmento da empresa</AccordionTrigger>
+        <AccordionItem value="categoria">
+          <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">Categorias</AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-2 pb-3">
-              {segments.map((seg) => (
-                <div key={seg} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`seg-${seg}`}
-                    checked={filters.segments.includes(seg)}
-                    onCheckedChange={() => onChange({ ...filters, segments: toggleArray(filters.segments, seg) })}
-                  />
-                  <Label htmlFor={`seg-${seg}`} className="text-sm cursor-pointer">{seg}</Label>
-                </div>
-              ))}
-            </div>
+            <FilterChecks idPrefix="category" items={categories} selected={filters.categories} onToggle={(value) => toggle("categories", value)} />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="preco" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-sm font-semibold py-3">Faixa de preço</AccordionTrigger>
+        <AccordionItem value="regiao">
+          <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">Região</AccordionTrigger>
           <AccordionContent>
-            <div className="flex items-center gap-2 pb-3">
-              <Input
-                type="number"
-                placeholder="De R$"
-                value={filters.priceMin}
-                onChange={(e) => onChange({ ...filters, priceMin: e.target.value })}
-                className="h-9 text-sm"
-              />
-              <Input
-                type="number"
-                placeholder="Até R$"
-                value={filters.priceMax}
-                onChange={(e) => onChange({ ...filters, priceMax: e.target.value })}
-                className="h-9 text-sm"
-              />
-            </div>
+            <FilterChecks idPrefix="region" items={MARKETPLACE_REGIONS.map((region) => region.name)} selected={filters.regions} onToggle={(value) => toggle("regions", value)} />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="cidade" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-sm font-semibold py-3">Cidade</AccordionTrigger>
+        <AccordionItem value="cidade">
+          <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">Cidade</AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-2 pb-3">
-              {cities.map((city) => (
-                <div key={city} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`city-${city}`}
-                    checked={filters.cities.includes(city)}
-                    onCheckedChange={() => onChange({ ...filters, cities: toggleArray(filters.cities, city) })}
-                  />
-                  <Label htmlFor={`city-${city}`} className="text-sm cursor-pointer">{city}</Label>
-                </div>
-              ))}
-            </div>
+            <FilterChecks idPrefix="city" items={cities} selected={filters.cities} onToggle={(value) => toggle("cities", value)} />
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="plano" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-sm font-semibold py-3">Plano do vendedor</AccordionTrigger>
+        <AccordionItem value="segmento">
+          <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">Segmento da empresa</AccordionTrigger>
           <AccordionContent>
-            <div className="flex items-center gap-2 pb-3">
-              <Checkbox
-                id="premium-only"
-                checked={filters.premiumOnly}
-                onCheckedChange={(c) => onChange({ ...filters, premiumOnly: !!c })}
-              />
-              <Label htmlFor="premium-only" className="text-sm cursor-pointer flex items-center gap-1">
-                <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" /> Apenas Premium
-              </Label>
+            <FilterChecks idPrefix="segment" items={segments} selected={filters.segments} onToggle={(value) => toggle("segments", value)} />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="preco" className="border-b-0">
+          <AccordionTrigger className="py-3 text-sm font-semibold hover:no-underline">Faixa de preço</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-2 pb-2">
+              <div>
+                <Label htmlFor="price-min" className="mb-1 block text-xs text-muted-foreground">Mínimo</Label>
+                <Input id="price-min" type="number" min="0" placeholder="R$ 0" value={filters.priceMin} onChange={(event) => onChange({ ...filters, priceMin: event.target.value })} />
+              </div>
+              <div>
+                <Label htmlFor="price-max" className="mb-1 block text-xs text-muted-foreground">Máximo</Label>
+                <Input id="price-max" type="number" min="0" placeholder="R$ 5.000" value={filters.priceMax} onChange={(event) => onChange({ ...filters, priceMax: event.target.value })} />
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground">Anúncios com “consultar preço” permanecem visíveis.</p>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-
-      <Button variant="outline" size="sm" className="w-full text-primary border-primary hover:bg-primary/5" onClick={onClear}>
-        <X className="mr-1 h-3.5 w-3.5" /> Limpar filtros
-      </Button>
     </div>
   );
 }
