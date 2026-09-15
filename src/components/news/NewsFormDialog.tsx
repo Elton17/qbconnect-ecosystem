@@ -19,9 +19,9 @@ const schema = z.object({
   category: z.string().trim().min(2, "Selecione uma categoria.").max(60),
 });
 
-type Props = { open: boolean; onOpenChange: (open: boolean) => void; item?: NewsItem | null; onSaved: () => void };
+type Props = { open: boolean; onOpenChange: (open: boolean) => void; item?: NewsItem | null; onSaved: () => void; adminMode?: boolean };
 
-export default function NewsFormDialog({ open, onOpenChange, item, onSaved }: Props) {
+export default function NewsFormDialog({ open, onOpenChange, item, onSaved, adminMode = false }: Props) {
   const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({ title: "", summary: "", content: "", category: "" });
@@ -58,7 +58,8 @@ export default function NewsFormDialog({ open, onOpenChange, item, onSaved }: Pr
     setSaving(true);
     try {
       const { data: profile, error: profileError } = await supabase.from("profiles").select("id, approved").eq("user_id", user.id).maybeSingle();
-      if (profileError || !profile?.approved) throw new Error("Somente empresas aprovadas podem enviar notícias.");
+      if (!adminMode && (profileError || !profile?.approved)) throw new Error("Somente empresas aprovadas podem enviar notícias.");
+      if (!item && !profile) throw new Error("Perfil da empresa não encontrado.");
 
       let coverPath = item?.cover_image_path || null;
       if (file) {
@@ -68,10 +69,18 @@ export default function NewsFormDialog({ open, onOpenChange, item, onSaved }: Pr
         if (error) throw error;
       }
 
-      const payload = { ...parsed.data, user_id: user.id, profile_id: profile.id, cover_image_path: coverPath, status: "pending", rejection_reason: null, published_at: null };
+      const payload = {
+        ...parsed.data,
+        user_id: item?.user_id || user.id,
+        profile_id: item?.profile_id || profile?.id || "",
+        cover_image_path: coverPath,
+        status: adminMode && item ? item.status : "pending",
+        rejection_reason: adminMode && item ? item.rejection_reason : null,
+        published_at: adminMode && item ? item.published_at : null,
+      };
       const response = item
         ? await supabase.from("news").update(payload).eq("id", item.id)
-        : await supabase.from("news").insert(payload);
+        : await supabase.from("news").insert({ ...payload, title: parsed.data.title, summary: parsed.data.summary, content: parsed.data.content, category: parsed.data.category });
       if (response.error) throw response.error;
       toast.success(item ? "Notícia reenviada para aprovação." : "Notícia enviada para aprovação.");
       onOpenChange(false);
