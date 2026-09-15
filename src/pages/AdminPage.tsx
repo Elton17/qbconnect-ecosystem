@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
-import { formatCNPJ, formatCPF, isValidCNPJ, isValidCPF } from "@/lib/masks";
+import { isValidCNPJ, isValidCPF } from "@/lib/masks";
 import AdminNewsManagement from "@/components/admin/AdminNewsManagement";
 
 interface Stat { label: string; value: number; icon: any; tab?: string; }
