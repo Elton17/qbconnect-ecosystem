@@ -1082,6 +1082,12 @@ function ActiveBadge({ active }: { active: boolean }) {
   );
 }
 
+function ModerationBadge({ status }: { status?: string | null }) {
+  const label = status === "pending" ? "Em análise" : status === "rejected" ? "Recusado" : "Aprovado";
+  const variant = status === "approved" || !status ? "default" : status === "rejected" ? "destructive" : "outline";
+  return <Badge variant={variant} className="text-[10px]">{label}</Badge>;
+}
+
 function ToggleActiveBtn({ active, onClick }: { active: boolean; onClick: () => void }) {
   return (
     <Button size="sm" variant="outline" onClick={onClick} title={active ? "Desativar" : "Ativar"}>

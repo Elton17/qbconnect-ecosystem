@@ -201,7 +201,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     async function fetchProfile() {
-      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user!.id).single();
+      const { data, error } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
       if (error) { toast({ title: "Erro ao carregar perfil", description: error.message, variant: "destructive" }); }
       else if (data) {
         setProfile(data);

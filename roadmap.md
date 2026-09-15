@@ -14,7 +14,7 @@
 - [x] Criar Portal de Notícias com envio por associados aprovados e moderação administrativa.
 - [x] Criar banners institucionais e segmentação no Marketplace
 - [x] Adicionar filtros completos e adaptados ao celular no Marketplace
-- [ ] Substituir Atividade Recente por uma vitrine editorial dinâmica na home.
-- [ ] Adicionar banners fotográficos regionais aos menus públicos.
-- [ ] Tornar a logo obrigatória no cadastro e na ativação, com exibição automática ajustada.
-- [ ] Padronizar edição e nova aprovação para todos os conteúdos empresariais.
+- [x] Substituir Atividade Recente por uma vitrine editorial dinâmica na home.
+- [x] Adicionar banners fotográficos regionais aos menus públicos.
+- [x] Tornar a logo obrigatória no cadastro e na ativação, com exibição automática ajustada.
+- [x] Padronizar edição e nova aprovação para todos os conteúdos empresariais.
