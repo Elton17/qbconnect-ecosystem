@@ -562,6 +562,62 @@ export type Database = {
           },
         ]
       }
+      news: {
+        Row: {
+          category: string
+          content: string
+          cover_image_path: string | null
+          created_at: string
+          id: string
+          profile_id: string
+          published_at: string | null
+          rejection_reason: string | null
+          status: string
+          summary: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          content: string
+          cover_image_path?: string | null
+          created_at?: string
+          id?: string
+          profile_id: string
+          published_at?: string | null
+          rejection_reason?: string | null
+          status?: string
+          summary: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          cover_image_path?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string
+          published_at?: string | null
+          rejection_reason?: string | null
+          status?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           active: boolean | null

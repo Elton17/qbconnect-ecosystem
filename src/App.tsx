@@ -36,6 +36,8 @@ import MeusCursosPage from "@/pages/MeusCoursosPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import WaitlistActivationPage from "@/pages/WaitlistActivationPage";
+import NewsPage from "@/pages/NewsPage";
+import NewsDetailPage from "@/pages/NewsDetailPage";
 
 import EmailPreviewPage from "@/pages/EmailPreviewPage";
 
@@ -63,6 +65,8 @@ const App = () => (
               <Route path="/ranking" element={<RankingPage />} />
               <Route path="/beneficios" element={<BenefitsPage />} />
               <Route path="/eventos" element={<EventsPage />} />
+              <Route path="/noticias" element={<NewsPage />} />
+              <Route path="/noticias/:id" element={<NewsDetailPage />} />
               <Route path="/evento/:id" element={<EventDetailPage />} />
               <Route path="/curso/:id" element={<CourseDetailPage />} />
               <Route path="/empresa/:id" element={<CompanyProfilePage />} />

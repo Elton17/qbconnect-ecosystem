@@ -20,12 +20,11 @@ import {
   Building2, ShoppingBag, GraduationCap, CalendarDays, Handshake, Gift, Trophy,
   CheckCircle2, XCircle, Search, Users, BarChart3, Eye, Trash2, ToggleLeft,
   ToggleRight, Shield, Loader2, Pencil, ExternalLink, ClipboardList, Route, Plus,
-  MessageCircle, Download, Send, Clock,
+  MessageCircle, Download, Send, Clock, Newspaper,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
-import AdminStudentManagement from "@/components/admin/AdminStudentManagement";
-import AdminCourseReports from "@/components/admin/AdminCourseReports";
+import AdminNewsManagement from "@/components/admin/AdminNewsManagement";
 
 interface Stat { label: string; value: number; icon: any; tab?: string; }
 
@@ -42,6 +41,7 @@ export default function AdminPage() {
   const [learningPaths, setLearningPaths] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("overview");
@@ -73,7 +73,7 @@ export default function AdminPage() {
     const [
       profilesRes, productsRes, coursesRes, eventsRes,
       oppsRes, benefitsRes, rolesRes,
-      enrollRes, eventRegRes, pathsRes, waitlistRes,
+      enrollRes, eventRegRes, pathsRes, waitlistRes, newsRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("products").select("*").order("created_at", { ascending: false }),
@@ -86,6 +86,7 @@ export default function AdminPage() {
       supabase.from("event_registrations").select("id", { count: "exact", head: true }),
       supabase.from("learning_paths").select("*").order("sort_order"),
       supabase.from("waitlist").select("*").order("created_at", { ascending: false }),
+      supabase.from("news").select("*").order("created_at", { ascending: false }),
     ]);
 
     const p = profilesRes.data || [];
@@ -100,16 +101,16 @@ export default function AdminPage() {
     setLearningPaths(pathsRes.data || []);
     setUserRoles(rolesRes.data || []);
     setWaitlist(waitlistRes.data || []);
+    setNews(newsRes.data || []);
 
     setStats([
       { label: "Empresas", value: p.length, icon: Building2, tab: "companies" },
       { label: "Lista de Espera", value: waitlistRes.data?.length || 0, icon: Clock, tab: "waitlist" },
       { label: "Produtos", value: pr.length, icon: ShoppingBag, tab: "products" },
-      { label: "Cursos", value: c.length, icon: GraduationCap, tab: "courses" },
+      { label: "Notícias", value: newsRes.data?.length || 0, icon: Newspaper, tab: "news" },
       { label: "Eventos", value: ev.length, icon: CalendarDays, tab: "events" },
       { label: "Oportunidades", value: op.length, icon: Handshake, tab: "opportunities" },
       { label: "Benefícios", value: b.length, icon: Gift, tab: "benefits" },
-      { label: "Matrículas", value: enrollRes.count || 0, icon: Users },
       { label: "Inscrições Eventos", value: eventRegRes.count || 0, icon: Trophy },
     ]);
     setLoading(false);
@@ -458,13 +459,10 @@ export default function AdminPage() {
             <TabsTrigger value="waitlist"><Clock className="mr-1 h-4 w-4" /> Lista de Espera ({waitlist.length})</TabsTrigger>
             <TabsTrigger value="companies">Empresas ({profiles.length})</TabsTrigger>
             <TabsTrigger value="products">Produtos ({products.length})</TabsTrigger>
-            <TabsTrigger value="courses">Cursos ({courses.length})</TabsTrigger>
+            <TabsTrigger value="news"><Newspaper className="mr-1 h-4 w-4" /> Notícias ({news.length})</TabsTrigger>
             <TabsTrigger value="events">Eventos ({events.length})</TabsTrigger>
             <TabsTrigger value="opportunities">Oportunidades ({opportunities.length})</TabsTrigger>
             <TabsTrigger value="benefits">Benefícios ({benefits.length})</TabsTrigger>
-            <TabsTrigger value="learning_paths">Trilhas ({learningPaths.length})</TabsTrigger>
-            <TabsTrigger value="students">👩‍🎓 Alunos</TabsTrigger>
-            <TabsTrigger value="course_reports">📊 Relatórios</TabsTrigger>
             <TabsTrigger value="roles">Papéis</TabsTrigger>
           </TabsList>
 
@@ -506,7 +504,7 @@ export default function AdminPage() {
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                   {[
                     ...products.slice(0, 3).map((p) => ({ type: "Produto", title: p.title, active: p.active, link: `/produto/${p.id}` })),
-                    ...courses.slice(0, 3).map((c) => ({ type: "Curso", title: c.title, active: c.active, link: `/curso/${c.id}` })),
+                    ...news.slice(0, 3).map((item) => ({ type: "Notícia", title: item.title, active: item.status === "approved", link: `/noticias/${item.id}` })),
                     ...events.slice(0, 3).map((e) => ({ type: "Evento", title: e.title, active: e.active, link: `/evento/${e.id}` })),
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between rounded-lg border border-border px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => navigate(item.link)}>
@@ -523,6 +521,10 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="news">
+            <AdminNewsManagement />
           </TabsContent>
 
           {/* ── COMPANIES ── */}
@@ -599,41 +601,6 @@ export default function AdminPage() {
                   </Button>
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("products", item.id, item.active, setProducts)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("products", item.id, setProducts)}>
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </>
-              )}
-            />
-          </TabsContent>
-
-          {/* ── COURSES ── */}
-          <TabsContent value="courses">
-            <AdminTable
-              items={filterBySearch(courses, ["title", "category"])}
-              columns={[
-                { key: "title", label: "Título" },
-                { key: "category", label: "Categoria" },
-                { key: "duration", label: "Duração" },
-              ]}
-              renderStatus={(item) => (
-                <div className="flex gap-1">
-                  <ActiveBadge active={item.active} />
-                  {item.premium && <Badge className="text-[10px] bg-amber-500">Premium</Badge>}
-                </div>
-              )}
-              actions={(item) => (
-                <>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/curso/${item.id}`)} title="Ver curso">
-                    <Eye className="h-3 w-3" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/curso/${item.id}/gerenciar`)} title="Gerenciar módulos">
-                    <ClipboardList className="h-3 w-3" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => openEdit("courses", item)} title="Editar">
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <ToggleActiveBtn active={item.active} onClick={() => toggleActive("courses", item.id, item.active, setCourses)} />
-                  <Button size="sm" variant="destructive" onClick={() => deleteRecord("courses", item.id, setCourses)}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </>
@@ -733,96 +700,6 @@ export default function AdminPage() {
                 </>
               )}
             />
-          </TabsContent>
-
-          {/* ── LEARNING PATHS ── */}
-          <TabsContent value="learning_paths">
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-card-foreground flex items-center gap-2">
-                  <Route className="h-5 w-5 text-primary" /> Trilhas de Aprendizado
-                </h2>
-                <Button size="sm" onClick={() => setLpDialog(true)}><Plus className="mr-1 h-4 w-4" /> Nova Trilha</Button>
-              </div>
-
-              {learningPaths.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhuma trilha criada.</p>
-              ) : (
-                <div className="space-y-3">
-                  {filterBySearch(learningPaths, ["title", "description"]).map((lp: any) => (
-                    <div key={lp.id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                      <div>
-                        <div className="text-sm font-semibold text-card-foreground">{lp.title}</div>
-                        <div className="text-xs text-muted-foreground">{lp.description || "Sem descrição"}</div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <ActiveBadge active={lp.active} />
-                        <ToggleActiveBtn active={lp.active} onClick={() => toggleActive("learning_paths", lp.id, lp.active, setLearningPaths)} />
-                        <Button size="sm" variant="outline" onClick={() => openLinkDialog(lp.id)} title="Gerenciar cursos">
-                          <ClipboardList className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => openEdit("learning_paths", lp)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button size="sm" variant="destructive" onClick={() => deleteRecord("learning_paths", lp.id, setLearningPaths)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Create learning path dialog */}
-            <Dialog open={lpDialog} onOpenChange={setLpDialog}>
-              <DialogContent>
-                <DialogHeader><DialogTitle>Nova Trilha de Aprendizado</DialogTitle></DialogHeader>
-                <div className="space-y-4">
-                  <div><Label>Título *</Label><Input value={lpForm.title} onChange={(e) => setLpForm({ ...lpForm, title: e.target.value })} placeholder="Ex: Vendas e Comercial" /></div>
-                  <div><Label>Descrição</Label><Textarea value={lpForm.description} onChange={(e) => setLpForm({ ...lpForm, description: e.target.value })} rows={3} /></div>
-                  <Button onClick={createLearningPath} disabled={lpSaving || !lpForm.title} className="w-full">
-                    {lpSaving ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : null} Criar Trilha
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Link courses dialog */}
-            <Dialog open={linkDialog.open} onOpenChange={(o) => setLinkDialog({ ...linkDialog, open: o })}>
-              <DialogContent className="max-w-lg">
-                <DialogHeader><DialogTitle>Cursos da Trilha</DialogTitle></DialogHeader>
-                <div className="space-y-3">
-                  {linkedCourses.map((lc: any) => (
-                    <div key={lc.id} className="flex items-center justify-between rounded-lg border border-border p-2">
-                      <span className="text-sm text-foreground">{(lc.courses as any)?.title || lc.course_id}</span>
-                      <Button size="sm" variant="destructive" onClick={() => removeCourseFromPath(lc.id)}><Trash2 className="h-3 w-3" /></Button>
-                    </div>
-                  ))}
-                  <div className="flex gap-2">
-                    <Select value={linkCourseId} onValueChange={setLinkCourseId}>
-                      <SelectTrigger><SelectValue placeholder="Selecione um curso" /></SelectTrigger>
-                      <SelectContent>
-                        {courses.filter((c: any) => !linkedCourses.some((lc: any) => lc.course_id === c.id)).map((c: any) => (
-                          <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button onClick={addCourseToPath} disabled={!linkCourseId}>Vincular</Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </TabsContent>
-
-          {/* ── STUDENTS ── */}
-          <TabsContent value="students">
-            <AdminStudentManagement />
-          </TabsContent>
-
-          {/* ── COURSE REPORTS ── */}
-          <TabsContent value="course_reports">
-            <AdminCourseReports />
           </TabsContent>
 
           {/* ── ROLES ── */}
