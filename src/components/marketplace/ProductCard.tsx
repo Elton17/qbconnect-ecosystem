@@ -21,6 +21,7 @@ export interface ProductWithSeller {
   image_url: string | null;
   images: string[] | null;
   contact_phone: string | null;
+  contact_email: string | null;
   view_count: number;
   contact_count: number;
   price_type: string;

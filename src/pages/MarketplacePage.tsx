@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Building2, Filter, MapPinned, Package, Search, ShoppingBag, Store, Wrench, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +9,9 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import ProductCard, { type ProductWithSeller } from "@/components/marketplace/ProductCard";
 import MarketplaceBannerCarousel from "@/components/marketplace/MarketplaceBannerCarousel";
 import MarketplaceFilters, { defaultFilters, MARKETPLACE_REGIONS, type FilterState } from "@/components/marketplace/MarketplaceFilters";
+import ProductFormDialog from "@/components/marketplace/ProductFormDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 type SortOrder = "recent" | "price-low" | "price-high" | "popular";
 
@@ -19,20 +23,25 @@ const shortcuts = [
 ];
 
 export default function MarketplacePage() {
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<ProductWithSeller[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductWithSeller | null>(null);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const editProductId = searchParams.get("editar");
 
-  useEffect(() => {
-    async function loadProducts() {
-      setLoading(true);
+  async function loadProducts() {
+    setLoading(true);
+    try {
       const { data: productRows } = await supabase.from("products").select("*").eq("active", true).eq("moderation_status", "approved").order("created_at", { ascending: false });
       if (!productRows?.length) {
         setProducts([]);
-        setLoading(false);
         return;
       }
       const userIds = [...new Set(productRows.map((product) => product.user_id))];
@@ -53,10 +62,54 @@ export default function MarketplacePage() {
           seller_segment: seller?.segment,
         } as ProductWithSeller;
       }));
+    } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    if (!editProductId || authLoading) return;
+    if (!user) {
+      toast({ title: "Entre na sua conta para editar este anúncio.", variant: "destructive" });
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    let active = true;
+    async function openEditor() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", editProductId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!active) return;
+      if (error || !data) {
+        toast({ title: "Anúncio não encontrado ou sem permissão para editar.", variant: "destructive" });
+        setSearchParams({}, { replace: true });
+        return;
+      }
+
+      setEditingProduct(data as ProductWithSeller);
+      setEditorOpen(true);
+    }
+
+    void openEditor();
+    return () => { active = false; };
+  }, [editProductId, user?.id, authLoading]);
+
+  function handleEditorOpenChange(open: boolean) {
+    setEditorOpen(open);
+    if (!open) {
+      setEditingProduct(null);
+      setSearchParams({}, { replace: true });
+    }
+  }
 
   const categories = useMemo(() => [...new Set(products.map((item) => item.category).filter((item): item is string => Boolean(item)))].sort((a, b) => a.localeCompare(b, "pt-BR")), [products]);
   const cities = useMemo(() => [...new Set(products.map((item) => item.city || item.seller_city).filter((item): item is string => Boolean(item)))].sort((a, b) => a.localeCompare(b, "pt-BR")), [products]);
@@ -98,6 +151,12 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
+      <ProductFormDialog
+        open={editorOpen}
+        onOpenChange={handleEditorOpenChange}
+        product={editingProduct}
+        onSaved={() => void loadProducts()}
+      />
       <section className="border-b border-border bg-card py-6 md:py-8">
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="grid items-center gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
