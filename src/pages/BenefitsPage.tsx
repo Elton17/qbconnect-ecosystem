@@ -159,7 +159,7 @@ export default function BenefitsPage() {
 
   return (
     <div>
-      <PublicPageBanner image={benefitsBanner} imageAlt="Entrada urbana de Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Clube exclusivo" title={<>Clube de <span className="text-primary">Benefícios</span></>} description="Descontos e condições exclusivas entre empresas associadas da QBCAMP." icon={Gift} align="center">
+      <PublicPageBanner image={benefitsBannerAsset} imageAlt="Entrada urbana de Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Clube exclusivo" title={<>Clube de <span className="text-primary">Benefícios</span></>} description="Descontos e condições exclusivas entre empresas associadas da QBCAMP." icon={Gift} align="center">
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>

@@ -31,7 +31,7 @@ const fadeInUp = {
 export default function ServicosPage() {
   return (
     <div>
-      <PublicPageBanner image={servicesBanner} imageAlt="Vista de Campina Grande do Sul, Paraná" locationLabel="Campina Grande do Sul" eyebrow="Serviços especializados" title={<>Principais <span className="text-primary">Serviços</span></>} description="Somos a ponte que aproxima a indústria e a empresa do mercado, com soluções para o crescimento do seu negócio." icon={Briefcase} align="center">
+      <PublicPageBanner image={servicesBannerAsset} imageAlt="Vista de Campina Grande do Sul, Paraná" locationLabel="Campina Grande do Sul" eyebrow="Serviços especializados" title={<>Principais <span className="text-primary">Serviços</span></>} description="Somos a ponte que aproxima a indústria e a empresa do mercado, com soluções para o crescimento do seu negócio." icon={Briefcase} align="center">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap justify-center gap-3">
             {[
               { label: "Serviços", value: `${services.length}`, icon: Briefcase },

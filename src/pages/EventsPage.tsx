@@ -182,7 +182,7 @@ export default function EventsPage() {
 
   return (
     <div>
-      <PublicPageBanner image={eventsBanner} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Portal de eventos" title={<>Eventos & Experiências <span className="text-primary">QBCAMP</span></>} description="Feiras, workshops, networking e encontros para associados e comunidade empresarial." icon={CalendarDays} align="center">
+      <PublicPageBanner image={eventsBannerAsset} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Portal de eventos" title={<>Eventos & Experiências <span className="text-primary">QBCAMP</span></>} description="Feiras, workshops, networking e encontros para associados e comunidade empresarial." icon={CalendarDays} align="center">
               {isAdmin && (
                 <Button variant="hero" size="xl" onClick={handleCreate}>
                   <Plus className="mr-1 h-5 w-5" /> Criar Evento

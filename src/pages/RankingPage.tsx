@@ -70,7 +70,7 @@ export default function RankingPage() {
 
   return (
     <div>
-      <PublicPageBanner image={rankingBanner} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Gamificação e reconhecimento" title={<>Ranking <span className="text-primary">Empresarial</span></>} description="As empresas mais ativas e engajadas da associação QBCAMP." icon={Trophy} align="center">
+      <PublicPageBanner image={rankingBannerAsset} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Gamificação e reconhecimento" title={<>Ranking <span className="text-primary">Empresarial</span></>} description="As empresas mais ativas e engajadas da associação QBCAMP." icon={Trophy} align="center">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap items-center justify-center gap-3">
             {[
               { label: "Empresas Rankeadas", value: `${ranking.length}`, icon: Crown },
