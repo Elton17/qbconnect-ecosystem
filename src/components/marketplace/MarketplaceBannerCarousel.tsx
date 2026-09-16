@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, Network, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import quatroBarrasAsset from "@/assets/regions/quatro-barras-entrada.webp.asset.json";
-import campinaAsset from "@/assets/regions/campina-centro.webp.asset.json";
-import reservaAsset from "@/assets/regions/campina-reserva.webp.asset.json";
+import quatroBarrasAsset from "@/assets/regions/quatro-barras-entrada.webp";
+import campinaAsset from "@/assets/regions/campina-centro.webp";
+import reservaAsset from "@/assets/regions/campina-reserva.webp";
 
 const banners = [
   {
-    image: quatroBarrasAsset.url,
+    image: quatroBarrasAsset,
     imageAlt: "Vista urbana de Quatro Barras, Paraná",
     eyebrow: "Quatro Barras · Comércio local",
     title: "Produtos que movimentam nossa cidade",
@@ -17,7 +17,7 @@ const banners = [
     icon: MapPin,
   },
   {
-    image: campinaAsset.url,
+    image: campinaAsset,
     imageAlt: "Paisagem de Campina Grande do Sul, Paraná",
     eyebrow: "Campina Grande do Sul · Serviços",
     title: "Especialistas perto da sua empresa",
@@ -27,7 +27,7 @@ const banners = [
     icon: Wrench,
   },
   {
-    image: reservaAsset.url,
+    image: reservaAsset,
     imageAlt: "Paisagem natural de Campina Grande do Sul, Paraná",
     eyebrow: "Quatro Barras + Campina Grande do Sul",
     title: "Uma região conectada para crescer",

@@ -16,7 +16,7 @@ import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import PublicPageBanner from "@/components/ui/public-page-banner";
-import eventsBannerAsset from "@/assets/regions/quatro-barras-portal.webp.asset.json";
+import eventsBannerAsset from "@/assets/regions/quatro-barras-portal.webp";
 import EventCover from "@/components/events/EventCover";
 
 const eventCategories = ["Todos", "Networking", "Palestra", "Workshop", "Feira", "Curso", "Assembleia", "Social", "Outro"];
@@ -182,7 +182,7 @@ export default function EventsPage() {
 
   return (
     <div>
-      <PublicPageBanner image={eventsBannerAsset.url} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Portal de eventos" title={<>Eventos & Experiências <span className="text-primary">QBCAMP</span></>} description="Feiras, workshops, networking e encontros para associados e comunidade empresarial." icon={CalendarDays} align="center">
+      <PublicPageBanner image={eventsBannerAsset} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Portal de eventos" title={<>Eventos & Experiências <span className="text-primary">QBCAMP</span></>} description="Feiras, workshops, networking e encontros para associados e comunidade empresarial." icon={CalendarDays} align="center">
               {isAdmin && (
                 <Button variant="hero" size="xl" onClick={handleCreate}>
                   <Plus className="mr-1 h-5 w-5" /> Criar Evento

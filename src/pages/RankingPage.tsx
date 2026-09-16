@@ -3,7 +3,7 @@ import { Trophy, ShoppingBag, GraduationCap, Handshake, Loader2, Crown, Medal, S
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import PublicPageBanner from "@/components/ui/public-page-banner";
-import rankingBannerAsset from "@/assets/regions/quatro-barras-portal.webp.asset.json";
+import rankingBannerAsset from "@/assets/regions/quatro-barras-portal.webp";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -70,7 +70,7 @@ export default function RankingPage() {
 
   return (
     <div>
-      <PublicPageBanner image={rankingBannerAsset.url} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Gamificação e reconhecimento" title={<>Ranking <span className="text-primary">Empresarial</span></>} description="As empresas mais ativas e engajadas da associação QBCAMP." icon={Trophy} align="center">
+      <PublicPageBanner image={rankingBannerAsset} imageAlt="Portal de pedra em Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Gamificação e reconhecimento" title={<>Ranking <span className="text-primary">Empresarial</span></>} description="As empresas mais ativas e engajadas da associação QBCAMP." icon={Trophy} align="center">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap items-center justify-center gap-3">
             {[
               { label: "Empresas Rankeadas", value: `${ranking.length}`, icon: Crown },

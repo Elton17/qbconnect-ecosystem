@@ -23,7 +23,7 @@ import PlanUpgradeModal from "@/components/PlanUpgradeModal";
 import PremiumBadge from "@/components/PremiumBadge";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import PublicPageBanner from "@/components/ui/public-page-banner";
-import benefitsBannerAsset from "@/assets/regions/quatro-barras-entrada.webp.asset.json";
+import benefitsBannerAsset from "@/assets/regions/quatro-barras-entrada.webp";
 
 const benefitCategories = ["Tecnologia", "Alimentação", "Construção", "Saúde", "Serviços", "Indústria", "Educação", "Outro"];
 
@@ -159,7 +159,7 @@ export default function BenefitsPage() {
 
   return (
     <div>
-      <PublicPageBanner image={benefitsBannerAsset.url} imageAlt="Entrada urbana de Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Clube exclusivo" title={<>Clube de <span className="text-primary">Benefícios</span></>} description="Descontos e condições exclusivas entre empresas associadas da QBCAMP." icon={Gift} align="center">
+      <PublicPageBanner image={benefitsBannerAsset} imageAlt="Entrada urbana de Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Clube exclusivo" title={<>Clube de <span className="text-primary">Benefícios</span></>} description="Descontos e condições exclusivas entre empresas associadas da QBCAMP." icon={Gift} align="center">
             {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                 <DialogTrigger asChild>

@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PublicPageBanner from "@/components/ui/public-page-banner";
-import companyBannerAsset from "@/assets/regions/quatro-barras-entrada.webp.asset.json";
+import companyBannerAsset from "@/assets/regions/quatro-barras-entrada.webp";
 
 interface Company {
   id: string;
@@ -68,7 +68,7 @@ export default function CompaniesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicPageBanner image={companyBannerAsset.url} imageAlt="Vista urbana de Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Rede empresarial regional" title="Guia de Empresas" description="Encontre empresas associadas, parceiros e fornecedores da região." icon={Building2}>
+      <PublicPageBanner image={companyBannerAsset} imageAlt="Vista urbana de Quatro Barras, Paraná" locationLabel="Quatro Barras" eyebrow="Rede empresarial regional" title="Guia de Empresas" description="Encontre empresas associadas, parceiros e fornecedores da região." icon={Building2}>
             <label className="relative block w-full max-w-3xl">
               <span className="sr-only">Buscar empresas</span>
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />

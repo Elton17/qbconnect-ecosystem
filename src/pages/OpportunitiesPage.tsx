@@ -18,7 +18,7 @@ import PlanUpgradeModal from "@/components/PlanUpgradeModal";
 import PremiumBadge from "@/components/PremiumBadge";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import PublicPageBanner from "@/components/ui/public-page-banner";
-import opportunitiesBannerAsset from "@/assets/regions/campina-reserva.webp.asset.json";
+import opportunitiesBannerAsset from "@/assets/regions/campina-reserva.webp";
 
 const types = [
   { label: "Todos", value: "all" },
@@ -155,7 +155,7 @@ export default function OpportunitiesPage() {
 
   return (
     <div>
-      <PublicPageBanner image={opportunitiesBannerAsset.url} imageAlt="Paisagem natural de Campina Grande do Sul, Paraná" locationLabel="Campina Grande do Sul" eyebrow="Matchmaking empresarial" title={<>Encontre o <span className="text-primary">parceiro ideal</span> para seu negócio</>} description="Conecte-se com fornecedores, parceiros e oportunidades de negócios da região." icon={Handshake} align="center">
+      <PublicPageBanner image={opportunitiesBannerAsset} imageAlt="Paisagem natural de Campina Grande do Sul, Paraná" locationLabel="Campina Grande do Sul" eyebrow="Matchmaking empresarial" title={<>Encontre o <span className="text-primary">parceiro ideal</span> para seu negócio</>} description="Conecte-se com fornecedores, parceiros e oportunidades de negócios da região." icon={Handshake} align="center">
               {user && approved && (
               <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setDialogOpen(true); }}>
                   <DialogTrigger asChild>
