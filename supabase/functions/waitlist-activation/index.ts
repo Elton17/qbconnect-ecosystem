@@ -25,8 +25,8 @@ const ActivateSchema = z.object({
   contactName: z.string().trim().min(2).max(100),
   contactRole: z.string().trim().min(2).max(100),
   contactPhone: z.string().trim().min(8).max(20),
-  logoBase64: z.string().min(100).max(3_000_000),
-  logoType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
+  logoBase64: z.string().min(100).max(3_000_000).optional(),
+  logoType: z.enum(['image/jpeg', 'image/png', 'image/webp']).optional(),
 })
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
@@ -132,19 +132,23 @@ Deno.serve(async (req) => {
   }
 
   const userId = created.user.id
-  const extension = value.logoType === 'image/png' ? 'png' : value.logoType === 'image/webp' ? 'webp' : 'jpg'
-  const logoPath = `${userId}/logo.${extension}`
-  const logoBytes = Uint8Array.from(atob(value.logoBase64), (character) => character.charCodeAt(0))
-  if (logoBytes.byteLength > 2 * 1024 * 1024) {
-    await admin.auth.admin.deleteUser(userId)
-    return json({ error: 'A logo deve ter no máximo 2 MB.' }, 400)
+  let logoUrl: string | null = null
+  if (value.logoBase64 && value.logoType) {
+    const extension = value.logoType === 'image/png' ? 'png' : value.logoType === 'image/webp' ? 'webp' : 'jpg'
+    const logoPath = `${userId}/logo.${extension}`
+    const logoBytes = Uint8Array.from(atob(value.logoBase64), (character) => character.charCodeAt(0))
+    if (logoBytes.byteLength > 2 * 1024 * 1024) {
+      await admin.auth.admin.deleteUser(userId)
+      return json({ error: 'A logo deve ter no máximo 2 MB.' }, 400)
+    }
+    const { error: logoError } = await admin.storage.from('logos').upload(logoPath, logoBytes, { contentType: value.logoType, upsert: true })
+    if (logoError) {
+      await admin.auth.admin.deleteUser(userId)
+      return json({ error: 'Não foi possível salvar a logo da empresa.' }, 500)
+    }
+    const { data: logoData } = admin.storage.from('logos').getPublicUrl(logoPath)
+    logoUrl = logoData.publicUrl
   }
-  const { error: logoError } = await admin.storage.from('logos').upload(logoPath, logoBytes, { contentType: value.logoType, upsert: true })
-  if (logoError) {
-    await admin.auth.admin.deleteUser(userId)
-    return json({ error: 'Não foi possível salvar a logo da empresa.' }, 500)
-  }
-  const { data: logoData } = admin.storage.from('logos').getPublicUrl(logoPath)
   const profileUpdates = {
     company_name: value.companyName,
     cnpj: value.cnpj || null,
@@ -167,7 +171,7 @@ Deno.serve(async (req) => {
     contact_phone: value.contactPhone,
     approved: true,
     plan: 'basic',
-    logo_url: logoData.publicUrl,
+    logo_url: logoUrl,
   }
 
   const { error: profileError } = await admin.from('profiles').update(profileUpdates).eq('user_id', userId)

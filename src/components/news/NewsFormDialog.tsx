@@ -74,15 +74,15 @@ export default function NewsFormDialog({ open, onOpenChange, item, onSaved, admi
         user_id: item?.user_id || user.id,
         profile_id: item?.profile_id || profile?.id || "",
         cover_image_path: coverPath,
-        status: adminMode && item ? item.status : "pending",
-        rejection_reason: adminMode && item ? item.rejection_reason : null,
-        published_at: adminMode && item ? item.published_at : null,
+        status: "approved",
+        rejection_reason: null,
+        published_at: item?.published_at || new Date().toISOString(),
       };
       const response = item
         ? await supabase.from("news").update(payload).eq("id", item.id)
         : await supabase.from("news").insert({ ...payload, title: parsed.data.title, summary: parsed.data.summary, content: parsed.data.content, category: parsed.data.category });
       if (response.error) throw response.error;
-      toast.success(item ? "Notícia reenviada para aprovação." : "Notícia enviada para aprovação.");
+      toast.success(item ? "Notícia atualizada e publicada." : "Notícia publicada com sucesso.");
       onOpenChange(false);
       onSaved();
     } catch (error) {
@@ -103,7 +103,7 @@ export default function NewsFormDialog({ open, onOpenChange, item, onSaved, admi
         <div><Label className="mb-2 block">Imagem de capa</Label><input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={chooseFile} />
           {preview ? <div className="relative aspect-[16/7] overflow-hidden rounded-md border border-border"><img src={preview} alt="Prévia da capa" className="h-full w-full object-cover" /><Button type="button" variant="destructive" size="icon" className="absolute right-2 top-2" onClick={() => { setFile(null); setPreview(null); }}><X className="h-4 w-4" /></Button></div> : <Button type="button" variant="outline" className="w-full" onClick={() => inputRef.current?.click()}><ImagePlus className="mr-2 h-4 w-4" /> Selecionar imagem</Button>}
         </div>
-        <Button className="w-full" onClick={save} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{item ? "Salvar e reenviar" : "Enviar para aprovação"}</Button>
+        <Button className="w-full" onClick={save} disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{item ? "Salvar alterações" : "Publicar notícia"}</Button>
       </div>
     </DialogContent>
   </Dialog>;
