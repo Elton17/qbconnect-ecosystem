@@ -30,3 +30,6 @@
 - [x] Separar produtos e serviços no Marketplace e adicionar parcelamento calculado automaticamente.
 - [x] Criar destaque regional do Marketplace na página inicial.
 - [x] Criar capas tipográficas automáticas para anúncios sem imagem.
+- [x] Substituir Cursos por Notícias na página pública da empresa.
+- [x] Limitar produtos e serviços a cinco anúncios ativos por empresa.
+- [x] Alternar a ordem dos anúncios a cada acesso ao Marketplace.

@@ -11,13 +11,13 @@ export const QBCAMP_HOURS = "Seg-Sex 08h às 17h";
 export const PLAN_LIMITS = {
   basic: {
     label: "Associado",
-    products: 999,
+    products: 5,
     opportunities: 999,
     benefits: 999,
   },
   premium: {
     label: "Premium",
-    products: 999,
+    products: 5,
     opportunities: 999,
     benefits: 999,
   },

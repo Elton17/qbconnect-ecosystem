@@ -14,7 +14,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 
-type SortOrder = "recent" | "price-low" | "price-high" | "popular";
+type SortOrder = "alternating" | "recent" | "price-low" | "price-high" | "popular";
+
+function seededRank(id: string, seed: string) {
+  let hash = 2166136261;
+  const value = `${seed}:${id}`;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
 
 const shortcuts = [
   { label: "Produtos", description: "Itens para sua empresa", icon: ShoppingBag, type: "product" as const },
@@ -32,7 +42,9 @@ export default function MarketplacePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("alternating");
+  const [visitSeed] = useState(() => crypto.randomUUID());
+  const [activeProductCount, setActiveProductCount] = useState(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductWithSeller | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -70,9 +82,17 @@ export default function MarketplacePage() {
     }
   }
 
+  async function loadActiveProductCount() {
+    if (!user) { setActiveProductCount(0); return; }
+    const { count } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("active", true);
+    setActiveProductCount(count || 0);
+  }
+
   useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => { void loadActiveProductCount(); }, [user?.id]);
 
   useEffect(() => {
     if (!editProductId || authLoading) return;
@@ -151,9 +171,10 @@ export default function MarketplacePage() {
       if (sortOrder === "price-low") return a.price - b.price;
       if (sortOrder === "price-high") return b.price - a.price;
       if (sortOrder === "popular") return (b.view_count + b.contact_count) - (a.view_count + a.contact_count);
-      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+       if (sortOrder === "recent") return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+       return seededRank(a.id, visitSeed) - seededRank(b.id, visitSeed);
     });
-  }, [products, search, filters, sortOrder]);
+  }, [products, search, filters, sortOrder, visitSeed]);
 
   const activeFilterCount = filters.categories.length + filters.segments.length + filters.regions.length + filters.cities.length
     + (filters.productType === "all" ? 0 : 1) + (filters.priceMin ? 1 : 0) + (filters.priceMax ? 1 : 0);
@@ -170,7 +191,7 @@ export default function MarketplacePage() {
         onOpenChange={handleEditorOpenChange}
         product={editingProduct}
         initialType={createType === "servico" ? "service" : "product"}
-        onSaved={() => void loadProducts()}
+        onSaved={() => { void loadProducts(); void loadActiveProductCount(); }}
       />
       <section className="border-b border-border bg-card py-6 md:py-8">
         <div className="container">
@@ -194,8 +215,8 @@ export default function MarketplacePage() {
         <MarketplaceBannerCarousel onTypeSelect={selectType} />
 
         {user && approved && <section className="grid gap-3 pt-6 sm:grid-cols-2" aria-label="Cadastrar no Marketplace">
-          <Button variant="outline" className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "produto" })}><ShoppingBag className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu produto</strong><small className="font-normal text-muted-foreground">Publique agora na vitrine regional</small></span></Button>
-          <Button variant="outline" className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "servico" })}><Wrench className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu serviço</strong><small className="font-normal text-muted-foreground">Apresente sua especialidade às empresas</small></span></Button>
+          <Button variant="outline" disabled={activeProductCount >= 5} className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "produto" })}><ShoppingBag className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu produto</strong><small className="font-normal text-muted-foreground">{activeProductCount >= 5 ? "Limite de 5 anúncios atingido" : `${5 - activeProductCount} ${5 - activeProductCount === 1 ? "vaga disponível" : "vagas disponíveis"}`}</small></span></Button>
+          <Button variant="outline" disabled={activeProductCount >= 5} className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "servico" })}><Wrench className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu serviço</strong><small className="font-normal text-muted-foreground">{activeProductCount >= 5 ? "Limite de 5 anúncios atingido" : `${activeProductCount}/5 anúncios ativos`}</small></span></Button>
         </section>}
 
         <section className="grid grid-cols-2 gap-3 py-6 md:grid-cols-4" aria-label="Atalhos do Marketplace">
@@ -231,6 +252,7 @@ export default function MarketplacePage() {
                 <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as SortOrder)}>
                   <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="alternating">Alternados</SelectItem>
                     <SelectItem value="recent">Mais recentes</SelectItem>
                     <SelectItem value="popular">Mais procurados</SelectItem>
                     <SelectItem value="price-low">Menor preço</SelectItem>

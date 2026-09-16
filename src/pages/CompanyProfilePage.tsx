@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { MapPin, Globe, Phone, Mail, Building2, ArrowLeft, Loader2, Briefcase, GraduationCap, Gift, Users } from "lucide-react";
+import { MapPin, Globe, Phone, Mail, Building2, ArrowLeft, Loader2, Briefcase, Newspaper, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,9 @@ import CompanyMatchmaking from "@/components/CompanyMatchmaking";
 
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { Seo, SITE_URL } from "@/components/Seo";
+import { attachNewsPresentation, type NewsItem } from "@/lib/news";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 
 interface Profile {
@@ -19,14 +22,13 @@ interface Profile {
   plan: string; user_id: string;
 }
 interface Opportunity { id: string; title: string; description: string | null; type: string; value: string | null; urgent: boolean | null; }
-interface Course { id: string; title: string; description: string | null; category: string | null; duration: string | null; premium: boolean | null; }
 interface Benefit { id: string; offer: string; category: string | null; exclusive: boolean | null; }
 
 export default function CompanyProfilePage() {
   const { id } = useParams<{ id: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,13 +44,13 @@ export default function CompanyProfilePage() {
       if (profileRes.data) {
         setProfile(profileRes.data);
         const userId = profileRes.data.user_id;
-        const [o, c, b] = await Promise.all([
+        const [o, n, b] = await Promise.all([
           supabase.from("opportunities").select("id, title, description, type, value, urgent").eq("user_id", userId).eq("active", true).eq("moderation_status", "approved"),
-          supabase.from("courses").select("id, title, description, category, duration, premium").eq("user_id", userId).eq("active", true),
+          supabase.from("news").select("*").eq("profile_id", profileRes.data.id).eq("status", "approved").order("published_at", { ascending: false }),
           supabase.from("benefits").select("id, offer, category, exclusive").eq("user_id", userId).eq("active", true).eq("moderation_status", "approved"),
         ]);
         setOpportunities(o.data || []);
-        setCourses(c.data || []);
+        setNews(await attachNewsPresentation(n.data || []));
         setBenefits(b.data || []);
       }
       setLoading(false);
@@ -70,7 +72,7 @@ export default function CompanyProfilePage() {
     );
   }
 
-  const totalItems = opportunities.length + courses.length + benefits.length;
+  const totalItems = opportunities.length + news.length + benefits.length;
 
   return (
     <div>
@@ -117,7 +119,7 @@ export default function CompanyProfilePage() {
         <Tabs defaultValue="opportunities" className="w-full">
           <TabsList className="mb-6 w-full justify-start">
             <TabsTrigger value="opportunities" className="gap-1.5"><Briefcase className="h-4 w-4" /> Oportunidades ({opportunities.length})</TabsTrigger>
-            <TabsTrigger value="courses" className="gap-1.5"><GraduationCap className="h-4 w-4" /> Cursos ({courses.length})</TabsTrigger>
+            <TabsTrigger value="news" className="gap-1.5"><Newspaper className="h-4 w-4" /> Notícias ({news.length})</TabsTrigger>
             <TabsTrigger value="benefits" className="gap-1.5"><Gift className="h-4 w-4" /> Benefícios ({benefits.length})</TabsTrigger>
           </TabsList>
 
@@ -147,27 +149,20 @@ export default function CompanyProfilePage() {
             )}
           </TabsContent>
 
-          <TabsContent value="courses">
-            {courses.length === 0 ? (
-              <div className="py-12 text-center"><GraduationCap className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" /><p className="text-muted-foreground">Nenhum curso publicado.</p></div>
+          <TabsContent value="news">
+            {news.length === 0 ? (
+              <div className="py-12 text-center"><Newspaper className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" /><p className="text-muted-foreground">Nenhuma notícia publicada.</p></div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
-                {courses.map((course) => (
-                  <Card key={course.id} className="card-shadow hover:card-shadow-hover transition-all">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-base">{course.title}</CardTitle>
-                        <div className="flex gap-1.5">
-                          {course.category && <Badge variant="outline">{course.category}</Badge>}
-                          {course.premium && <Badge variant="secondary">Premium</Badge>}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{course.description || "Sem descrição"}</p>
-                      {course.duration && <p className="mt-2 text-xs text-muted-foreground">Duração: {course.duration}</p>}
-                    </CardContent>
-                  </Card>
+                {news.map((item) => (
+                  <Link key={item.id} to={`/noticias/${item.id}`} className="group overflow-hidden rounded-lg border border-border bg-card card-shadow transition-all hover:card-shadow-hover">
+                    {item.cover_url && <div className="aspect-[16/7] overflow-hidden bg-muted"><img src={item.cover_url} alt={item.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /></div>}
+                    <div className="p-5">
+                      <div className="mb-2 flex flex-wrap items-center gap-2"><Badge variant="outline">{item.category}</Badge><span className="text-xs text-muted-foreground">{format(new Date(item.published_at || item.created_at), "dd MMM yyyy", { locale: ptBR })}</span></div>
+                      <h3 className="text-base font-bold text-card-foreground group-hover:text-primary">{item.title}</h3>
+                      <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{item.summary}</p>
+                    </div>
+                  </Link>
                 ))}
               </div>
             )}
