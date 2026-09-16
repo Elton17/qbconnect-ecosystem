@@ -459,7 +459,6 @@ export default function EventOrganizerPage() {
             city: fullEvent.city || "",
             state: fullEvent.state || "",
             online_url: fullEvent.online_url || "",
-            image_url: fullEvent.image_url || "",
             start_date: fullEvent.start_date || "",
             end_date: fullEvent.end_date || "",
             price: String(fullEvent.price || 0),

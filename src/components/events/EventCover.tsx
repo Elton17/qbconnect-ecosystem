@@ -37,8 +37,9 @@ export default function EventCover({
   size = "card",
 }: EventCoverProps) {
   const date = new Date(startDate);
-  const day = format(date, "dd");
-  const month = format(date, "MMM", { locale: ptBR }).replace(".", "").toUpperCase();
+  const validDate = !Number.isNaN(date.getTime());
+  const day = validDate ? format(date, "dd") : "--";
+  const month = validDate ? format(date, "MMM", { locale: ptBR }).replace(".", "").toUpperCase() : "MÊS";
   const typeLabel = eventType === "online" ? "Online" : eventType === "hibrido" ? "Híbrido" : "Presencial";
 
   return (

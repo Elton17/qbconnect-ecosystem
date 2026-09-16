@@ -11,6 +11,7 @@ import RegistrationFieldsConfig, { type RegistrationFieldKey } from "./Registrat
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import EventCover from "./EventCover";
 
 const eventCategories = ["Networking", "Palestra", "Workshop", "Feira", "Curso", "Assembleia", "Social", "Outro"];
 const eventTypes = [
@@ -173,6 +174,19 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
                 <SelectContent>{eventTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+          </div>
+          <div>
+            <Label>Prévia da capa automática</Label>
+            <EventCover
+              title={form.title || "Nome do evento"}
+              startDate={form.start_date}
+              category={form.category}
+              eventType={form.event_type}
+              isFree={form.is_free}
+              price={Number(form.price) || 0}
+              className="mt-1 border-[5px] border-secondary"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">A capa usa automaticamente o nome, a data e a categoria do evento.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays, MapPin, Search, Plus, Loader2, Users, Clock, Ticket, Star,
-  Filter, ArrowRight, Globe, Building2, Tag, Sparkles, Pencil
+  Filter, ArrowRight, Globe, Building2, Tag, Pencil
 } from "lucide-react";
 import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
@@ -226,7 +226,6 @@ export default function EventsPage() {
             </div>
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {featuredEvents.slice(0, 3).map((event, i) => {
-                const dateInfo = formatShortDate(event.start_date);
                 const isRegistered = userRegistrations.has(event.id);
                 const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
                 return (
@@ -325,7 +324,6 @@ export default function EventsPage() {
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredEvents.map((event, i) => {
-              const dateInfo = formatShortDate(event.start_date);
               const isRegistered = userRegistrations.has(event.id);
               const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
               return (
