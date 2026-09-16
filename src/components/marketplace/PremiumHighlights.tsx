@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Star, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ProductWithSeller } from "./ProductCard";
+import ProductFallbackCover from "./ProductFallbackCover";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -63,9 +64,7 @@ export default function PremiumHighlights({ products }: Props) {
                   {img ? (
                     <img src={img} alt={p.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   ) : (
-                    <div className="h-full w-full bg-muted flex items-center justify-center">
-                      <Star className="h-8 w-8 text-primary/25" />
-                    </div>
+                    <ProductFallbackCover id={p.id} title={p.title} productType={p.product_type} category={p.category} />
                   )}
                   <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground shadow">
                     <Star className="h-2.5 w-2.5 fill-current" /> Premium

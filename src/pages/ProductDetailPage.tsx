@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import ProductCard, { type ProductWithSeller } from "@/components/marketplace/ProductCard";
 import { Seo, SITE_URL } from "@/components/Seo";
+import ProductFallbackCover from "@/components/marketplace/ProductFallbackCover";
 
 interface Product {
   id: string; user_id: string; title: string; description: string | null; price: number;
@@ -233,7 +234,7 @@ export default function ProductDetailPage() {
             {images.length > 0 ? (
               <img src={images[selectedImage]} alt={product.title} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full items-center justify-center"><Package className="h-20 w-20 text-muted-foreground/30" /></div>
+              <ProductFallbackCover id={product.id} title={product.title} productType={product.product_type} category={product.category} />
             )}
             {images.length > 1 && (
               <>
