@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PublicPageBanner from "@/components/ui/public-page-banner";
-import servicesBannerAsset from "@/assets/regions/campina-centro.webp.asset.json";
+import servicesBannerAsset from "@/assets/regions/campina-centro.webp";
 
 const services = [
   { title: "Consulta ao SCPC", description: "Informações na área de liberação de crédito, consultas, registros ao SCPC, bancos e cartórios.", icon: ShieldCheck, link: "https://associado.scpc.inf.br/?entidade=83420" },
@@ -31,7 +31,7 @@ const fadeInUp = {
 export default function ServicosPage() {
   return (
     <div>
-      <PublicPageBanner image={servicesBannerAsset.url} imageAlt="Vista de Campina Grande do Sul, Paraná" locationLabel="Campina Grande do Sul" eyebrow="Serviços especializados" title={<>Principais <span className="text-primary">Serviços</span></>} description="Somos a ponte que aproxima a indústria e a empresa do mercado, com soluções para o crescimento do seu negócio." icon={Briefcase} align="center">
+      <PublicPageBanner image={servicesBanner} imageAlt="Vista de Campina Grande do Sul, Paraná" locationLabel="Campina Grande do Sul" eyebrow="Serviços especializados" title={<>Principais <span className="text-primary">Serviços</span></>} description="Somos a ponte que aproxima a indústria e a empresa do mercado, com soluções para o crescimento do seu negócio." icon={Briefcase} align="center">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex flex-wrap justify-center gap-3">
             {[
               { label: "Serviços", value: `${services.length}`, icon: Briefcase },
