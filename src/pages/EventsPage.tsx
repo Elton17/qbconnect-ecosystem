@@ -77,7 +77,6 @@ function eventToFormData(event: EventItem): EventFormData {
     city: event.city,
     state: event.state,
     online_url: event.online_url,
-    image_url: event.image_url,
     start_date: event.start_date,
     end_date: event.end_date || "",
     price: String(event.price || 0),
@@ -230,7 +229,7 @@ export default function EventsPage() {
                 const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
                 return (
                   <motion.div key={event.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-                    className="group overflow-hidden rounded-2xl border-2 border-primary/20 bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
+                    className="event-card group overflow-hidden bg-card">
                     <EventCover title={event.title} startDate={event.start_date} category={event.category} eventType={event.event_type} isFree={event.is_free} price={event.price} featured />
                     <div className="p-5">
                       <h3 className="mb-2 text-lg font-bold text-card-foreground line-clamp-2">{event.title}</h3>
@@ -328,7 +327,7 @@ export default function EventsPage() {
               const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
               return (
                 <motion.div key={event.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-                  className="group overflow-hidden rounded-2xl border border-border bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
+                  className="event-card group overflow-hidden bg-card">
                   <EventCover title={event.title} startDate={event.start_date} category={event.category} eventType={event.event_type} isFree={event.is_free} price={event.price} />
                   <div className="p-4">
                     <span className="mb-1.5 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">

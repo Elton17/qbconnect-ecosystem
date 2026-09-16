@@ -32,7 +32,6 @@ export interface EventFormData {
   city: string;
   state: string;
   online_url: string;
-  image_url?: string;
   start_date: string;
   end_date: string;
   price: string;

@@ -151,7 +151,6 @@ export default function EventDetailPage() {
       city: event.city,
       state: event.state,
       online_url: event.online_url,
-      image_url: event.image_url,
       start_date: event.start_date,
       end_date: event.end_date || "",
       price: String(event.price || 0),
