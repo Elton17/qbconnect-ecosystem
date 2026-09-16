@@ -103,7 +103,7 @@ function MeusAnuncios({ userId }: { userId: string }) {
       <div className="flex items-center gap-2 ml-2 shrink-0">
         <Switch checked={active !== false} onCheckedChange={() => handleToggleActive(table, id, active !== false, label)} className="scale-90" />
         <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-          <Link to={link}><ExternalLink className="h-3.5 w-3.5" /></Link>
+          <Link to={table === "products" ? `/marketplace?editar=${id}` : link} aria-label={table === "products" ? `Editar ${title}` : `Abrir ${title}`}><ExternalLink className="h-3.5 w-3.5" /></Link>
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => confirmDelete(() => handleDelete(table, id, label))}>
           <Trash2 className="h-3.5 w-3.5" />

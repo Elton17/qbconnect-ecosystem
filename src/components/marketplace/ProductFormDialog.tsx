@@ -128,7 +128,7 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
         moderation_status: "pending",
       };
       if (product) {
-        const { error } = await supabase.from("products").update(payload).eq("id", product.id);
+        const { error } = await supabase.from("products").update(payload).eq("id", product.id).eq("user_id", user.id);
         if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
         toast({ title: "Alterações enviadas para aprovação!" });
       } else {
