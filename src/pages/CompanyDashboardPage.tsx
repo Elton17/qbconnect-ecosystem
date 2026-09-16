@@ -17,7 +17,7 @@ import { ptBR } from "date-fns/locale";
 import MyNewsManager from "@/components/news/MyNewsManager";
 import { Link } from "react-router-dom";
 import { useApprovedCompany } from "@/hooks/useApprovedCompany";
-import { Plus, Wrench } from "lucide-react";
+import { Wrench } from "lucide-react";
 
 interface DashboardStats {
   products: number;

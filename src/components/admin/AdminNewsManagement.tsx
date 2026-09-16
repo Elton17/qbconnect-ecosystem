@@ -7,7 +7,6 @@ import { useConfirmDelete } from "@/hooks/useConfirmDelete";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import NewsFormDialog from "@/components/news/NewsFormDialog";
 import { toast } from "sonner";
 
