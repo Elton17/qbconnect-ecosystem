@@ -16,7 +16,7 @@
 - [x] Adicionar filtros completos e adaptados ao celular no Marketplace
 - [x] Substituir Atividade Recente por uma vitrine editorial dinâmica na home.
 - [x] Adicionar banners fotográficos regionais aos menus públicos.
-- [x] Tornar a logo obrigatória no cadastro e na ativação, com exibição automática ajustada.
+- [x] Tornar a logo opcional no cadastro e na ativação, mantendo edição e exibição automática ajustada.
 - [x] Padronizar edição e nova aprovação para todos os conteúdos empresariais.
 - [x] Criar sitemap automático com páginas e conteúdos públicos aprovados.
 - [x] Aplicar metadados, canonicals, indexação e dados estruturados por página.
@@ -25,3 +25,6 @@
 - [x] Permitir anexar e substituir logos na edição logada e administrativa.
 - [x] Consolidar todas as aprovações pendentes no painel administrativo.
 - [x] Preservar a aba selecionada ao usar e retomar o painel administrativo.
+- [x] Destacar cadastros de produtos, serviços e notícias na área logada.
+- [x] Publicar imediatamente produtos, notícias e benefícios de empresas aprovadas.
+- [x] Separar produtos e serviços no Marketplace e adicionar parcelamento calculado automaticamente.
