@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 interface PublicPageBannerProps {
   image: string;
   imageAlt: string;
+  locationLabel?: string;
   eyebrow: string;
   title: ReactNode;
   description: string;
@@ -15,6 +16,7 @@ interface PublicPageBannerProps {
 export default function PublicPageBanner({
   image,
   imageAlt,
+  locationLabel,
   eyebrow,
   title,
   description,
@@ -31,9 +33,11 @@ export default function PublicPageBanner({
         alt={imageAlt}
         width={1600}
         height={600}
+        loading="eager"
+        fetchPriority="high"
         className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
       />
-      <div className="absolute inset-0 -z-10 bg-secondary/75 md:bg-secondary/55" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-secondary/95 via-secondary/75 to-secondary/35" />
       <div className="container flex min-h-[250px] items-center md:min-h-[260px]">
         <div className={centered ? "mx-auto max-w-4xl text-center" : "max-w-3xl"}>
           <div className={`mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-primary ${centered ? "justify-center" : ""}`}>
@@ -44,6 +48,12 @@ export default function PublicPageBanner({
           {children && <div className={`mt-7 flex flex-wrap gap-3 ${centered ? "justify-center" : ""}`}>{children}</div>}
         </div>
       </div>
+      {locationLabel && (
+        <div className="absolute bottom-4 right-5 z-10 border-l-2 border-primary pl-3 text-right md:bottom-6 md:right-8">
+          <span className="block text-[10px] font-semibold uppercase text-secondary-foreground/65">Nossa região</span>
+          <span className="text-sm font-bold text-secondary-foreground">{locationLabel}</span>
+        </div>
+      )}
     </section>
   );
 }
