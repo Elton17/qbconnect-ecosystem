@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarDays, MapPin, Search, Plus, Loader2, Users, Clock, Ticket, Star,
-  Filter, ArrowRight, Globe, Building2, Tag, Sparkles, Pencil
+  Filter, ArrowRight, Globe, Building2, Tag, Pencil
 } from "lucide-react";
 import EventFormDialog, { type EventFormData } from "@/components/events/EventFormDialog";
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import PublicPageBanner from "@/components/ui/public-page-banner";
 import bannerEvents from "@/assets/banner-events.jpg";
+import EventCover from "@/components/events/EventCover";
 
 const eventCategories = ["Todos", "Networking", "Palestra", "Workshop", "Feira", "Curso", "Assembleia", "Social", "Outro"];
 
@@ -76,7 +77,6 @@ function eventToFormData(event: EventItem): EventFormData {
     city: event.city,
     state: event.state,
     online_url: event.online_url,
-    image_url: event.image_url,
     start_date: event.start_date,
     end_date: event.end_date || "",
     price: String(event.price || 0),
@@ -225,35 +225,12 @@ export default function EventsPage() {
             </div>
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {featuredEvents.slice(0, 3).map((event, i) => {
-                const dateInfo = formatShortDate(event.start_date);
                 const isRegistered = userRegistrations.has(event.id);
                 const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
                 return (
                   <motion.div key={event.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-                    className="group overflow-hidden rounded-2xl border-2 border-primary/20 bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
-                    <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                      {event.image_url ? (
-                        <img src={event.image_url} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                          <CalendarDays className="h-16 w-16 text-primary/30" />
-                        </div>
-                      )}
-                      <div className="absolute left-3 top-3 flex flex-col items-center rounded-xl bg-card/90 px-3 py-2 shadow-lg backdrop-blur-sm">
-                        <span className="text-2xl font-extrabold leading-none text-primary">{dateInfo.day}</span>
-                        <span className="text-xs font-bold uppercase text-muted-foreground">{dateInfo.month}</span>
-                      </div>
-                      <div className="absolute right-3 top-3">
-                        <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-lg">
-                          <Sparkles className="mr-1 inline h-3 w-3" />Destaque
-                        </span>
-                      </div>
-                      {event.is_free && (
-                        <div className="absolute bottom-3 right-3">
-                          <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground shadow">Gratuito</span>
-                        </div>
-                      )}
-                    </div>
+                    className="event-card group overflow-hidden bg-card">
+                    <EventCover title={event.title} startDate={event.start_date} category={event.category} eventType={event.event_type} isFree={event.is_free} price={event.price} featured />
                     <div className="p-5">
                       <h3 className="mb-2 text-lg font-bold text-card-foreground line-clamp-2">{event.title}</h3>
                       <div className="mb-3 space-y-1.5 text-sm text-muted-foreground">
@@ -346,36 +323,12 @@ export default function EventsPage() {
         ) : (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredEvents.map((event, i) => {
-              const dateInfo = formatShortDate(event.start_date);
               const isRegistered = userRegistrations.has(event.id);
               const isFull = event.max_attendees ? (event.registration_count || 0) >= event.max_attendees : false;
               return (
                 <motion.div key={event.id} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-                  className="group overflow-hidden rounded-2xl border border-border bg-card card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1">
-                  <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                    {event.image_url ? (
-                      <img src={event.image_url} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-                        <CalendarDays className="h-12 w-12 text-primary/20" />
-                      </div>
-                    )}
-                    <div className="absolute left-3 top-3 flex flex-col items-center rounded-xl bg-card/90 px-3 py-2 shadow backdrop-blur-sm">
-                      <span className="text-xl font-extrabold leading-none text-primary">{dateInfo.day}</span>
-                      <span className="text-[10px] font-bold uppercase text-muted-foreground">{dateInfo.month}</span>
-                    </div>
-                    {event.is_free ? (
-                      <div className="absolute right-3 top-3">
-                        <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-accent-foreground">Gratuito</span>
-                      </div>
-                    ) : (
-                      <div className="absolute right-3 top-3">
-                        <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
-                          R$ {event.price.toFixed(2).replace(".", ",")}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  className="event-card group overflow-hidden bg-card">
+                  <EventCover title={event.title} startDate={event.start_date} category={event.category} eventType={event.event_type} isFree={event.is_free} price={event.price} />
                   <div className="p-4">
                     <span className="mb-1.5 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                       {event.category}

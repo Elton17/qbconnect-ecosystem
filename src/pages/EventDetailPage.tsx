@@ -16,6 +16,7 @@ import EventFormDialog, { type EventFormData } from "@/components/events/EventFo
 import { type RegistrationFieldKey } from "@/components/events/RegistrationFieldsConfig";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { Seo, SITE_URL } from "@/components/Seo";
+import EventCover from "@/components/events/EventCover";
 
 function generateTicketCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -150,7 +151,6 @@ export default function EventDetailPage() {
       city: event.city,
       state: event.state,
       online_url: event.online_url,
-      image_url: event.image_url,
       start_date: event.start_date,
       end_date: event.end_date || "",
       price: String(event.price || 0),
@@ -170,22 +170,14 @@ export default function EventDetailPage() {
 
   return (
     <div>
-      <Seo title={event.title} description={event.short_description || event.description} canonicalPath={`/evento/${event.id}`} image={event.image_url} structuredData={{ "@context": "https://schema.org", "@type": "Event", name: event.title, description: event.short_description || event.description, image: event.image_url || undefined, startDate: event.start_date, endDate: event.end_date || undefined, eventAttendanceMode: event.event_type === "online" ? "https://schema.org/OnlineEventAttendanceMode" : event.event_type === "hibrido" ? "https://schema.org/MixedEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", eventStatus: "https://schema.org/EventScheduled", location: event.event_type === "online" ? { "@type": "VirtualLocation", url: event.online_url || `${SITE_URL}/evento/${event.id}` } : { "@type": "Place", name: event.location || event.company_name, address: { "@type": "PostalAddress", streetAddress: event.address || undefined, addressLocality: event.city || undefined, addressRegion: event.state || "PR", addressCountry: "BR" } }, organizer: { "@type": "Organization", name: event.company_name || "QBCAMP Conecta Mais" }, url: `${SITE_URL}/evento/${event.id}`, isAccessibleForFree: event.is_free }} />
-      {/* Hero Image */}
-      <section className="relative">
-        <div className="aspect-[3/1] max-h-[400px] w-full overflow-hidden bg-muted">
-          {event.image_url ? (
-            <img src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/20 via-accent/10 to-secondary">
-              <CalendarDays className="h-24 w-24 text-primary/20" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+      <Seo title={event.title} description={event.short_description || event.description} canonicalPath={`/evento/${event.id}`} structuredData={{ "@context": "https://schema.org", "@type": "Event", name: event.title, description: event.short_description || event.description, startDate: event.start_date, endDate: event.end_date || undefined, eventAttendanceMode: event.event_type === "online" ? "https://schema.org/OnlineEventAttendanceMode" : event.event_type === "hibrido" ? "https://schema.org/MixedEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode", eventStatus: "https://schema.org/EventScheduled", location: event.event_type === "online" ? { "@type": "VirtualLocation", url: event.online_url || `${SITE_URL}/evento/${event.id}` } : { "@type": "Place", name: event.location || event.company_name, address: { "@type": "PostalAddress", streetAddress: event.address || undefined, addressLocality: event.city || undefined, addressRegion: event.state || "PR", addressCountry: "BR" } }, organizer: { "@type": "Organization", name: event.company_name || "QBCAMP Conecta Mais" }, url: `${SITE_URL}/evento/${event.id}`, isAccessibleForFree: event.is_free }} />
+      <section className="border-b-[6px] border-secondary bg-muted">
+        <div className="container py-5 md:py-8">
+          <EventCover title={event.title} startDate={event.start_date} category={event.category} eventType={event.event_type} isFree={event.is_free} price={event.price} featured={event.featured} size="wide" className="aspect-[16/7] min-h-56 border-[6px] border-secondary" />
         </div>
       </section>
 
-      <div className="container relative -mt-20 pb-16">
+      <div className="container relative pb-16 pt-8">
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Main Content */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-2">
