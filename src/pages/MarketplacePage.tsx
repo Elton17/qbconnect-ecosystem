@@ -23,7 +23,7 @@ const shortcuts = [
 ];
 
 export default function MarketplacePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<ProductWithSeller[]>([]);
@@ -72,7 +72,7 @@ export default function MarketplacePage() {
   }, []);
 
   useEffect(() => {
-    if (!editProductId) return;
+    if (!editProductId || authLoading) return;
     if (!user) {
       toast({ title: "Entre na sua conta para editar este anúncio.", variant: "destructive" });
       setSearchParams({}, { replace: true });
@@ -101,7 +101,7 @@ export default function MarketplacePage() {
 
     void openEditor();
     return () => { active = false; };
-  }, [editProductId, user?.id]);
+  }, [editProductId, user?.id, authLoading]);
 
   function handleEditorOpenChange(open: boolean) {
     setEditorOpen(open);
