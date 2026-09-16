@@ -106,10 +106,11 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
   .font-event-display {
-    font-family: 'Archivo Black', 'Montserrat', system-ui, sans-serif;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-weight: 900;
   }
   .font-event-body {
-    font-family: 'Hind', 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
   .event-card {
     border: 6px solid hsl(var(--secondary));
