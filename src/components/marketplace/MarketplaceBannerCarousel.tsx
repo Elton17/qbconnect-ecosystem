@@ -1,33 +1,36 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, Network, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import regionBanner from "@/assets/marketplace-region-banner.jpg";
-import servicesBanner from "@/assets/marketplace-services-banner.jpg";
-import connectionsBanner from "@/assets/marketplace-connections-banner.jpg";
+import quatroBarrasAsset from "@/assets/regions/quatro-barras-entrada.webp.asset.json";
+import campinaAsset from "@/assets/regions/campina-centro.webp.asset.json";
+import reservaAsset from "@/assets/regions/campina-reserva.webp.asset.json";
 
 const banners = [
   {
-    image: regionBanner,
-    eyebrow: "Valorize quem produz perto de você",
-    title: "Compre da nossa região",
+    image: quatroBarrasAsset.url,
+    imageAlt: "Vista urbana de Quatro Barras, Paraná",
+    eyebrow: "Quatro Barras · Comércio local",
+    title: "Produtos que movimentam nossa cidade",
     description: "Encontre produtos de empresas locais e movimente a economia regional.",
     action: "Ver produtos",
     type: "product" as const,
     icon: MapPin,
   },
   {
-    image: servicesBanner,
-    eyebrow: "Especialistas para cada necessidade",
-    title: "Serviços para sua empresa",
+    image: campinaAsset.url,
+    imageAlt: "Paisagem de Campina Grande do Sul, Paraná",
+    eyebrow: "Campina Grande do Sul · Serviços",
+    title: "Especialistas perto da sua empresa",
     description: "Conecte-se a fornecedores preparados para apoiar o crescimento do seu negócio.",
     action: "Encontrar serviços",
     type: "service" as const,
     icon: Wrench,
   },
   {
-    image: connectionsBanner,
-    eyebrow: "QBCAMP Conecta Mais",
-    title: "Conexões que fortalecem negócios",
+    image: reservaAsset.url,
+    imageAlt: "Paisagem natural de Campina Grande do Sul, Paraná",
+    eyebrow: "Quatro Barras + Campina Grande do Sul",
+    title: "Uma região conectada para crescer",
     description: "Uma rede regional feita para aproximar empresas, oportunidades e novos mercados.",
     action: "Explorar a região",
     type: "all" as const,
@@ -53,7 +56,7 @@ export default function MarketplaceBannerCarousel({ onTypeSelect }: { onTypeSele
         <img
           key={banner.title}
           src={banner.image}
-          alt=""
+          alt={banner.imageAlt}
           width={1600}
           height={600}
           aria-hidden={index !== active}
