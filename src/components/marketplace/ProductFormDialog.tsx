@@ -125,6 +125,14 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
     if (!user || !form.title) { toast({ title: "Preencha o título", variant: "destructive" }); return; }
     setUploading(true);
     try {
+      if (!product) {
+        const { count, error: countError } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("active", true);
+        if (countError) throw countError;
+        if ((count || 0) >= 5) {
+          toast({ title: "Limite de anúncios atingido", description: "Sua empresa já possui 5 produtos ou serviços ativos.", variant: "destructive" });
+          return;
+        }
+      }
       const newUrls = await uploadImages();
       const allImages = [...existingImages, ...newUrls];
       const payload = {
@@ -150,7 +158,11 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
         toast({ title: "Anúncio atualizado e publicado!" });
       } else {
         const { error } = await supabase.from("products").insert(payload);
-        if (error) { toast({ title: "Erro ao cadastrar", variant: "destructive" }); return; }
+        if (error) {
+          const limitReached = error.message.includes("Limite de 5 anúncios");
+          toast({ title: limitReached ? "Limite de anúncios atingido" : "Erro ao cadastrar", description: limitReached ? "Sua empresa já possui 5 produtos ou serviços ativos." : undefined, variant: "destructive" });
+          return;
+        }
         toast({ title: "Anúncio publicado com sucesso!" });
       }
       onOpenChange(false);
