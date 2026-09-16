@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { CalendarDays, Loader2, ImagePlus, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CalendarDays, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,9 +69,6 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
   const [form, setForm] = useState<EventFormData>(emptyForm);
   const [registrationFields, setRegistrationFields] = useState<RegistrationFieldKey[]>(["nome"]);
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditing = !!initialData?.id;
 
@@ -83,26 +80,11 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
         end_date: initialData.end_date ? toLocalDatetime(initialData.end_date) : "",
       });
       setRegistrationFields(initialData.registration_fields || ["nome"]);
-      setImagePreview(initialData.image_url || "");
-      setImageFile(null);
     } else if (open && !initialData) {
       setForm(emptyForm);
       setRegistrationFields(["nome"]);
-      setImagePreview("");
-      setImageFile(null);
     }
   }, [open, initialData]);
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Imagem muito grande (máx 5MB)", variant: "destructive" });
-      return;
-    }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -111,17 +93,6 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
       return;
     }
     setSaving(true);
-
-    let imageUrl = form.image_url || "";
-    if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
-      const path = `events/${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("products").upload(path, imageFile);
-      if (!uploadErr) {
-        const { data: urlData } = supabase.storage.from("products").getPublicUrl(path);
-        imageUrl = urlData.publicUrl;
-      }
-    }
 
     const payload = {
       title: form.title,
@@ -134,7 +105,6 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
       city: form.city,
       state: form.state,
       online_url: form.online_url,
-      image_url: imageUrl,
       start_date: new Date(form.start_date).toISOString(),
       end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
       price: form.is_free ? 0 : parseFloat(form.price) || 0,
@@ -256,27 +226,6 @@ export default function EventFormDialog({ open, onOpenChange, initialData, onSuc
           <div>
             <Label>Limite de vagas (deixe vazio para ilimitado)</Label>
             <Input type="number" value={form.max_attendees} onChange={(e) => setForm({ ...form, max_attendees: e.target.value })} placeholder="Ex: 100" />
-          </div>
-
-          {/* Image upload */}
-          <div>
-            <Label>Imagem de capa</Label>
-            <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageSelect} className="hidden" />
-            {imagePreview ? (
-              <div className="relative mt-1 aspect-[16/9] overflow-hidden rounded-lg border border-border">
-                <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                <button onClick={() => { setImageFile(null); setImagePreview(""); setForm({ ...form, image_url: "" }); }} className="absolute right-2 top-2 rounded-full bg-destructive p-1 text-destructive-foreground">
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ) : (
-              <div onClick={() => fileInputRef.current?.click()} className="mt-1 flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-input bg-muted/50 py-8 transition-colors hover:border-primary/50">
-                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                  <ImagePlus className="h-8 w-8" />
-                  <span className="text-sm">Clique para adicionar imagem</span>
-                </div>
-              </div>
-            )}
           </div>
 
           <RegistrationFieldsConfig selected={registrationFields} onChange={setRegistrationFields} />

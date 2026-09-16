@@ -104,6 +104,12 @@
   .font-body {
     font-family: 'Inter', system-ui, sans-serif;
   }
+  .font-event-display {
+    font-family: 'Archivo Black', 'Montserrat', system-ui, sans-serif;
+  }
+  .font-event-body {
+    font-family: 'Hind', 'Inter', system-ui, sans-serif;
+  }
   .card-shadow {
     box-shadow: var(--card-shadow);
   }
@@ -115,6 +121,13 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-cover,
+  .event-cover * {
+    transition-duration: 0.01ms !important;
   }
 }
 

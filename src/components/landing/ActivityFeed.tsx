@@ -6,6 +6,7 @@ import { ArrowRight, CalendarDays, Handshake, Newspaper } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { attachNewsPresentation } from "@/lib/news";
+import EventCover from "@/components/events/EventCover";
 
 interface FeedItem {
   id: string;
@@ -15,6 +16,10 @@ interface FeedItem {
   href: string;
   description: string;
   image?: string | null;
+  category?: string | null;
+  eventType?: string | null;
+  isFree?: boolean;
+  price?: number | null;
 }
 
 const icons = {
@@ -36,7 +41,7 @@ export default function ActivityFeed() {
     async function fetch() {
       const [newsResponse, events, opportunities] = await Promise.all([
         supabase.from("news").select("*").eq("status", "approved").order("published_at", { ascending: false }).limit(4),
-        supabase.from("events").select("id, title, short_description, description, image_url, start_date, created_at").eq("active", true).eq("moderation_status", "approved").order("start_date", { ascending: true }).limit(4),
+        supabase.from("events").select("id, title, short_description, description, start_date, created_at, category, event_type, is_free, price").eq("active", true).eq("moderation_status", "approved").order("start_date", { ascending: true }).limit(4),
         supabase.from("opportunities").select("id, title, description, created_at").eq("active", true).eq("status", "open").eq("moderation_status", "approved").order("created_at", { ascending: false }).limit(4),
       ]);
 
@@ -44,7 +49,7 @@ export default function ActivityFeed() {
 
       const all: FeedItem[] = [
         ...news.map(item => ({ id: item.id, title: item.title, description: item.summary, image: item.cover_url, type: "news" as const, created_at: item.published_at || item.created_at, href: `/noticias/${item.id}` })),
-        ...(events.data || []).map(item => ({ id: item.id, title: item.title, description: item.short_description || item.description || "Confira os detalhes deste evento regional.", image: item.image_url, type: "event" as const, created_at: item.start_date || item.created_at || new Date().toISOString(), href: `/evento/${item.id}` })),
+        ...(events.data || []).map(item => ({ id: item.id, title: item.title, description: item.short_description || item.description || "Confira os detalhes deste evento regional.", type: "event" as const, created_at: item.start_date || item.created_at || new Date().toISOString(), href: `/evento/${item.id}`, category: item.category, eventType: item.event_type, isFree: item.is_free, price: item.price })),
         ...(opportunities.data || []).map(item => ({ id: item.id, title: item.title, description: item.description || "Uma nova possibilidade de parceria para empresas da região.", type: "opportunity" as const, created_at: item.created_at || new Date().toISOString(), href: "/oportunidades" })),
       ]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -75,14 +80,14 @@ export default function ActivityFeed() {
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
             <Link to={featured.href} className="group relative min-h-[420px] overflow-hidden rounded-lg bg-secondary">
-              {featured.image ? <img src={featured.image} alt={featured.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <div className="absolute inset-0 flex items-center justify-center bg-secondary"><Newspaper className="h-20 w-20 text-secondary-foreground/20" /></div>}
-              <div className="absolute inset-0 bg-secondary/65" />
-              <div className="absolute inset-x-0 bottom-0 p-6 text-secondary-foreground md:p-8">
+              {featured.type === "event" ? <EventCover title={featured.title} startDate={featured.created_at} category={featured.category} eventType={featured.eventType} isFree={featured.isFree} price={featured.price} size="wide" className="absolute inset-0 aspect-auto h-full" /> : featured.image ? <img src={featured.image} alt={featured.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <div className="absolute inset-0 flex items-center justify-center bg-secondary"><Newspaper className="h-20 w-20 text-secondary-foreground/20" /></div>}
+              {featured.type !== "event" && <div className="absolute inset-0 bg-secondary/65" />}
+              {featured.type !== "event" && <div className="absolute inset-x-0 bottom-0 p-6 text-secondary-foreground md:p-8">
                 <span className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase text-primary">{labels[featured.type]}</span>
                 <h3 className="text-2xl font-extrabold leading-tight md:text-3xl">{featured.title}</h3>
                 <p className="mt-3 line-clamp-3 text-sm text-secondary-foreground/80 md:text-base">{featured.description}</p>
                 <span className="mt-5 flex items-center gap-2 text-sm font-semibold">Saiba mais <ArrowRight className="h-4 w-4" /></span>
-              </div>
+              </div>}
             </Link>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
           {supporting.map((item, i) => {
