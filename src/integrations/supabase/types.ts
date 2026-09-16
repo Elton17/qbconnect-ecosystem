@@ -732,6 +732,7 @@ export type Database = {
           id: string
           image_url: string | null
           images: string[] | null
+          installment_count: number
           moderation_status: string
           price: number
           price_type: string
@@ -753,6 +754,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          installment_count?: number
           moderation_status?: string
           price?: number
           price_type?: string
@@ -774,6 +776,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           images?: string[] | null
+          installment_count?: number
           moderation_status?: string
           price?: number
           price_type?: string
