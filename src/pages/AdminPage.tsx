@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { QBCAMP_EMAIL, QBCAMP_PHONE_DISPLAY, getWhatsAppContactUrl } from "@/lib/constants";
 import { isValidCNPJ, isValidCPF } from "@/lib/masks";
 import AdminNewsManagement from "@/components/admin/AdminNewsManagement";
+import CompanyLogoEditor from "@/components/company/CompanyLogoEditor";
 
 interface Stat { label: string; value: number; icon: any; tab?: string; }
+
+const ADMIN_TABS = ["overview", "waitlist", "companies", "products", "news", "events", "opportunities", "benefits", "roles"] as const;
+type AdminTab = typeof ADMIN_TABS[number];
 
 export default function AdminPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [stats, setStats] = useState<Stat[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -45,7 +50,9 @@ export default function AdminPage() {
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [tab, setTab] = useState("overview");
+  const requestedTab = searchParams.get("aba");
+  const initialTab = ADMIN_TABS.includes(requestedTab as AdminTab) ? requestedTab as AdminTab : "overview";
+  const [tab, setTabState] = useState<AdminTab>(initialTab);
   const [waitlistFilter, setWaitlistFilter] = useState<"all" | "associate" | "non_associate">("all");
   const [waitlistStatus, setWaitlistStatus] = useState<"all" | "pending" | "accepted" | "rejected" | "activated">("all");
   const [waitlistSearch, setWaitlistSearch] = useState("");
@@ -68,6 +75,14 @@ export default function AdminPage() {
   const [linkedCourses, setLinkedCourses] = useState<any[]>([]);
 
   useEffect(() => { if (user) fetchAll(); }, [user]);
+
+  function setTab(nextTab: string) {
+    const validTab = ADMIN_TABS.includes(nextTab as AdminTab) ? nextTab as AdminTab : "overview";
+    setTabState(validTab);
+    const next = new URLSearchParams(searchParams);
+    if (validTab === "overview") next.delete("aba"); else next.set("aba", validTab);
+    setSearchParams(next, { replace: true });
+  }
 
   async function fetchAll() {
     setLoading(true);
@@ -319,6 +334,16 @@ export default function AdminPage() {
   }
 
   const pendingProfiles = profiles.filter((p) => !p.approved);
+  const pendingGroups = [
+    { label: "Empresas", tab: "companies" as AdminTab, items: pendingProfiles, title: (item: any) => item.company_name },
+    { label: "Lista de Espera", tab: "waitlist" as AdminTab, items: waitlist.filter((item) => item.decision_status === "pending"), title: (item: any) => item.company_name },
+    { label: "Produtos", tab: "products" as AdminTab, items: products.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.title },
+    { label: "Notícias", tab: "news" as AdminTab, items: news.filter((item) => item.status === "pending"), title: (item: any) => item.title },
+    { label: "Eventos", tab: "events" as AdminTab, items: events.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.title },
+    { label: "Oportunidades", tab: "opportunities" as AdminTab, items: opportunities.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.title },
+    { label: "Benefícios", tab: "benefits" as AdminTab, items: benefits.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.offer },
+  ];
+  const pendingTotal = pendingGroups.reduce((total, group) => total + group.items.length, 0);
 
   // ── Edit form field configs per table ──
   const editFields: Record<string, { key: string; label: string; type?: string; options?: string[] }[]> = {
@@ -442,9 +467,9 @@ export default function AdminPage() {
             <h1 className="text-3xl font-extrabold text-foreground">Painel Administrativo</h1>
             <p className="text-muted-foreground">Gestão completa da plataforma</p>
           </div>
-          {pendingProfiles.length > 0 && (
+          {pendingTotal > 0 && (
             <Badge variant="destructive" className="text-sm px-3 py-1">
-              {pendingProfiles.length} empresa(s) pendente(s)
+              {pendingTotal} aprovação(ões) pendente(s)
             </Badge>
           )}
         </div>
@@ -493,25 +518,15 @@ export default function AdminPage() {
                 <h2 className="mb-4 text-lg font-bold text-card-foreground flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" /> Aprovações Pendentes
                 </h2>
-                {pendingProfiles.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhuma empresa pendente 🎉</p>
+                {pendingTotal === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhuma aprovação pendente.</p>
                 ) : (
                   <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {pendingProfiles.map((p) => (
-                      <div key={p.id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                        <div className="min-w-0">
-                          <div className="text-sm font-semibold text-card-foreground truncate">{p.company_name || "Sem nome"}</div>
-                          <div className="text-xs text-muted-foreground">{p.cnpj} · {p.city}</div>
-                        </div>
-                        <div className="flex gap-2 shrink-0">
-                          <Button size="sm" variant="outline" onClick={() => openEdit("profiles", p)}>
-                            <Eye className="mr-1 h-3 w-3" /> Ver
-                          </Button>
-                          <Button size="sm" onClick={() => toggleApproval(p.id, p.approved)}>
-                            <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Aprovar
-                          </Button>
-                        </div>
-                      </div>
+                    {pendingGroups.filter((group) => group.items.length > 0).map((group) => (
+                      <button key={group.tab} type="button" onClick={() => setTab(group.tab)} className="flex w-full items-center justify-between rounded-md border border-border p-3 text-left transition-colors hover:bg-muted/50">
+                        <div className="min-w-0"><div className="text-sm font-semibold text-card-foreground">{group.label}</div><div className="truncate text-xs text-muted-foreground">{group.items.slice(0, 2).map(group.title).join(" • ")}</div></div>
+                        <Badge variant="destructive">{group.items.length}</Badge>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -570,7 +585,7 @@ export default function AdminPage() {
               )}
               actions={(item) => (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/empresa/${item.user_id}`)} title="Ver perfil">
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/empresa/${item.user_id}`, { state: { from: `/admin?aba=companies` } })} title="Ver perfil">
                     <Eye className="h-3 w-3" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit("profiles", item)} title="Editar">
@@ -613,7 +628,7 @@ export default function AdminPage() {
               renderStatus={(item) => <div className="flex gap-1"><ActiveBadge active={item.active} /><ModerationBadge status={item.moderation_status} /></div>}
               actions={(item) => (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/produto/${item.id}`)} title="Ver">
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/produto/${item.id}`, { state: { from: `/admin?aba=products` } })} title="Ver">
                     <Eye className="h-3 w-3" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit("products", item)} title="Editar">
@@ -649,7 +664,7 @@ export default function AdminPage() {
               )}
               actions={(item) => (
                 <>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/evento/${item.id}`)} title="Ver evento">
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/evento/${item.id}`, { state: { from: `/admin?aba=events` } })} title="Ver evento">
                     <Eye className="h-3 w-3" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/evento/${item.id}/painel`)} title="Painel do organizador">
@@ -1033,6 +1048,21 @@ export default function AdminPage() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              {editDialog.table === "profiles" && editDialog.item?.user_id && (
+                <div className="space-y-2">
+                  <Label>Logo da empresa</Label>
+                  <CompanyLogoEditor
+                    ownerId={editDialog.item.user_id}
+                    value={editForm.logo_url}
+                    onChange={async (logoUrl) => {
+                      const { error } = await supabase.from("profiles").update({ logo_url: logoUrl }).eq("id", editDialog.item.id);
+                      if (error) throw error;
+                      setEditForm((current) => ({ ...current, logo_url: logoUrl }));
+                      setProfiles((current) => current.map((profile) => profile.id === editDialog.item.id ? { ...profile, logo_url: logoUrl } : profile));
+                    }}
+                  />
+                </div>
+              )}
               {(editFields[editDialog.table] || []).map((field) => (
                 <div key={field.key}>
                   <Label className="mb-1.5 block text-sm font-medium">{field.label}</Label>

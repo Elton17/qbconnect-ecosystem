@@ -13,11 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Building2, User, Globe, Save, Loader2, Shield, Camera, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone, Users } from "lucide-react";
+import { Building2, User, Globe, Save, Loader2, Shield, Package, Handshake, Gift, CalendarDays, GraduationCap, Trash2, ExternalLink, Megaphone, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import type { Tables } from "@/integrations/supabase/types";
 import { formatPhone, formatCNPJ as formatCNPJMask, formatCPF, isValidCNPJ, isValidCPF } from "@/lib/masks";
+import CompanyLogoEditor from "@/components/company/CompanyLogoEditor";
 
 
 
@@ -189,7 +190,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     company_name: "", cnpj: "", cpf: "", segment: "", city: "", phone: "", email: "",
     website: "", address: "", description: "", contact_name: "", contact_role: "",
@@ -225,23 +225,12 @@ export default function ProfilePage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith("image/") || file.size > 2 * 1024 * 1024) {
-      toast({ title: "Logo inválida", description: "Use uma imagem JPG, PNG ou WebP de até 2 MB.", variant: "destructive" });
-      return;
-    }
-    setUploading(true);
-    const fileExt = file.name.split(".").pop();
-    const filePath = `${user.id}/logo.${fileExt}`;
-    const { error: uploadError } = await supabase.storage.from("logos").upload(filePath, file, { upsert: true });
-    if (uploadError) { toast({ title: "Erro no upload", description: uploadError.message, variant: "destructive" }); setUploading(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from("logos").getPublicUrl(filePath);
-    await supabase.from("profiles").update({ logo_url: publicUrl }).eq("user_id", user.id);
-    setForm((prev) => ({ ...prev, logo_url: publicUrl }));
-    toast({ title: "Logo atualizado!" });
-    setUploading(false);
+  const updateLogo = async (logoUrl: string | null) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").update({ logo_url: logoUrl, approved: false }).eq("user_id", user.id);
+    if (error) throw error;
+    setForm((prev) => ({ ...prev, logo_url: logoUrl || "" }));
+    setProfile((current) => current ? { ...current, logo_url: logoUrl, approved: false } : current);
   };
 
   const handleSave = async () => {
@@ -275,17 +264,11 @@ export default function ProfilePage() {
         </div>
         <div className="container relative">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative group">
-                <Avatar className="h-20 w-28 rounded-md border-2 border-secondary-foreground/10 bg-background p-2">
-                  {form.logo_url ? <AvatarImage src={form.logo_url} alt="Logo da empresa" className="object-contain" /> : null}
-                  <AvatarFallback className="bg-primary/20 text-primary text-2xl"><Building2 className="h-10 w-10" /></AvatarFallback>
-                </Avatar>
-                 <label htmlFor="logo-upload" className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-md bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100">
-                  {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
-                </label>
-                <input id="logo-upload" type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploading} />
-              </div>
+              <div className="flex items-center gap-4">
+               <Avatar className="h-20 w-28 rounded-md border-2 border-secondary-foreground/10 bg-background p-2">
+                 {form.logo_url ? <AvatarImage src={form.logo_url} alt="Logo da empresa" className="object-contain" /> : null}
+                 <AvatarFallback className="bg-primary/20 text-primary text-2xl"><Building2 className="h-10 w-10" /></AvatarFallback>
+               </Avatar>
               <div>
                 <h1 className="text-2xl font-extrabold text-secondary-foreground">{form.company_name || "Meu Perfil"}</h1>
                 <div className="mt-1 flex items-center gap-2">
@@ -324,6 +307,7 @@ export default function ProfilePage() {
                 <CardDescription>Informações principais do seu negócio.</CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6 sm:grid-cols-2">
+                {user && <div className="sm:col-span-2 space-y-2"><Label>Logo da empresa</Label><CompanyLogoEditor ownerId={user.id} value={form.logo_url} onChange={updateLogo} compact /></div>}
                 <div className="space-y-2"><Label htmlFor="company_name">Razão Social</Label><Input id="company_name" value={form.company_name} onChange={(e) => handleChange("company_name", e.target.value)} /></div>
                 <div className="space-y-2"><Label htmlFor="cnpj">CNPJ (opcional)</Label><Input id="cnpj" inputMode="numeric" value={form.cnpj} onChange={(e) => handleChange("cnpj", e.target.value)} placeholder="00.000.000/0000-00" /></div>
                 <div className="space-y-2"><Label htmlFor="cpf">CPF (opcional)</Label><Input id="cpf" inputMode="numeric" value={form.cpf} onChange={(e) => handleChange("cpf", e.target.value)} placeholder="000.000.000-00" /></div>

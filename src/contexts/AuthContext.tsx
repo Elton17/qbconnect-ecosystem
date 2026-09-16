@@ -38,8 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Revalida/renova a sessão ao voltar para a aba, evitando "deslogar sozinho"
     const onVisible = () => {
       if (document.visibilityState === "visible") {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session) setSession(session);
+        supabase.auth.getSession().then(({ data: { session: refreshedSession } }) => {
+          setSession((current) => current?.access_token === refreshedSession?.access_token ? current : refreshedSession);
         });
       }
     };
