@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ShoppingBag, Handshake, Newspaper, Trophy, ArrowRight, ArrowUpRight,
   Building2, TrendingUp, Users, Gift, Briefcase, CalendarDays,
-  CheckCircle2, Zap, Shield, Star, Smartphone, Download, Crown, Check,
+  CheckCircle2, Zap, Shield, Star, Smartphone, Download, Crown, Check, MapPin, Package,
 } from "lucide-react";
 import ActivityFeed from "@/components/landing/ActivityFeed";
 import CompanyLogosCarousel from "@/components/landing/CompanyLogosCarousel";
@@ -217,6 +217,57 @@ export default function LandingPage() {
                 <Building2 className="mr-2 h-5 w-5" /> Cadastre sua Empresa <ArrowRight className="ml-1 h-5 w-5" />
               </Link>
             </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ===== MARKETPLACE REGIONAL ===== */}
+      <section className="bg-background py-10 md:py-16">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55 }}
+            className="relative overflow-hidden rounded-lg bg-secondary text-secondary-foreground shadow-2xl"
+          >
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[90px]" />
+            <div className="absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-primary/10 blur-[70px]" />
+            <div className="relative grid items-center gap-8 px-6 py-10 md:grid-cols-[1.45fr_0.75fr] md:px-12 md:py-14 lg:px-16">
+              <div className="text-center md:text-left">
+                <span className="mb-4 inline-flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-bold uppercase text-primary">
+                  <MapPin className="h-3.5 w-3.5" /> Marketplace regional
+                </span>
+                <h2 className="max-w-3xl text-3xl font-extrabold leading-tight md:text-5xl">
+                  Compre aqui. <span className="text-primary">Compre na região.</span>
+                  <span className="block">Fortaleça as empresas locais.</span>
+                </h2>
+                <p className="mx-auto mt-5 max-w-2xl text-base text-secondary-foreground/70 md:mx-0 md:text-lg">
+                  Encontre produtos e serviços de empresas de Quatro Barras, Campina Grande do Sul e cidades da região.
+                </p>
+                <Button size="xl" asChild className="mt-7 font-heading font-bold shadow-lg transition-transform hover:-translate-y-0.5">
+                  <Link to="/marketplace">Acessar Marketplace <ArrowRight className="ml-1 h-5 w-5" /></Link>
+                </Button>
+              </div>
+
+              <div className="relative mx-auto aspect-square w-full max-w-[260px] rounded-lg border border-secondary-foreground/15 bg-secondary-foreground/5 p-5">
+                <div className="grid h-full grid-cols-2 gap-3">
+                  <div className="flex flex-col items-center justify-center rounded-md bg-primary text-primary-foreground shadow-lg">
+                    <ShoppingBag className="mb-2 h-10 w-10" />
+                    <span className="text-xs font-bold uppercase">Produtos</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center rounded-md border border-secondary-foreground/15 bg-background/10 text-secondary-foreground">
+                    <Briefcase className="mb-2 h-10 w-10 text-primary" />
+                    <span className="text-xs font-bold uppercase">Serviços</span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-center gap-3 rounded-md border border-secondary-foreground/15 bg-background/10 px-4 text-secondary-foreground">
+                    <Package className="h-7 w-7 text-primary" />
+                    <span className="text-sm font-bold">Negócios que movimentam nossa região</span>
+                  </div>
+                </div>
+                <span className="absolute -bottom-3 -right-2 rounded-md bg-primary px-3 py-2 text-[10px] font-extrabold uppercase text-primary-foreground shadow-lg">QBCAMP Conecta+</span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>

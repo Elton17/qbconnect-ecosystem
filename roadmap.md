@@ -28,3 +28,5 @@
 - [x] Destacar cadastros de produtos, serviços e notícias na área logada.
 - [x] Publicar imediatamente produtos, notícias e benefícios de empresas aprovadas.
 - [x] Separar produtos e serviços no Marketplace e adicionar parcelamento calculado automaticamente.
+- [x] Criar destaque regional do Marketplace na página inicial.
+- [x] Criar capas tipográficas automáticas para anúncios sem imagem.

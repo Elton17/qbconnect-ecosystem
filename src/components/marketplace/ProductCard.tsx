@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { Package, MapPin, Eye, MessageCircle, Star } from "lucide-react";
+import { MapPin, Eye, MessageCircle, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import ProductFallbackCover from "./ProductFallbackCover";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -75,9 +76,7 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted">
-            <Package className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/30" />
-          </div>
+          <ProductFallbackCover id={product.id} title={product.title} productType={product.product_type} category={product.category} />
         )}
 
         {isPremium && (
