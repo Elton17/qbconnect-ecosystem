@@ -22,6 +22,7 @@ interface Product {
   category: string | null; image_url: string | null; images: string[] | null;
   contact_phone: string | null; contact_email: string | null;
   view_count: number; contact_count: number; price_type: string; product_type: string; city: string | null;
+  installment_count: number;
   created_at: string | null;
 }
 
@@ -278,6 +279,7 @@ export default function ProductDetailPage() {
                   {product.price > 0 ? `R$ ${product.price.toFixed(2).replace(".", ",")}` : "Consultar preço"}
                 </span>
                 {product.price_type === "negotiable" && <span className="ml-2 text-sm text-muted-foreground">Preço negociável</span>}
+                {product.installment_count > 1 && <p className="mt-1 text-sm text-muted-foreground">ou {product.installment_count}x de aproximadamente R$ {(product.price / product.installment_count).toFixed(2).replace(".", ",")} · total R$ {product.price.toFixed(2).replace(".", ",")}</p>}
               </>
             )}
           </div>

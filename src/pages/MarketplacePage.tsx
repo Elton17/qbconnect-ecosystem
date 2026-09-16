@@ -12,6 +12,7 @@ import MarketplaceFilters, { defaultFilters, MARKETPLACE_REGIONS, type FilterSta
 import ProductFormDialog from "@/components/marketplace/ProductFormDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useApprovedCompany } from "@/hooks/useApprovedCompany";
 
 type SortOrder = "recent" | "price-low" | "price-high" | "popular";
 
@@ -24,6 +25,7 @@ const shortcuts = [
 
 export default function MarketplacePage() {
   const { user, loading: authLoading } = useAuth();
+  const { approved, checking: checkingApproval } = useApprovedCompany();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<ProductWithSeller[]>([]);
@@ -35,6 +37,7 @@ export default function MarketplacePage() {
   const [editingProduct, setEditingProduct] = useState<ProductWithSeller | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const editProductId = searchParams.get("editar");
+  const createType = searchParams.get("cadastrar");
 
   async function loadProducts() {
     setLoading(true);
@@ -103,6 +106,17 @@ export default function MarketplacePage() {
     return () => { active = false; };
   }, [editProductId, user?.id, authLoading]);
 
+  useEffect(() => {
+    if (!createType || authLoading || checkingApproval) return;
+    if (!user || !approved) {
+      toast({ title: user ? "Aguarde a aprovação da sua empresa para anunciar." : "Entre na sua conta para cadastrar um anúncio.", variant: "destructive" });
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    setEditingProduct(null);
+    setEditorOpen(true);
+  }, [createType, user?.id, approved, authLoading, checkingApproval]);
+
   function handleEditorOpenChange(open: boolean) {
     setEditorOpen(open);
     if (!open) {
@@ -155,6 +169,7 @@ export default function MarketplacePage() {
         open={editorOpen}
         onOpenChange={handleEditorOpenChange}
         product={editingProduct}
+        initialType={createType === "servico" ? "service" : "product"}
         onSaved={() => void loadProducts()}
       />
       <section className="border-b border-border bg-card py-6 md:py-8">
@@ -177,6 +192,11 @@ export default function MarketplacePage() {
 
       <main className="container py-6 md:py-8">
         <MarketplaceBannerCarousel onTypeSelect={selectType} />
+
+        {user && approved && <section className="grid gap-3 pt-6 sm:grid-cols-2" aria-label="Cadastrar no Marketplace">
+          <Button variant="outline" className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "produto" })}><ShoppingBag className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu produto</strong><small className="font-normal text-muted-foreground">Publique agora na vitrine regional</small></span></Button>
+          <Button variant="outline" className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "servico" })}><Wrench className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu serviço</strong><small className="font-normal text-muted-foreground">Apresente sua especialidade às empresas</small></span></Button>
+        </section>}
 
         <section className="grid grid-cols-2 gap-3 py-6 md:grid-cols-4" aria-label="Atalhos do Marketplace">
           {shortcuts.map((shortcut) => (

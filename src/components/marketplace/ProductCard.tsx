@@ -27,6 +27,7 @@ export interface ProductWithSeller {
   price_type: string;
   product_type: string;
   city: string | null;
+  installment_count: number;
   created_at: string | null;
   seller_name?: string;
   seller_city?: string;
@@ -112,6 +113,7 @@ export default function ProductCard({ product }: { product: ProductWithSeller })
         <span className="mb-1 sm:mb-2 text-base sm:text-xl font-extrabold text-foreground">
           {priceLabel}
         </span>
+        {product.price_type !== "consult" && product.price > 0 && product.installment_count > 1 && <span className="-mt-1 mb-2 text-xs text-muted-foreground">ou {product.installment_count}x de R$ {(product.price / product.installment_count).toFixed(2).replace(".", ",")}</span>}
 
         {/* Seller info */}
         <div className="mb-1 sm:mb-2 flex items-center gap-1.5 sm:gap-2">

@@ -157,10 +157,6 @@ export default function CompanyRegistrationPage() {
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!logoFile) {
-      toast({ title: "Logo obrigatória", description: "Adicione a logo da empresa antes de continuar.", variant: "destructive" });
-      return;
-    }
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -173,14 +169,18 @@ export default function CompanyRegistrationPage() {
     }
 
     if (authData.user) {
-      const extension = logoFile.name.split(".").pop()?.toLowerCase() || "jpg";
-      const logoPath = `${authData.user.id}/logo.${extension}`;
-      const { error: logoError } = await supabase.storage.from("logos").upload(logoPath, logoFile, { upsert: true, contentType: logoFile.type });
-      if (logoError) {
-        toast({ title: "Erro ao enviar a logo", description: "Tente novamente com uma imagem JPG, PNG ou WebP.", variant: "destructive" });
-        return;
+      let logoUrl: string | null = null;
+      if (logoFile) {
+        const extension = logoFile.name.split(".").pop()?.toLowerCase() || "jpg";
+        const logoPath = `${authData.user.id}/logo.${extension}`;
+        const { error: logoError } = await supabase.storage.from("logos").upload(logoPath, logoFile, { upsert: true, contentType: logoFile.type });
+        if (logoError) {
+          toast({ title: "Erro ao enviar a logo", description: "Tente novamente com uma imagem JPG, PNG ou WebP.", variant: "destructive" });
+          return;
+        }
+        const { data: logoData } = supabase.storage.from("logos").getPublicUrl(logoPath);
+        logoUrl = logoData.publicUrl;
       }
-      const { data: logoData } = supabase.storage.from("logos").getPublicUrl(logoPath);
       const { error: profileError } = await supabase
         .from("profiles")
         .update({
@@ -203,7 +203,7 @@ export default function CompanyRegistrationPage() {
           contact_role: data.contactRole,
           contact_email: data.contactEmail,
           contact_phone: data.contactPhone,
-          logo_url: logoData.publicUrl,
+          logo_url: logoUrl,
         })
         .eq("user_id", authData.user.id);
 
@@ -373,7 +373,7 @@ export default function CompanyRegistrationPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                   <Label htmlFor="company-logo">Logo da Empresa *</Label>
+                   <Label htmlFor="company-logo">Logo da Empresa (opcional)</Label>
                   <div className="mt-2 flex items-center gap-4">
                     {logoPreview ? (
                        <img src={logoPreview} alt="Prévia da logo" className="h-20 w-32 rounded-md border border-border bg-card p-2 object-contain" />
@@ -382,7 +382,7 @@ export default function CompanyRegistrationPage() {
                         <Upload className="h-6 w-6 text-muted-foreground" />
                       </div>
                     )}
-                     <Input id="company-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={onLogoChange} className="max-w-xs" required />
+                     <Input id="company-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={onLogoChange} className="max-w-xs" />
                   </div>
                    <p className="mt-2 text-xs text-muted-foreground">JPG, PNG ou WebP, até 2 MB. A imagem será ajustada sem cortes.</p>
                 </div>

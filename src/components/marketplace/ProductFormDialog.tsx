@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const productCategories = ["Produtos", "Serviços", "Alimentação", "Tecnologia", "Vestuário", "Saúde", "Educação", "Outro"];
+const productCategories = ["Alimentação", "Automotivo", "Casa e construção", "Educação", "Indústria", "Saúde e beleza", "Tecnologia", "Vestuário", "Outro"];
 
 interface ProductData {
   id: string;
@@ -27,6 +27,7 @@ interface ProductData {
   price_type: string;
   product_type: string;
   city: string | null;
+  installment_count: number;
 }
 
 interface Props {
@@ -34,16 +35,30 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   product: ProductData | null;
   onSaved: () => void;
+  initialType?: "product" | "service";
 }
 
-export default function ProductFormDialog({ open, onOpenChange, product, onSaved }: Props) {
+interface ProductFormState {
+  title: string;
+  description: string;
+  price: string;
+  category: string;
+  contact_phone: string;
+  contact_email: string;
+  price_type: string;
+  product_type: string;
+  city: string;
+  installment_count: string;
+}
+
+export default function ProductFormDialog({ open, onOpenChange, product, onSaved, initialType = "product" }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ProductFormState>({
     title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "",
-    price_type: "fixed", product_type: "product", city: "",
+    price_type: "fixed", product_type: initialType, city: "", installment_count: "1",
   });
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -63,10 +78,11 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
         price_type: product.price_type || "fixed",
         product_type: product.product_type || "product",
         city: product.city || "",
+        installment_count: String(product.installment_count || 1),
       });
       setExistingImages(imgs);
     } else {
-      setForm({ title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "", price_type: "fixed", product_type: "product", city: "" });
+      setForm({ title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "", price_type: "fixed", product_type: initialType, city: "", installment_count: "1" });
       setExistingImages([]);
       // Pre-fill city from profile
       if (user) {
@@ -79,7 +95,7 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
     }
     setImageFiles([]);
     setImagePreviews([]);
-  }, [product, open, user]);
+  }, [product, open, user, initialType]);
 
   function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -124,17 +140,18 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
         price_type: form.price_type,
         product_type: form.product_type,
         city: form.city,
+        installment_count: form.price_type === "consult" ? 1 : Math.max(1, Math.min(36, Number(form.installment_count) || 1)),
         active: true,
-        moderation_status: "pending",
+        moderation_status: "approved",
       };
       if (product) {
         const { error } = await supabase.from("products").update(payload).eq("id", product.id).eq("user_id", user.id);
         if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
-        toast({ title: "Alterações enviadas para aprovação!" });
+        toast({ title: "Anúncio atualizado e publicado!" });
       } else {
         const { error } = await supabase.from("products").insert(payload);
         if (error) { toast({ title: "Erro ao cadastrar", variant: "destructive" }); return; }
-        toast({ title: "Anúncio enviado para aprovação!" });
+        toast({ title: "Anúncio publicado com sucesso!" });
       }
       onOpenChange(false);
       onSaved();
@@ -204,6 +221,17 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
               </Select>
             </div>
           </div>
+
+          {form.price_type !== "consult" && Number(form.price) > 0 && (
+            <div>
+              <Label className="mb-1 block text-sm font-medium">Parcelamento</Label>
+              <Select value={form.installment_count} onValueChange={(v) => setForm({ ...form, installment_count: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{Array.from({ length: 36 }, (_, index) => index + 1).map((count) => <SelectItem key={count} value={String(count)}>{count === 1 ? "À vista" : `${count}x de aproximadamente R$ ${(Number(form.price) / count).toFixed(2).replace(".", ",")}`}</SelectItem>)}</SelectContent>
+              </Select>
+              {Number(form.installment_count) > 1 && <p className="mt-1 text-xs text-muted-foreground">Valor total: R$ {Number(form.price).toFixed(2).replace(".", ",")}</p>}
+            </div>
+          )}
 
           <div>
             <Label className="mb-1 block text-sm font-medium">Cidade</Label>

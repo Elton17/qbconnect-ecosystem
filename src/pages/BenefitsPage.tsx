@@ -100,15 +100,15 @@ export default function BenefitsPage() {
     if (!user) return;
     setSaving(true);
     if (editingId) {
-      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "pending" }).eq("id", editingId);
+      const { error } = await supabase.from("benefits").update({ offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "approved" }).eq("id", editingId);
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Alterações enviadas para aprovação!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Benefício atualizado e publicado!" }); resetForm(); fetchData(); }
     } else {
-      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "pending" });
+      const { error } = await supabase.from("benefits").insert({ user_id: user.id, offer: form.offer, category: form.category, exclusive: form.exclusive, whatsapp: form.whatsapp, expires_at: form.expires_at?.toISOString() || null, moderation_status: "approved" });
       setSaving(false);
       if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); }
-      else { toast({ title: "Benefício enviado para aprovação!" }); resetForm(); fetchData(); }
+      else { toast({ title: "Benefício publicado com sucesso!" }); resetForm(); fetchData(); }
     }
   };
 

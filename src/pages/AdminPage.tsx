@@ -342,11 +342,8 @@ export default function AdminPage() {
   const pendingGroups = [
     { label: "Empresas", tab: "companies" as AdminTab, items: pendingProfiles, title: (item: any) => item.company_name },
     { label: "Lista de Espera", tab: "waitlist" as AdminTab, items: waitlist.filter((item) => item.decision_status === "pending"), title: (item: any) => item.company_name },
-    { label: "Produtos", tab: "products" as AdminTab, items: products.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.title },
-    { label: "Notícias", tab: "news" as AdminTab, items: news.filter((item) => item.status === "pending"), title: (item: any) => item.title },
     { label: "Eventos", tab: "events" as AdminTab, items: events.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.title },
     { label: "Oportunidades", tab: "opportunities" as AdminTab, items: opportunities.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.title },
-    { label: "Benefícios", tab: "benefits" as AdminTab, items: benefits.filter((item) => item.moderation_status === "pending"), title: (item: any) => item.offer },
   ];
   const pendingTotal = pendingGroups.reduce((total, group) => total + group.items.length, 0);
 
@@ -371,6 +368,7 @@ export default function AdminPage() {
       { key: "description", label: "Descrição", type: "textarea" },
       { key: "category", label: "Categoria" },
       { key: "price", label: "Preço", type: "number" },
+      { key: "installment_count", label: "Parcelas", type: "number" },
       { key: "contact_email", label: "E-mail contato" },
       { key: "contact_phone", label: "Telefone contato" },
       { key: "active", label: "Ativo", type: "switch" },
@@ -633,7 +631,7 @@ export default function AdminPage() {
                 { key: "category", label: "Categoria" },
                 { key: "price", label: "Preço", render: (v: number) => `R$ ${Number(v).toFixed(2)}` },
               ]}
-              renderStatus={(item) => <div className="flex gap-1"><ActiveBadge active={item.active} /><ModerationBadge status={item.moderation_status} /></div>}
+              renderStatus={(item) => <ActiveBadge active={item.active} />}
               actions={(item) => (
                 <>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/produto/${item.id}`, { state: { from: `/admin?aba=products` } })} title="Ver">
@@ -642,7 +640,6 @@ export default function AdminPage() {
                   <Button size="sm" variant="outline" onClick={() => openEdit("products", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
                   </Button>
-                  {item.moderation_status !== "approved" && <Button size="sm" onClick={() => approveContent("products", item.id, setProducts)}>Aprovar</Button>}
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("products", item.id, item.active, setProducts)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("products", item.id, setProducts)}>
                     <Trash2 className="h-3 w-3" />
@@ -667,7 +664,6 @@ export default function AdminPage() {
                 <div className="flex gap-1">
                   <ActiveBadge active={item.active} />
                   {item.featured && <Badge className="text-[10px] bg-amber-500">Destaque</Badge>}
-                  <ModerationBadge status={item.moderation_status} />
                 </div>
               )}
               actions={(item) => (
@@ -742,7 +738,6 @@ export default function AdminPage() {
                   <Button size="sm" variant="outline" onClick={() => openEdit("benefits", item)} title="Editar">
                     <Pencil className="h-3 w-3" />
                   </Button>
-                  {item.moderation_status !== "approved" && <Button size="sm" onClick={() => approveContent("benefits", item.id, setBenefits)}>Aprovar</Button>}
                   <ToggleActiveBtn active={item.active} onClick={() => toggleActive("benefits", item.id, item.active, setBenefits)} />
                   <Button size="sm" variant="destructive" onClick={() => deleteRecord("benefits", item.id, setBenefits)}>
                     <Trash2 className="h-3 w-3" />
