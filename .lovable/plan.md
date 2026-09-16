@@ -32,6 +32,8 @@ O painel mostrará o total geral e a quantidade por categoria. Cada item terá i
 
 ## 3. Permanência na aba administrativa
 
+- Corrigir a renovação da sessão ao voltar para a janela: hoje ela provoca uma nova verificação de administrador, desmonta o painel e reinicia a aba em **Visão Geral**.
+- Manter a verificação de administrador estável enquanto a conta conectada não mudar, sem desmontar o conteúdo durante renovações comuns da sessão.
 - Sincronizar a aba ativa com o endereço do painel, por exemplo `/admin?aba=empresas`.
 - Preservar a aba ao salvar edições, aprovar conteúdos e atualizar as listas.
 - Ao abrir uma página para visualizar empresa, produto ou evento, guardar a origem para que o retorno volte à mesma aba.
@@ -48,6 +50,7 @@ O painel mostrará o total geral e a quantidade por categoria. Cada item terá i
 
 ## Detalhes técnicos
 
-- A aba hoje já é controlada em memória, mas começa sempre em `overview` quando a página é remontada; o parâmetro no endereço será a fonte persistente.
+- A aba já é controlada em memória. O retorno ao início acontece porque a renovação ao recuperar o foco recria a sessão, repete a checagem de administrador e remonta a página; serão estabilizadas a sessão e a checagem por identificador do usuário.
+- O parâmetro no endereço será uma proteção adicional para preservar a aba em recarregamentos e navegações de ida e volta.
 - O armazenamento de logos já restringe gravações à pasta do próprio usuário. Será criada uma autorização administrativa específica, mantendo leitura pública e escrita comum limitada ao proprietário.
 - Cursos não entrarão na central: estão ocultos e não possuem fluxo de moderação. Registros existentes serão preservados.
