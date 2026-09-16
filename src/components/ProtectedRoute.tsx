@@ -42,7 +42,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     return () => {
       cancelled = true;
     };
-  }, [user, requiredRole, authLoading]);
+  }, [user?.id, requiredRole, authLoading]);
 
   if (authLoading || checking) {
     return (
