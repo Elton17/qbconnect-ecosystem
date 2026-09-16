@@ -167,8 +167,10 @@ export default function ProductFormDialog({ open, onOpenChange, product, onSaved
       }
       onOpenChange(false);
       onSaved();
-    } catch {
-      toast({ title: "Erro ao enviar imagens", variant: "destructive" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      const limitReached = message.includes("Limite de 5 anúncios");
+      toast({ title: limitReached ? "Limite de anúncios atingido" : "Não foi possível salvar o anúncio", description: limitReached ? "Sua empresa já possui 5 produtos ou serviços ativos." : undefined, variant: "destructive" });
     } finally {
       setUploading(false);
     }
