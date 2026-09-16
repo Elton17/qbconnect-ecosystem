@@ -38,12 +38,25 @@ interface Props {
   initialType?: "product" | "service";
 }
 
+interface ProductFormState {
+  title: string;
+  description: string;
+  price: string;
+  category: string;
+  contact_phone: string;
+  contact_email: string;
+  price_type: string;
+  product_type: string;
+  city: string;
+  installment_count: string;
+}
+
 export default function ProductFormDialog({ open, onOpenChange, product, onSaved, initialType = "product" }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ProductFormState>({
     title: "", description: "", price: "", category: "", contact_phone: "", contact_email: "",
     price_type: "fixed", product_type: initialType, city: "", installment_count: "1",
   });

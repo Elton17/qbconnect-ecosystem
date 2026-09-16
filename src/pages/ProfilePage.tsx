@@ -47,7 +47,7 @@ function MeusAnuncios({ userId }: { userId: string }) {
   const fetchAll = async () => {
     setLoading(true);
     const [prodRes, oppRes, benRes, evtRes, crsRes] = await Promise.all([
-      supabase.from("products").select("id, title, category, price, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
+      supabase.from("products").select("id, title, category, price, installment_count, product_type, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
       supabase.from("opportunities").select("id, title, type, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
       supabase.from("benefits").select("id, offer, category, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
       supabase.from("events").select("id, title, category, start_date, active, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
@@ -134,7 +134,7 @@ function MeusAnuncios({ userId }: { userId: string }) {
               <>
                 <SectionHeader icon={Package} title="Produtos" count={products.length} />
                 {products.map((p) => (
-                  <ItemRow key={p.id} id={p.id} title={p.title} subtitle={`${p.category || "Sem categoria"} • R$ ${Number(p.price).toFixed(2)}`} link={`/produto/${p.id}`} table="products" label="Produto" active={p.active} />
+                  <ItemRow key={p.id} id={p.id} title={p.title} subtitle={`${p.product_type === "service" ? "Serviço" : "Produto"} • ${p.category || "Sem categoria"} • R$ ${Number(p.price).toFixed(2)}${p.installment_count > 1 ? ` ou ${p.installment_count}x de R$ ${(Number(p.price) / p.installment_count).toFixed(2)}` : ""}`} link={`/produto/${p.id}`} table="products" label={p.product_type === "service" ? "Serviço" : "Produto"} active={p.active} />
                 ))}
               </>
             )}

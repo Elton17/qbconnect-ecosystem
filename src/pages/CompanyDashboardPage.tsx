@@ -15,6 +15,9 @@ import { getPlanLimits, getUpgradeWhatsAppUrl } from "@/lib/plans";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import MyNewsManager from "@/components/news/MyNewsManager";
+import { Link } from "react-router-dom";
+import { useApprovedCompany } from "@/hooks/useApprovedCompany";
+import { Plus, Wrench } from "lucide-react";
 
 interface DashboardStats {
   products: number;
@@ -32,6 +35,7 @@ interface MonthlyData {
 
 export default function CompanyDashboardPage() {
   const { user } = useAuth();
+  const { approved, checking: checkingApproval } = useApprovedCompany();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [companyName, setCompanyName] = useState("");
   const [plan, setPlan] = useState("basic");
@@ -127,6 +131,17 @@ export default function CompanyDashboardPage() {
             </div>
           </div>
         </div>
+
+        {!checkingApproval && (approved ? (
+          <section className="mb-8" aria-labelledby="quick-actions-title">
+            <h2 id="quick-actions-title" className="mb-3 text-lg font-bold text-foreground">Cadastre e publique</h2>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Button asChild variant="outline" className="h-auto justify-start p-4"><Link to="/marketplace?cadastrar=produto"><ShoppingBag className="mr-3 h-5 w-5 text-primary" /><span className="text-left"><strong className="block">Cadastrar produto</strong><small className="font-normal text-muted-foreground">Publicação imediata</small></span></Link></Button>
+              <Button asChild variant="outline" className="h-auto justify-start p-4"><Link to="/marketplace?cadastrar=servico"><Wrench className="mr-3 h-5 w-5 text-primary" /><span className="text-left"><strong className="block">Cadastrar serviço</strong><small className="font-normal text-muted-foreground">Publicação imediata</small></span></Link></Button>
+              <Button asChild variant="outline" className="h-auto justify-start p-4"><Link to="/dashboard?cadastrar=noticia"><Newspaper className="mr-3 h-5 w-5 text-primary" /><span className="text-left"><strong className="block">Cadastrar notícia</strong><small className="font-normal text-muted-foreground">Publicação imediata</small></span></Link></Button>
+            </div>
+          </section>
+        ) : <div className="mb-8 rounded-md border border-border bg-muted/40 p-4 text-sm text-muted-foreground">Os cadastros de produtos, serviços e notícias serão liberados após a aprovação da sua empresa.</div>)}
 
         {/* Plan usage section */}
         <Card className={`mb-6 ${isPremium ? "border-2 border-amber-400" : ""}`}>

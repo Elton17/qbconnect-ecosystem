@@ -194,8 +194,8 @@ export default function MarketplacePage() {
         <MarketplaceBannerCarousel onTypeSelect={selectType} />
 
         {user && approved && <section className="grid gap-3 pt-6 sm:grid-cols-2" aria-label="Cadastrar no Marketplace">
-          <Button asChild variant="outline" className="h-auto justify-start p-5"><button onClick={() => setSearchParams({ cadastrar: "produto" })}><ShoppingBag className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu produto</strong><small className="font-normal text-muted-foreground">Publique agora na vitrine regional</small></span></button></Button>
-          <Button asChild variant="outline" className="h-auto justify-start p-5"><button onClick={() => setSearchParams({ cadastrar: "servico" })}><Wrench className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu serviço</strong><small className="font-normal text-muted-foreground">Apresente sua especialidade às empresas</small></span></button></Button>
+          <Button variant="outline" className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "produto" })}><ShoppingBag className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu produto</strong><small className="font-normal text-muted-foreground">Publique agora na vitrine regional</small></span></Button>
+          <Button variant="outline" className="h-auto justify-start p-5" onClick={() => setSearchParams({ cadastrar: "servico" })}><Wrench className="mr-3 h-6 w-6 text-primary" /><span className="text-left"><strong className="block">Cadastre seu serviço</strong><small className="font-normal text-muted-foreground">Apresente sua especialidade às empresas</small></span></Button>
         </section>}
 
         <section className="grid grid-cols-2 gap-3 py-6 md:grid-cols-4" aria-label="Atalhos do Marketplace">
