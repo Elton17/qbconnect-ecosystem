@@ -22,6 +22,6 @@
 - [x] Aplicar metadados, canonicals, indexação e dados estruturados por página.
 - [x] Validar SEO técnico, páginas públicas e áreas restritas antes do lançamento.
 - [x] Tornar CPF e CNPJ opcionais em todos os cadastros e edições de empresas.
-- [ ] Permitir anexar e substituir logos na edição logada e administrativa.
-- [ ] Consolidar todas as aprovações pendentes no painel administrativo.
-- [ ] Preservar a aba selecionada ao usar e retomar o painel administrativo.
+- [x] Permitir anexar e substituir logos na edição logada e administrativa.
+- [x] Consolidar todas as aprovações pendentes no painel administrativo.
+- [x] Preservar a aba selecionada ao usar e retomar o painel administrativo.

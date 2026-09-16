@@ -76,6 +76,11 @@ export default function AdminPage() {
 
   useEffect(() => { if (user) fetchAll(); }, [user]);
 
+  useEffect(() => {
+    const nextTab = ADMIN_TABS.includes(requestedTab as AdminTab) ? requestedTab as AdminTab : "overview";
+    setTabState(nextTab);
+  }, [requestedTab]);
+
   function setTab(nextTab: string) {
     const validTab = ADMIN_TABS.includes(nextTab as AdminTab) ? nextTab as AdminTab : "overview";
     setTabState(validTab);
@@ -522,12 +527,15 @@ export default function AdminPage() {
                   <p className="text-sm text-muted-foreground">Nenhuma aprovação pendente.</p>
                 ) : (
                   <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {pendingGroups.filter((group) => group.items.length > 0).map((group) => (
-                      <button key={group.tab} type="button" onClick={() => setTab(group.tab)} className="flex w-full items-center justify-between rounded-md border border-border p-3 text-left transition-colors hover:bg-muted/50">
-                        <div className="min-w-0"><div className="text-sm font-semibold text-card-foreground">{group.label}</div><div className="truncate text-xs text-muted-foreground">{group.items.slice(0, 2).map(group.title).join(" • ")}</div></div>
-                        <Badge variant="destructive">{group.items.length}</Badge>
+                    {pendingGroups.filter((group) => group.items.length > 0).flatMap((group) => group.items.map((item) => (
+                      <button key={`${group.tab}-${item.id}`} type="button" onClick={() => setTab(group.tab)} className="flex w-full items-center justify-between gap-3 rounded-md border border-border p-3 text-left transition-colors hover:bg-muted/50">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2"><Badge variant="outline">{group.label}</Badge><span className="truncate text-sm font-semibold text-card-foreground">{group.title(item) || "Sem título"}</span></div>
+                          <div className="mt-1 text-xs text-muted-foreground">Enviado em {new Date(item.created_at).toLocaleDateString("pt-BR")}</div>
+                        </div>
+                        <span className="shrink-0 text-xs font-medium text-primary">Revisar</span>
                       </button>
-                    ))}
+                    )))}
                   </div>
                 )}
               </div>

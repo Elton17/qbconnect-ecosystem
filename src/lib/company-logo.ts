@@ -13,6 +13,10 @@ export async function optimizeCompanyLogo(file: File): Promise<Blob> {
   if (error) throw new Error(error);
 
   const bitmap = await createImageBitmap(file);
+  if (bitmap.width < 120 || bitmap.height < 120) {
+    bitmap.close();
+    throw new Error("Use uma imagem com pelo menos 120 × 120 pixels.");
+  }
   const canvas = document.createElement("canvas");
   canvas.width = LOGO_SIZE;
   canvas.height = LOGO_SIZE;
