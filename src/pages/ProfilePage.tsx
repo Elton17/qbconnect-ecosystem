@@ -227,10 +227,10 @@ export default function ProfilePage() {
 
   const updateLogo = async (logoUrl: string | null) => {
     if (!user) return;
-    const { error } = await supabase.from("profiles").update({ logo_url: logoUrl, approved: false }).eq("user_id", user.id);
+    const { error } = await supabase.from("profiles").update({ logo_url: logoUrl }).eq("user_id", user.id);
     if (error) throw error;
     setForm((prev) => ({ ...prev, logo_url: logoUrl || "" }));
-    setProfile((current) => current ? { ...current, logo_url: logoUrl, approved: false } : current);
+    setProfile((current) => current ? { ...current, logo_url: logoUrl } : current);
   };
 
   const handleSave = async () => {
@@ -243,11 +243,10 @@ export default function ProfilePage() {
       phone: form.phone, email: form.email, website: form.website, address: form.address,
       description: form.description, contact_name: form.contact_name, contact_role: form.contact_role,
       contact_email: form.contact_email, contact_phone: form.contact_phone,
-      approved: false,
     }).eq("user_id", user.id);
     setSaving(false);
     if (error) { toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" }); }
-    else { setProfile((current) => current ? { ...current, approved: false } : current); toast({ title: "Alterações enviadas!", description: "Seu perfil ficará em análise antes de voltar ao guia público." }); }
+    else { toast({ title: "Alterações salvas!", description: "Os dados da sua empresa foram atualizados." }); }
   };
 
   if (authLoading || loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
